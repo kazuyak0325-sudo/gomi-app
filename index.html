@@ -63,5 +63,12 @@
   <a class="card disabled" style="background:#2b2b2b" href="kuro/">黒コース<small>準備中</small></a>
   <a class="card disabled" style="background:#d6336c" href="pink/">ピンクコース<small>準備中</small></a>
 </div>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
 </body>
 </html>
