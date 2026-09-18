@@ -1,5 +1,5 @@
-﻿const CACHE_NAME = "gomi-app-ao-picker-v1";
-const ASSETS = ["./", "index.html", "icon.png"];
+﻿const CACHE_NAME = "gomi-app-murasaki-getsumoku-v1";
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css", "../../app.js"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

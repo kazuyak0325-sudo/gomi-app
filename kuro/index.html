@@ -3,46 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>黒コース回収記録</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.png">
+<title>黒コース</title>
 <link rel="icon" href="icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="黒コース">
 <meta name="theme-color" content="#2b2b2b">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
 <style>
-  :root { --accent: #2b2b2b; --accent-contrast: #ffffff; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #f5f5f5;
+    color: #222;
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
+  }
+  a.back {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #555;
+    text-decoration: none;
+    border-bottom: 1px solid #999;
+  }
+  h1 {
+    font-size: 18px;
+    margin: 0 0 16px;
+    text-align: center;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  a.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 8px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    min-height: 90px;
+  }
+  a.card.disabled {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .card small {
+    font-weight: 400;
+    font-size: 11px;
+    opacity: 0.85;
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1>黒コース</h1>
-  <p class="sub">回収したステーションをタップして時刻を記録</p>
-  <p class="meta" id="dateVersion"></p>
-  <div id="progress">0 / 0 完了</div>
-  <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
-  <div class="actions">
-    <button id="copyBtn">時刻を一覧コピー</button>
-    <button id="resetBtn">今日の記録をリセット</button>
-  </div>
-  <div class="actions actions-2">
-    <button id="saveBtn">本日の収集データを保存</button>
-  </div>
-</header>
-<main>
-  <ul id="list"></ul>
-</main>
-
+<a class="back" href="../">← コース選択に戻る</a>
+<h1>黒コース：収集日程を選んでください</h1>
+<div class="grid">
+  <a class="card disabled" style="background:#2b2b2b" href="getsumoku/">月・木<small>準備中</small></a>
+  <a class="card disabled" style="background:#2b2b2b" href="kakin/">火・金<small>準備中</small></a>
+  <a class="card disabled" style="background:#2b2b2b" href="pet1/">ペット①<small>準備中</small></a>
+  <a class="card disabled" style="background:#2b2b2b" href="pet2/">ペット②<small>準備中</small></a>
+</div>
 <script>
-const COURSE_ID = "kuro";
-const COURSE_NAME = "黒コース";
-const APP_VERSION = "v0.3";
-
-const stations = [];
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
 </script>
-<script src="../app.js"></script>
 </body>
 </html>

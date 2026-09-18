@@ -1,5 +1,5 @@
-﻿const CACHE_NAME = "gomi-app-kuro-v2";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../style.css", "../app.js"];
+﻿const CACHE_NAME = "gomi-app-kuro-picker-v1";
+const ASSETS = ["./", "index.html", "icon.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
