@@ -70,6 +70,7 @@
   }
   #filter::placeholder { color: var(--text-muted); }
   .actions { display: flex; gap: 8px; }
+  .actions-2 { margin-top: 8px; }
   .actions button {
     flex: 1;
     padding: 9px 6px;
@@ -262,6 +263,9 @@
     <button id="copyBtn">時刻を一覧コピー</button>
     <button id="resetBtn">今日の記録をリセット</button>
   </div>
+  <div class="actions actions-2">
+    <button id="saveBtn">本日の収集データを保存</button>
+  </div>
 </header>
 <main>
   <ul id="list"></ul>
@@ -269,6 +273,7 @@
 
 <script>
 const COURSE_ID = "murasaki-kanamaru-okuzawa";
+const COURSE_NAME = "紫コース";
 
 const stations = [
   {no:1,st:"789",map:"69-F-5",target:"住宅地ST"},
@@ -608,6 +613,44 @@ document.getElementById("resetBtn").addEventListener("click", () => {
     saveViolations();
     render(document.getElementById("filter").value);
   });
+});
+
+function csvField(v){
+  const s = String(v);
+  if (/[",\r\n]/.test(s)) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function buildCsv(){
+  const rows = [["番号", "ST番号", "地図番号", "目標物", "収集時刻", "違反ゴミ個数"]];
+  stations.forEach(s => {
+    const v = violations[s.st];
+    rows.push([
+      String(s.no),
+      s.st,
+      s.map,
+      s.target,
+      records[s.st] || "",
+      v ? String(v.count) : ""
+    ]);
+  });
+  return "﻿" + rows.map(row => row.map(csvField).join(",")).join("\r\n");
+}
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+  const csv = buildCsv();
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = COURSE_NAME + "_" + todayDateStr() + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast("保存中です。保存先はOneDriveの「ゴミ収集データ／" + COURSE_NAME + "」フォルダを選んでください。");
 });
 
 document.getElementById("copyBtn").addEventListener("click", async () => {
