@@ -4,6 +4,17 @@ function formatDateJp(d){
 }
 document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + "　" + APP_VERSION;
 
+(function(){
+  const header = document.querySelector("header");
+  if (header) {
+    const backLink = document.createElement("a");
+    backLink.href = "../";
+    backLink.className = "back-link";
+    backLink.textContent = "← コース選択に戻る";
+    header.insertBefore(backLink, header.firstChild);
+  }
+})();
+
 function todayDateStr(){
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
