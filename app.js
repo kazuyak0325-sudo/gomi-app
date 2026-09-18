@@ -17,6 +17,24 @@ function todayViolationKey(){
   return "gomi_v_" + COURSE_ID + "_" + todayDateStr();
 }
 
+function todaySavedKey(){
+  return "gomi_saved_" + COURSE_ID + "_" + todayDateStr();
+}
+
+function markSavedToday(){
+  try {
+    localStorage.setItem(todaySavedKey(), "1");
+  } catch (e) {}
+}
+
+function isSavedToday(){
+  try {
+    return localStorage.getItem(todaySavedKey()) === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
 let records = {};
 try {
   records = JSON.parse(localStorage.getItem(todayKey()) || "{}");
@@ -235,14 +253,20 @@ function clearViolation(s){
 
 document.getElementById("filter").addEventListener("input", e => render(e.target.value));
 
+function doReset(){
+  records = {};
+  violations = {};
+  save();
+  saveViolations();
+  render(document.getElementById("filter").value);
+}
+
 document.getElementById("resetBtn").addEventListener("click", () => {
-  showConfirm("今日の記録（収集時刻・違反ゴミ）をすべてリセットしますか？", () => {
-    records = {};
-    violations = {};
-    save();
-    saveViolations();
-    render(document.getElementById("filter").value);
-  });
+  const hasData = Object.keys(records).length > 0 || Object.keys(violations).length > 0;
+  const message = (hasData && !isSavedToday())
+    ? "本日のデータはまだ保存されていません。保存せずにリセットすると記録が失われます。本当にリセットしますか？"
+    : "今日の記録（収集時刻・違反ゴミ）をすべてリセットしますか？";
+  showConfirm(message, doReset);
 });
 
 function csvField(v){
@@ -284,6 +308,7 @@ document.getElementById("saveBtn").addEventListener("click", () => {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  markSavedToday();
   showToast("保存中です。保存先はOneDriveの「ゴミ収集データ／" + COURSE_NAME + "」フォルダを選んでください。");
 });
 
