@@ -1,5 +1,5 @@
-const CACHE_NAME = "gomi-app-v1";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png"];
+﻿const CACHE_NAME = "gomi-app-midori-v1";
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../style.css", "../app.js"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
