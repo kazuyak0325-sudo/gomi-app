@@ -46,6 +46,40 @@ function isSavedToday(){
   }
 }
 
+function stationsOverrideKey(){
+  return "gomi_stations_" + COURSE_ID;
+}
+
+function loadStations(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(stationsOverrideKey()) || "null");
+    if (Array.isArray(saved) && saved.length > 0) return saved;
+  } catch (e) {}
+  return DEFAULT_STATIONS.slice();
+}
+
+function saveStationsOverride(){
+  try {
+    localStorage.setItem(stationsOverrideKey(), JSON.stringify(stations));
+  } catch (e) {}
+}
+
+function renumberStations(){
+  stations.forEach((s, i) => { s.no = i + 1; });
+}
+
+function resetStationsToDefault(){
+  showConfirm("編集内容をすべて取り消して、最初のステーション一覧に戻しますか？", () => {
+    stations = DEFAULT_STATIONS.slice();
+    try { localStorage.removeItem(stationsOverrideKey()); } catch (e) {}
+    render(document.getElementById("filter").value);
+    showToast("元のステーション一覧に戻しました。");
+  });
+}
+
+let stations = loadStations();
+let editMode = false;
+
 let records = {};
 try {
   records = JSON.parse(localStorage.getItem(todayKey()) || "{}");
@@ -144,6 +178,136 @@ function showToast(message){
   }, 2500);
 }
 
+function showStationEditor(existing, onSave){
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+
+  const title = document.createElement("p");
+  title.textContent = existing ? "ステーションを編集" : "ステーションを追加";
+  box.appendChild(title);
+
+  function mkField(labelText, value){
+    const wrap = document.createElement("div");
+    wrap.className = "field-group";
+    const label = document.createElement("label");
+    label.textContent = labelText;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = value || "";
+    input.className = "field-input";
+    wrap.appendChild(label);
+    wrap.appendChild(input);
+    box.appendChild(wrap);
+    return input;
+  }
+
+  const stInput = mkField("ST番号", existing ? existing.st : "");
+  const mapInput = mkField("地図番号", existing ? existing.map : "");
+  const targetInput = mkField("目標物（名称）", existing ? existing.target : "");
+
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "キャンセル";
+  cancelBtn.addEventListener("click", () => overlay.remove());
+  const okBtn = document.createElement("button");
+  okBtn.className = "modal-btn-ok";
+  okBtn.textContent = "保存";
+  okBtn.addEventListener("click", () => {
+    const st = stInput.value.trim();
+    const map = mapInput.value.trim();
+    const target = targetInput.value.trim();
+    if (!st || !target) {
+      showToast("ST番号と目標物は必須です。");
+      return;
+    }
+    const dup = stations.some(s => s.st === st && s !== existing);
+    if (dup) {
+      showToast("そのST番号は既に使われています。");
+      return;
+    }
+    overlay.remove();
+    onSave({ st, map, target });
+  });
+  actions.appendChild(cancelBtn);
+  actions.appendChild(okBtn);
+  box.appendChild(actions);
+
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  stInput.focus();
+}
+
+function mkEditBtn(label, className, onClick){
+  const b = document.createElement("button");
+  b.className = className;
+  b.textContent = label;
+  b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    onClick();
+  });
+  return b;
+}
+
+function addStationFlow(){
+  showStationEditor(null, (newStation) => {
+    newStation.no = stations.length + 1;
+    stations.push(newStation);
+    saveStationsOverride();
+    render(document.getElementById("filter").value);
+  });
+}
+
+function editStationAt(idx){
+  const original = stations[idx];
+  showStationEditor(original, (updated) => {
+    if (updated.st !== original.st) {
+      if (records[original.st] !== undefined) {
+        records[updated.st] = records[original.st];
+        delete records[original.st];
+        save();
+      }
+      if (violations[original.st] !== undefined) {
+        violations[updated.st] = violations[original.st];
+        delete violations[original.st];
+        saveViolations();
+      }
+    }
+    stations[idx] = { no: original.no, st: updated.st, map: updated.map, target: updated.target };
+    saveStationsOverride();
+    render(document.getElementById("filter").value);
+  });
+}
+
+function deleteStationAt(idx){
+  const s = stations[idx];
+  showConfirm('「' + s.target + '」を削除しますか？関連する収集記録・違反ゴミ記録も削除されます。', () => {
+    delete records[s.st];
+    delete violations[s.st];
+    stations.splice(idx, 1);
+    renumberStations();
+    save();
+    saveViolations();
+    saveStationsOverride();
+    render(document.getElementById("filter").value);
+  });
+}
+
+function moveStationAt(idx, delta){
+  const newIdx = idx + delta;
+  if (newIdx < 0 || newIdx >= stations.length) return;
+  const tmp = stations[idx];
+  stations[idx] = stations[newIdx];
+  stations[newIdx] = tmp;
+  renumberStations();
+  saveStationsOverride();
+  render(document.getElementById("filter").value);
+}
+
 function mkStepperBtn(label, onClick){
   const b = document.createElement("button");
   b.className = "stepper-btn";
@@ -159,7 +323,7 @@ function render(filterText){
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  if (stations.length === 0) {
+  if (stations.length === 0 && !editMode) {
     list.innerHTML = '<li class="empty-state">このコースはまだ準備中です。<br>ステーションデータが追加されるとここに一覧が表示されます。</li>';
     document.getElementById("progress").textContent = "準備中";
     return;
@@ -170,7 +334,7 @@ function render(filterText){
   let violationItems = 0;
   const ft = (filterText || "").trim();
 
-  stations.forEach(s => {
+  stations.forEach((s, idx) => {
     const time = records[s.st];
     const v = violations[s.st];
     if (time) doneCount++;
@@ -221,8 +385,40 @@ function render(filterText){
     }
     li.appendChild(vRow);
 
+    if (editMode) {
+      const editRow = document.createElement("div");
+      editRow.className = "edit-row";
+      if (!ft) {
+        editRow.appendChild(mkEditBtn("↑", "move-btn", () => moveStationAt(idx, -1)));
+        editRow.appendChild(mkEditBtn("↓", "move-btn", () => moveStationAt(idx, 1)));
+      }
+      editRow.appendChild(mkEditBtn("編集", "edit-btn", () => editStationAt(idx)));
+      editRow.appendChild(mkEditBtn("削除", "delete-btn", () => deleteStationAt(idx)));
+      li.appendChild(editRow);
+    }
+
     list.appendChild(li);
   });
+
+  if (editMode) {
+    const addLi = document.createElement("li");
+    addLi.style.textAlign = "center";
+    const addBtn = document.createElement("button");
+    addBtn.className = "add-station-btn";
+    addBtn.textContent = "＋ ステーションを追加";
+    addBtn.addEventListener("click", addStationFlow);
+    addLi.appendChild(addBtn);
+    list.appendChild(addLi);
+
+    const resetLi = document.createElement("li");
+    resetLi.style.textAlign = "center";
+    const resetBtn2 = document.createElement("button");
+    resetBtn2.className = "reset-stations-btn";
+    resetBtn2.textContent = "編集を元に戻す";
+    resetBtn2.addEventListener("click", resetStationsToDefault);
+    resetLi.appendChild(resetBtn2);
+    list.appendChild(resetLi);
+  }
 
   document.getElementById("progress").textContent =
     doneCount + " / " + stations.length + " 完了　違反ゴミ " + violationStations + "箇所（計" + violationItems + "個）";
@@ -263,6 +459,13 @@ function clearViolation(s){
 }
 
 document.getElementById("filter").addEventListener("input", e => render(e.target.value));
+
+document.getElementById("editBtn").addEventListener("click", () => {
+  editMode = !editMode;
+  document.getElementById("editBtn").textContent = editMode ? "編集モードを終了" : "ステーションを編集";
+  document.getElementById("filter").value = "";
+  render("");
+});
 
 function doReset(){
   records = {};

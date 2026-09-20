@@ -29,6 +29,7 @@
     <button id="resetBtn">今日の記録をリセット</button>
   </div>
   <div class="actions actions-2">
+    <button id="editBtn">ステーションを編集</button>
     <button id="saveBtn">本日の収集データを保存</button>
   </div>
 </header>
@@ -39,9 +40,9 @@
 <script>
 const COURSE_ID = "murasaki-getsumoku-kanamaru-okuzawa";
 const COURSE_NAME = "紫コース（月・木）";
-const APP_VERSION = "v0.4";
+const APP_VERSION = "v0.5";
 
-const stations = [
+const DEFAULT_STATIONS = [
   {no:1,st:"782",map:"69-B-1",target:"ﾘﾌﾞﾘｰﾌｫﾚｽﾄ"},
   {no:2,st:"788",map:"69-F-5",target:"ﾊﾞﾙﾌｧﾝﾐﾅﾐ"},
   {no:3,st:"789",map:"69-F-5",target:"住宅地ST"},
