@@ -58,6 +58,29 @@
     font-size: 11px;
     opacity: 0.85;
   }
+  .footer {
+    max-width: 480px;
+    margin: 28px auto 0;
+    text-align: center;
+  }
+  .version-tag {
+    font-size: 12px;
+    color: #888;
+    margin: 0 0 10px;
+    font-family: ui-monospace, "SFMono-Regular", monospace;
+  }
+  #updateBtn {
+    padding: 10px 20px;
+    border: 1px solid #999;
+    border-radius: 8px;
+    background: #fff;
+    color: #333;
+    font-size: 13px;
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  }
+  #updateBtn:active {
+    background: #eee;
+  }
 </style>
 </head>
 <body>
@@ -71,12 +94,36 @@
   <a class="card disabled" style="background:#2b2b2b" href="kuro/">黒コース<small>準備中</small></a>
   <a class="card disabled" style="background:#d6336c" href="pink/">ピンクコース<small>準備中</small></a>
 </div>
+<div class="footer">
+  <p class="version-tag" id="versionTag"></p>
+  <button id="updateBtn">最新版に更新する</button>
+</div>
 <script>
+const TOP_VERSION = "v1.0";
+document.getElementById("versionTag").textContent = "バージョン " + TOP_VERSION;
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 }
+
+document.getElementById("updateBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("updateBtn");
+  btn.textContent = "更新中...";
+  btn.disabled = true;
+  try {
+    if ("serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch (e) {}
+  location.reload();
+});
 </script>
 </body>
 </html>
