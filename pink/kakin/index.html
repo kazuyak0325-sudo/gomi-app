@@ -3,35 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>ピンクコース（火・金）</title>
-<link rel="icon" href="../icon.png">
+<title>ピンクコース（火・金） 回収記録</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ピンクコース（火・金）">
 <meta name="theme-color" content="#d6336c">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../style.css?v=1789967545">
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: #f5f5f5;
-    color: #222;
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
-    text-align: center;
-  }
-  a.back {
-    display: inline-block;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: #555;
-    text-decoration: none;
-    border-bottom: 1px solid #999;
-  }
-  h1 { font-size: 17px; margin: 0 0 12px; }
-  p { color: #777; font-size: 14px; line-height: 1.7; }
+  :root { --accent: #d6336c; --accent-contrast: #ffffff; --surface-done: #fbe4ec; --done-text: #c02359; }
 </style>
 </head>
 <body>
-<a class="back" href="../">← 日程選択に戻る</a>
-<h1>ピンクコース（火・金）</h1>
-<p>このコースはまだ準備中です。<br>ステーションデータが追加されるとここで使えるようになります。</p>
+<header>
+  <h1>ピンクコース（火・金）</h1>
+  <p class="sub">回収したステーションをタップして時刻を記録</p>
+  <p class="meta" id="dateVersion"></p>
+  <div id="progress">0 / 0 完了</div>
+  <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
+  <div class="actions">
+    <button id="copyBtn">時刻を一覧コピー</button>
+    <button id="resetBtn">今日の記録をリセット</button>
+  </div>
+  <div class="actions actions-2">
+    <button id="editBtn">ステーションを編集</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
+  </div>
+</header>
+<main>
+  <ul id="list"></ul>
+</main>
+
+<script>
+const COURSE_ID = "pink-kakin";
+const COURSE_NAME = "ピンクコース（火・金）";
+const APP_VERSION = "v0.15";
+
+const DEFAULT_STATIONS = [
+  {no:1,st:"603",map:"61-E-3",target:"ﾊﾟｰｸｽｸｴｱ　ｻｲﾄｳ"},
+  {no:2,st:"586",map:"61-D-5",target:"県北体育館"},
+  {no:3,st:"805",map:"74-D-5",target:"西原小学校"},
+  {no:4,st:"1624",map:"74-D-3",target:"美原３丁目 新規"},
+  {no:5,st:"810",map:"74-D-3",target:"ｾﾌﾞﾝ裏　ﾌﾛｰﾙ"},
+  {no:6,st:"809",map:"74-E-3",target:"左側　斜め"},
+  {no:7,st:"602",map:"61-D-3",target:"礒建設　ﾌﾟﾗｰｼﾞｭ"},
+  {no:8,st:"1648",map:"61-G-2",target:"新設  ミハラデュオ"},
+  {no:9,st:"611",map:"61-I-1",target:"川沿いﾊﾞｯｸST"},
+  {no:10,st:"610",map:"61-J-1",target:"ﾗ・ｸﾞﾗｼｱ"},
+  {no:11,st:"406",map:"55-B-5",target:"ﾐﾊﾗﾃﾞｭｵA棟"},
+  {no:12,st:"407",map:"55-B-5",target:"大東建託側"},
+  {no:13,st:"388",map:"55-A-4",target:"ｱﾚｯｸｽISO"},
+  {no:14,st:"389",map:"54-G-2",target:"とちぎ薬局前ST"},
+  {no:15,st:"390",map:"54-G-3",target:"浅野製作所前ST"},
+  {no:16,st:"369",map:"54-D-2",target:"住宅地1"},
+  {no:17,st:"371",map:"54-D-3",target:"住宅地2"},
+  {no:18,st:"370",map:"54-C-3",target:"住宅地3"},
+  {no:19,st:"378",map:"54-B-4",target:"公園ﾌﾞﾛｯｸST"},
+  {no:20,st:"380",map:"54-B-4",target:"狭いST"},
+  {no:21,st:"1593",map:"54-C-5",target:"ﾐﾊﾗHRS　新設"},
+  {no:22,st:"376",map:"54-C-5",target:"ﾚｵﾊﾟﾚｽ"},
+  {no:23,st:"374",map:"54-D-4",target:"移動　右ST"},
+  {no:24,st:"372",map:"54-D-4",target:"ﾐﾊﾗﾓｰﾀｰ"},
+  {no:25,st:"373",map:"54-E-5",target:"住宅地三角STﾊﾞｯｸ"},
+  {no:26,st:"394",map:"54-F-5",target:"段差　ｸﾞﾗﾝﾄﾞﾚｰｳﾞ"},
+  {no:27,st:"393",map:"54-G-5",target:"鉄砲橋の十字路"},
+  {no:28,st:"392",map:"54-H-4",target:"ｷﾞﾌﾄﾌﾟﾗｻﾞ　裏2"},
+  {no:29,st:"391",map:"54-I-4",target:"ｷﾞﾌﾄﾌﾟﾗｻﾞ　裏1"},
+  {no:30,st:"1583",map:"55-A-5",target:"分譲地1  ｺﾓﾝﾗｲﾌ先"},
+  {no:31,st:"1609",map:"54-J-5",target:"分譲地2  ｺﾓﾝﾗｲﾌ先"},
+  {no:32,st:"1529",map:"54-H-5",target:"ｺﾓﾝﾗｲﾌ/ｻﾝｸｴﾄﾜｰﾙ"},
+  {no:33,st:"395",map:"54-F-5",target:"右永井棚STﾊﾞｯｸ"},
+  {no:34,st:"612",map:"61-F-1",target:"右ﾊﾞｯｸﾌﾀ壊れ"},
+  {no:35,st:"598",map:"61-D-1",target:"左ﾊﾞｯｸ1"},
+  {no:36,st:"599",map:"61-E-1",target:"左ﾊﾞｯｸ2"},
+  {no:37,st:"600",map:"61-E-1",target:"住宅地公園"},
+  {no:38,st:"1647",map:"61-E-2",target:"住宅地公園 先 AP"},
+  {no:39,st:"601",map:"61-E-2",target:"ﾐﾊﾗﾃﾞｭｵ"},
+  {no:40,st:"1400",map:"61-F-2",target:"ﾜｰﾙﾄﾞｽﾃｲ大田原"},
+  {no:41,st:"1438",map:"61-D-2",target:"分譲地ST"},
+  {no:42,st:"1600",map:"61-D-2",target:"新設分譲ｸﾞﾘｰﾝﾀｳﾝ"},
+  {no:43,st:"594",map:"61-A-2",target:"十字奥ｱﾊﾞﾝｻﾞｰﾙ"},
+  {no:44,st:"1621",map:"61-C-3",target:"新設物置ﾌﾟﾛﾑﾅｰﾄﾞ"},
+  {no:45,st:"596",map:"61-D-1",target:"ﾌﾟﾘﾑｳﾞｪｰﾙ"},
+  {no:46,st:"384",map:"54-C-5",target:"すぐ左ﾌﾞﾛｯｸ塀"},
+  {no:47,st:"377",map:"54-C-5",target:"右鉄のｶｺﾞ"},
+  {no:48,st:"379",map:"54-B-5",target:"ｼﾞｬﾙﾀﾞﾝ"},
+  {no:49,st:"381",map:"54-B-5",target:"すぐﾊﾞｯｸ"},
+  {no:50,st:"382",map:"54-A-5",target:"右折　ﾊﾞｯｸ"},
+  {no:51,st:"1446",map:"53-J-4",target:"Ksﾘﾝｸ美原"},
+  {no:52,st:"383",map:"54-A-5",target:"住宅地ST"},
+  {no:53,st:"576",map:"60-J-1",target:"ｱｲ電子裏住宅地(写真)"},
+  {no:54,st:"1445",map:"53-I-5",target:"向かい　ﾌｨｰﾙ"},
+  {no:55,st:"368",map:"53-H-5",target:"手前"},
+  {no:56,st:"365",map:"53-H-5",target:"外周1　ﾗｼﾞｭﾙ"},
+  {no:57,st:"366",map:"53-G-5",target:"外周2"},
+  {no:58,st:"1594",map:"60-H-1",target:"積水ﾊｳｽ　分譲地"},
+  {no:59,st:"575",map:"60-G-1",target:"Ksﾘﾝｸ加治屋"},
+  {no:60,st:"1509",map:"60-G-2",target:"Ｙ字手前分譲地ST"},
+  {no:61,st:"1628",map:"60-J-2",target:"新設　道路沿い"},
+  {no:62,st:"593",map:"61-A-2",target:"ﾌｪﾝｽ邪魔　ﾏｲｱﾐ"},
+  {no:63,st:"590",map:"61-A-4",target:"斜めST"},
+  {no:64,st:"591",map:"61-A-3",target:"ｴｽﾎﾟﾜｰﾙ"},
+  {no:65,st:"592",map:"61-A-3",target:"十字のST"},
+  {no:66,st:"1410",map:"60-J-3",target:"ﾋﾞﾝｺﾝﾃﾅ"},
+  {no:67,st:"579",map:"60-H-3",target:"ｸﾞﾘｰﾝｶﾞｰﾃﾞﾝ美原"},
+  {no:68,st:"580",map:"60-I-3",target:"ﾍﾟｯﾄﾎﾞﾄﾙ重石"},
+  {no:69,st:"794",map:"73-G-1",target:"ﾃﾞｨﾗｲﾄﾌｧｲﾙ"},
+  {no:70,st:"793",map:"73-G-1",target:"手前　愛菜園"},
+  {no:71,st:"577",map:"60-F-4",target:"ﾁｬﾄﾞｽ　和　P"},
+  {no:72,st:"792",map:"73-F-1",target:"ｱﾁｰﾊﾞST"},
+  {no:73,st:"578",map:"60-F-5",target:"右折住宅地"},
+  {no:74,st:"584",map:"60-I-5",target:"ﾌﾞﾛｯｸ塀"},
+  {no:75,st:"1573",map:"60-I-5",target:"新設　分譲地"},
+  {no:76,st:"585",map:"60-J-5",target:"竹芸工房"},
+  {no:77,st:"581",map:"60-J-4",target:"ﾐﾊﾗﾊﾟｰｸﾎｰﾑｽﾞ"},
+  {no:78,st:"582",map:"60-J-5",target:"住宅地　ﾊﾞｯｸ"},
+  {no:79,st:"1542",map:"61-A-5",target:"分譲地ST"},
+  {no:80,st:"589",map:"61-A-4",target:"ｻﾝﾊﾟﾃｨｰｸｷﾑﾗ"},
+  {no:81,st:"804",map:"74-A-1",target:"住宅地内"},
+  {no:82,st:"588",map:"61-B-5",target:"体育館先住宅"},
+  {no:83,st:"587",map:"61-A-5",target:"住宅地入り口物置"},
+  {no:84,st:"803",map:"73-J-1",target:"阿久津板金前"},
+  {no:85,st:"802",map:"73-J-2",target:"ｽｲｰﾄｱﾘｯｻﾑ"},
+  {no:86,st:"801",map:"73-J-2",target:"ｸﾞﾗﾝﾄﾞﾌﾟﾛｽﾍﾟﾗｰﾚ"},
+  {no:87,st:"1656",map:"73-J-2",target:"アパート・ハピネス"},
+  {no:88,st:"1658",map:"73-J-2",target:"アパート・セレクト"},
+  {no:89,st:"808",map:"74-A-3",target:"東興金属前"},
+  {no:90,st:"817",map:"74-F-2",target:"小学校裏1　ﾊﾟｲﾝ"},
+  {no:91,st:"818",map:"74-G-2",target:"小学校裏2"},
+  {no:92,st:"819",map:"74-G-2",target:"小学校裏3"},
+  {no:93,st:"820",map:"74-G-3",target:"小学校裏4"},
+  {no:94,st:"806",map:"74-C-2",target:"佐藤工務店"},
+  {no:95,st:"807",map:"74-B-2",target:"ﾌﾟﾗｾｰﾙ"},
+  {no:96,st:"800",map:"73-J-2",target:"ﾊﾞｯｸ段差ST"},
+  {no:97,st:"795",map:"73-H-3",target:"さくらﾊｲﾂ"},
+  {no:98,st:"796",map:"73-H-3",target:"すぐ左ST"},
+  {no:99,st:"1481",map:"73-H-3",target:"ﾘﾍﾞﾗ"},
+  {no:100,st:"797",map:"73-G-4",target:"右折　公園"},
+  {no:101,st:"798",map:"73-I-4",target:"ｻｻﾞﾝｽｸｴｱ"},
+  {no:102,st:"969",map:"80-H-2",target:"ｺｰﾎﾟ河崎"},
+  {no:103,st:"967",map:"80-D-2",target:"ﾆﾗｸ裏"},
+  {no:104,st:"966",map:"80-D-1",target:"藤川ｺｰﾎﾟ"},
+  {no:105,st:"968",map:"80-F-3",target:"たか隣ｳﾞｨｵﾗﾋﾙｽﾞ"},
+  {no:106,st:"970",map:"80-I-2",target:"風見鶏"},
+  {no:107,st:"1487",map:"73-J-5",target:"分譲地ST"},
+  {no:108,st:"799",map:"73-I-5",target:"ﾄﾞﾝｷ裏"},
+  {no:109,st:"811",map:"74-A-5",target:"増山医院裏ｿｼｱﾙ"},
+  {no:110,st:"812",map:"74-B-5",target:"みすず前ST"},
+  {no:111,st:"1426",map:"74-A-3",target:"にちにちそう加治屋"},
+  {no:112,st:"813",map:"74-B-5",target:"ｹﾞｵ大田原　奥"},
+  {no:113,st:"814",map:"74-C-5",target:"BOX"},
+  {no:114,st:"815",map:"74-D-5",target:"ﾍｱｰｻﾛﾝ　裏"},
+  {no:115,st:"824",map:"74-H-2",target:"大田原美原宿舎"},
+  {no:116,st:"823",map:"74-H-2",target:"市営西原団地11"},
+  {no:117,st:"825",map:"74-J-1",target:"大田原中学校"},
+  {no:118,st:"822",map:"74-H-2",target:"市営西原団地12"},
+  {no:119,st:"821",map:"74-H-1",target:"県職員宿舎"},
+  {no:120,st:"605",map:"61-G-4",target:"DIｽﾀｼﾞｱﾑ"},
+  {no:121,st:"827",map:"74-J-3",target:"ｻﾝﾗｲｽﾞｽｸｴｱ手前"},
+  {no:122,st:"843",map:"75-A-2",target:"ｻﾝﾗｲｽﾞｽｸｴｱ M"},
+  {no:123,st:"842",map:"75-C-2",target:"川沿い"},
+  {no:124,st:"626",map:"75-E-1",target:"十字通り手前hiro"},
+  {no:125,st:"615",map:"62-C-4",target:"交差点かど野球場"},
+  {no:126,st:"613",map:"62-A-2",target:"拘置所"},
+  {no:127,st:"607",map:"61-J-2",target:"みはら保育園"},
+  {no:128,st:"614",map:"62-A-4",target:"西原ほほえみｾﾝﾀｰ"},
+  {no:129,st:"606",map:"61-J-3",target:"プール前"},
+  {no:130,st:"609",map:"61-I-2",target:"みはら保育園手前"},
+  {no:131,st:"1589",map:"62-C-4",target:"新設　積水ハウス"},
+  {no:132,st:"629",map:"62-D-4",target:"西原団地 9・10"},
+  {no:133,st:"630",map:"62-D-4",target:"西原団地 2"},
+  {no:134,st:"628",map:"62-D-5",target:"西原団地 10"},
+  {no:135,st:"627",map:"62-D-5",target:"西原自治公民館"},
+  {no:136,st:"624",map:"62-E-5",target:"新築で移動 ST"},
+  {no:137,st:"623",map:"62-E-5",target:"西原団地 7"},
+  {no:138,st:"622",map:"62-E-4",target:"西原団地 6"},
+  {no:139,st:"620",map:"62-D-4",target:"西原団地 5"},
+  {no:140,st:"616",map:"62-D-3",target:"ｲｴﾛｰﾊｯﾄ裏 東ｺｰﾎﾟ"},
+  {no:141,st:"617",map:"62-D-3",target:"資材置き場"},
+  {no:142,st:"618",map:"62-D-4",target:"西原団地 3・4号棟"},
+  {no:143,st:"619",map:"62-E-4",target:"エルディム岩本"},
+  {no:144,st:"1537",map:"62-F-4",target:"ｸﾞﾘｰﾝｶﾞｰﾃﾞﾝ美原"},
+  {no:145,st:"621",map:"62-E-4",target:"西原団地 8"},
+  {no:146,st:"631",map:"62-F-5",target:"さき　電柱　移設"},
+  {no:147,st:"632",map:"62-F-5",target:"美原　M"},
+  {no:148,st:"625",map:"62-E-5",target:"美原電気左折 角"},
+  {no:149,st:"633",map:"62-F-5",target:"GU　前"}
+];
+</script>
+<script src="../../app.js?v=1789967545"></script>
 </body>
 </html>
