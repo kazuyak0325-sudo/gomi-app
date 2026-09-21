@@ -200,11 +200,6 @@ main {
   font-size: 13px;
   padding: 6px 10px;
 }
-.move-btn {
-  width: 36px;
-  padding: 6px 0;
-  text-align: center;
-}
 .edit-btn {
   border-color: var(--accent);
   color: var(--accent);
@@ -214,16 +209,27 @@ main {
   border-color: var(--danger);
   color: var(--danger);
 }
-.add-station-btn {
-  width: 100%;
-  padding: 14px;
-  border: 2px dashed var(--accent);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--accent);
-  font-size: 14px;
+.fab-add {
+  display: none;
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: 12px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 26px;
   font-weight: 700;
-  font-family: var(--font-body);
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  z-index: 500;
+}
+.fab-add.show {
+  display: flex;
 }
 .reset-stations-btn {
   padding: 10px 12px;

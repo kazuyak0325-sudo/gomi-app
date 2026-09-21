@@ -188,13 +188,13 @@ function showStationEditor(existing, onSave){
   title.textContent = existing ? "ステーションを編集" : "ステーションを追加";
   box.appendChild(title);
 
-  function mkField(labelText, value){
+  function mkField(labelText, value, type){
     const wrap = document.createElement("div");
     wrap.className = "field-group";
     const label = document.createElement("label");
     label.textContent = labelText;
     const input = document.createElement("input");
-    input.type = "text";
+    input.type = type || "text";
     input.value = value || "";
     input.className = "field-input";
     wrap.appendChild(label);
@@ -203,6 +203,13 @@ function showStationEditor(existing, onSave){
     return input;
   }
 
+  const maxPos = existing ? stations.length : stations.length + 1;
+  const posDefault = existing ? existing.no : stations.length + 1;
+  const posInput = mkField(
+    (existing ? "何番目に移動しますか？" : "何番目に追加しますか？") + "（1〜" + maxPos + "）",
+    String(posDefault),
+    "number"
+  );
   const stInput = mkField("ST番号", existing ? existing.st : "");
   const mapInput = mkField("地図番号", existing ? existing.map : "");
   const targetInput = mkField("目標物（名称）", existing ? existing.target : "");
@@ -220,8 +227,13 @@ function showStationEditor(existing, onSave){
     const st = stInput.value.trim();
     const map = mapInput.value.trim();
     const target = targetInput.value.trim();
+    let position = parseInt(posInput.value, 10);
     if (!st || !target) {
       showToast("ST番号と目標物は必須です。");
+      return;
+    }
+    if (!position || position < 1 || position > maxPos) {
+      showToast("番号は1〜" + maxPos + "の範囲で入力してください。");
       return;
     }
     const dup = stations.some(s => s.st === st && s !== existing);
@@ -230,7 +242,7 @@ function showStationEditor(existing, onSave){
       return;
     }
     overlay.remove();
-    onSave({ st, map, target });
+    onSave({ st, map, target }, position);
   });
   actions.appendChild(cancelBtn);
   actions.appendChild(okBtn);
@@ -239,7 +251,8 @@ function showStationEditor(existing, onSave){
   overlay.appendChild(box);
   overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
-  stInput.focus();
+  posInput.focus();
+  posInput.select();
 }
 
 function mkEditBtn(label, className, onClick){
@@ -254,17 +267,19 @@ function mkEditBtn(label, className, onClick){
 }
 
 function addStationFlow(){
-  showStationEditor(null, (newStation) => {
-    newStation.no = stations.length + 1;
-    stations.push(newStation);
+  showStationEditor(null, (newStation, position) => {
+    const idx = Math.min(Math.max(position - 1, 0), stations.length);
+    stations.splice(idx, 0, newStation);
+    renumberStations();
     saveStationsOverride();
     render(document.getElementById("filter").value);
+    showToast(position + "番目に追加しました。");
   });
 }
 
 function editStationAt(idx){
   const original = stations[idx];
-  showStationEditor(original, (updated) => {
+  showStationEditor(original, (updated, position) => {
     if (updated.st !== original.st) {
       if (records[original.st] !== undefined) {
         records[updated.st] = records[original.st];
@@ -277,7 +292,11 @@ function editStationAt(idx){
         saveViolations();
       }
     }
-    stations[idx] = { no: original.no, st: updated.st, map: updated.map, target: updated.target };
+    const updatedStation = { no: original.no, st: updated.st, map: updated.map, target: updated.target };
+    stations.splice(idx, 1);
+    const newIdx = Math.min(Math.max(position - 1, 0), stations.length);
+    stations.splice(newIdx, 0, updatedStation);
+    renumberStations();
     saveStationsOverride();
     render(document.getElementById("filter").value);
   });
@@ -295,17 +314,6 @@ function deleteStationAt(idx){
     saveStationsOverride();
     render(document.getElementById("filter").value);
   });
-}
-
-function moveStationAt(idx, delta){
-  const newIdx = idx + delta;
-  if (newIdx < 0 || newIdx >= stations.length) return;
-  const tmp = stations[idx];
-  stations[idx] = stations[newIdx];
-  stations[newIdx] = tmp;
-  renumberStations();
-  saveStationsOverride();
-  render(document.getElementById("filter").value);
 }
 
 function mkStepperBtn(label, onClick){
@@ -388,10 +396,6 @@ function render(filterText){
     if (editMode) {
       const editRow = document.createElement("div");
       editRow.className = "edit-row";
-      if (!ft) {
-        editRow.appendChild(mkEditBtn("↑", "move-btn", () => moveStationAt(idx, -1)));
-        editRow.appendChild(mkEditBtn("↓", "move-btn", () => moveStationAt(idx, 1)));
-      }
       editRow.appendChild(mkEditBtn("編集", "edit-btn", () => editStationAt(idx)));
       editRow.appendChild(mkEditBtn("削除", "delete-btn", () => deleteStationAt(idx)));
       li.appendChild(editRow);
@@ -401,15 +405,6 @@ function render(filterText){
   });
 
   if (editMode) {
-    const addLi = document.createElement("li");
-    addLi.style.textAlign = "center";
-    const addBtn = document.createElement("button");
-    addBtn.className = "add-station-btn";
-    addBtn.textContent = "＋ ステーションを追加";
-    addBtn.addEventListener("click", addStationFlow);
-    addLi.appendChild(addBtn);
-    list.appendChild(addLi);
-
     const resetLi = document.createElement("li");
     resetLi.style.textAlign = "center";
     const resetBtn2 = document.createElement("button");
@@ -460,9 +455,17 @@ function clearViolation(s){
 
 document.getElementById("filter").addEventListener("input", e => render(e.target.value));
 
+const fabAdd = document.createElement("button");
+fabAdd.className = "fab-add";
+fabAdd.textContent = "＋";
+fabAdd.setAttribute("aria-label", "ステーションを追加");
+fabAdd.addEventListener("click", addStationFlow);
+document.body.appendChild(fabAdd);
+
 document.getElementById("editBtn").addEventListener("click", () => {
   editMode = !editMode;
   document.getElementById("editBtn").textContent = editMode ? "編集モードを終了" : "ステーションを編集";
+  fabAdd.classList.toggle("show", editMode);
   document.getElementById("filter").value = "";
   render("");
 });
