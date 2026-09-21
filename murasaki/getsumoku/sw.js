@@ -1,5 +1,5 @@
-﻿const CACHE_NAME = "gomi-app-murasaki-getsumoku-v5";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=6", "../../app.js?v=6"];
+﻿const CACHE_NAME = "gomi-app-murasaki-getsumoku-1789951247";
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1789951247", "../../app.js?v=1789951247"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

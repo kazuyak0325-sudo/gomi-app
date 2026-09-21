@@ -1,18 +1,18 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>紫コース（月・木）回収記録</title>
+<title>紫コース（月・木） 回収記録</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="紫(月木)">
+<meta name="apple-mobile-web-app-title" content="紫コース（月・木）">
 <meta name="theme-color" content="#4b2e83">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=6">
+<link rel="stylesheet" href="../../style.css?v=1789951247">
 <style>
   :root { --accent: #4b2e83; --accent-contrast: #ffffff; --surface-done: #ece7f5; --done-text: #6a4bad; }
 </style>
@@ -20,7 +20,7 @@
 <body>
 <header>
   <h1>紫コース（月・木）</h1>
-  <p class="sub">金丸・奥沢／回収したステーションをタップして時刻を記録</p>
+  <p class="sub">回収したステーションをタップして時刻を記録</p>
   <p class="meta" id="dateVersion"></p>
   <div id="progress">0 / 0 完了</div>
   <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
@@ -38,9 +38,9 @@
 </main>
 
 <script>
-const COURSE_ID = "murasaki-getsumoku-kanamaru-okuzawa";
+const COURSE_ID = "murasaki-getsumoku";
 const COURSE_NAME = "紫コース（月・木）";
-const APP_VERSION = "v0.6";
+const APP_VERSION = "v0.7";
 
 const DEFAULT_STATIONS = [
   {no:1,st:"782",map:"69-B-1",target:"ﾘﾌﾞﾘｰﾌｫﾚｽﾄ"},
@@ -149,6 +149,6 @@ const DEFAULT_STATIONS = [
   {no:104,st:"572",map:"58-J-2",target:"側溝沿いST"}
 ];
 </script>
-<script src="../../app.js?v=6"></script>
+<script src="../../app.js?v=1789951247"></script>
 </body>
 </html>

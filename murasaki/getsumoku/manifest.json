@@ -1,6 +1,6 @@
-{
-  "name": "紫コース（月・木）回収記録",
-  "short_name": "紫(月木)",
+﻿{
+  "name": "紫コース（月・木） 回収記録",
+  "short_name": "紫コース（月・木）",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
