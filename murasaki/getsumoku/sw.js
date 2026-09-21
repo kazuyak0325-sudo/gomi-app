@@ -1,5 +1,5 @@
-﻿const CACHE_NAME = "gomi-app-murasaki-getsumoku-v4";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css", "../../app.js"];
+﻿const CACHE_NAME = "gomi-app-murasaki-getsumoku-v5";
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=6", "../../app.js?v=6"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -21,7 +21,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: "no-store" })
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
