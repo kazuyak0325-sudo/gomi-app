@@ -1,6 +1,6 @@
-﻿const CACHE_NAME = "gomi-app-top-v2";
+﻿const CACHE_NAME = "gomi-app-top-v3";
 const CACHE_PREFIX = "gomi-app-top-";
-const ASSETS = ["./", "index.html", "murasaki/icon.png"];
+const ASSETS = ["./", "index.html", "icon.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
