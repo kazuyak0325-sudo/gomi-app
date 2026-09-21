@@ -12,6 +12,13 @@ document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + 
     backLink.className = "back-link";
     backLink.textContent = "← コース選択に戻る";
     header.insertBefore(backLink, header.firstChild);
+
+    const topLink = document.createElement("a");
+    topLink.href = "../../";
+    topLink.className = "back-link";
+    topLink.style.marginLeft = "10px";
+    topLink.textContent = "トップ画面に戻る";
+    header.insertBefore(topLink, backLink.nextSibling);
   }
 })();
 

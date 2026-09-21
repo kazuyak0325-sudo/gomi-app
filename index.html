@@ -82,6 +82,69 @@
   #updateBtn:active {
     background: #eee;
   }
+  .admin-addr-box {
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #555;
+  }
+  .admin-addr-box code {
+    display: block;
+    margin: 4px 0 8px;
+    font-size: 13px;
+    color: #222;
+    font-family: ui-monospace, "SFMono-Regular", monospace;
+    word-break: break-all;
+  }
+  #editAdminBtn {
+    padding: 6px 14px;
+    border: 1px solid #999;
+    border-radius: 7px;
+    background: #f5f5f5;
+    color: #333;
+    font-size: 12px;
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100;
+  }
+  .modal-box {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    max-width: 340px;
+    width: 100%;
+  }
+  .modal-box p { margin: 0 0 10px; font-size: 14px; }
+  .modal-box input {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-bottom: 14px;
+    box-sizing: border-box;
+  }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .modal-btn-cancel { background: #eee; color: #333; }
+  .modal-btn-ok { background: #4b2e83; color: #fff; }
 </style>
 </head>
 <body>
@@ -96,12 +159,66 @@
   <a class="card" style="background:#d6336c" href="pink/">ピンクコース</a>
 </div>
 <div class="footer">
+  <div class="admin-addr-box">
+    アップロード先
+    <code id="adminAddrText">未設定</code>
+    <button id="editAdminBtn">編集</button>
+  </div>
   <p class="version-tag" id="versionTag"></p>
   <button id="updateBtn">最新版に更新する</button>
 </div>
 <script>
 const TOP_VERSION = "v0.15";
 document.getElementById("versionTag").textContent = "バージョン " + TOP_VERSION;
+
+function getAdminServer(){
+  try { return localStorage.getItem("gomi_admin_server") || ""; } catch (e) { return ""; }
+}
+function setAdminServer(v){
+  try { localStorage.setItem("gomi_admin_server", v); } catch (e) {}
+}
+function renderAdminAddr(){
+  const addr = getAdminServer();
+  document.getElementById("adminAddrText").textContent = addr || "未設定";
+}
+renderAdminAddr();
+
+document.getElementById("editAdminBtn").addEventListener("click", () => {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  const p = document.createElement("p");
+  p.textContent = "事務所PCのアドレスを入力してください（管理ツール画面に表示されているものと同じです）";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = getAdminServer();
+  input.placeholder = "例: https://192.168.1.50:8788";
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "キャンセル";
+  cancelBtn.addEventListener("click", () => overlay.remove());
+  const okBtn = document.createElement("button");
+  okBtn.className = "modal-btn-ok";
+  okBtn.textContent = "保存";
+  okBtn.addEventListener("click", () => {
+    setAdminServer(input.value.trim());
+    renderAdminAddr();
+    overlay.remove();
+  });
+  actions.appendChild(cancelBtn);
+  actions.appendChild(okBtn);
+  box.appendChild(p);
+  box.appendChild(input);
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  input.focus();
+  input.select();
+});
 
 try {
   if (sessionStorage.getItem("gomi_just_updated") === "1") {
