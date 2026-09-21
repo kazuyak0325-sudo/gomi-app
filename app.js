@@ -15,6 +15,33 @@ document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + 
   }
 })();
 
+function openAdminServerSetting(){
+  showInputModal(
+    "事務所PCのアドレスを入力してください（管理ツール画面に表示されているものと同じです）",
+    getAdminServer(),
+    (v) => {
+      setAdminServer(v);
+      showToast(v ? "送信先を設定しました。" : "送信先の設定を消去しました。");
+    }
+  );
+}
+
+(function(){
+  const meta = document.getElementById("dateVersion");
+  if (meta) {
+    const link = document.createElement("a");
+    link.href = "#";
+    link.className = "back-link";
+    link.style.marginLeft = "10px";
+    link.textContent = "アップロード先設定";
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      openAdminServerSetting();
+    });
+    meta.insertAdjacentElement("afterend", link);
+  }
+})();
+
 function todayDateStr(){
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
@@ -137,6 +164,62 @@ function showConfirm(message, onConfirm){
   overlay.appendChild(box);
   overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
+}
+
+function adminServerKey(){
+  return "gomi_admin_server";
+}
+
+function getAdminServer(){
+  try {
+    return localStorage.getItem(adminServerKey()) || "";
+  } catch (e) {
+    return "";
+  }
+}
+
+function setAdminServer(v){
+  try {
+    localStorage.setItem(adminServerKey(), v);
+  } catch (e) {}
+}
+
+function showInputModal(message, defaultValue, onSave){
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  const p = document.createElement("p");
+  p.textContent = message;
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "field-input";
+  input.value = defaultValue || "";
+  input.placeholder = "例: 192.168.1.50:8787";
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "キャンセル";
+  cancelBtn.addEventListener("click", () => overlay.remove());
+  const okBtn = document.createElement("button");
+  okBtn.className = "modal-btn-ok";
+  okBtn.textContent = "保存";
+  okBtn.addEventListener("click", () => {
+    const v = input.value.trim();
+    overlay.remove();
+    onSave(v);
+  });
+  actions.appendChild(cancelBtn);
+  actions.appendChild(okBtn);
+  box.appendChild(p);
+  box.appendChild(input);
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  input.focus();
+  input.select();
 }
 
 function showTextModal(message, text){
@@ -510,12 +593,7 @@ function buildCsv(){
   return "﻿" + rows.map(row => row.map(csvField).join(",")).join("\r\n");
 }
 
-document.getElementById("saveBtn").addEventListener("click", () => {
-  if (stations.length === 0) {
-    showToast("このコースはまだ準備中です。");
-    return;
-  }
-  const csv = buildCsv();
+function downloadCsvFallback(csv, reasonMessage){
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -526,7 +604,54 @@ document.getElementById("saveBtn").addEventListener("click", () => {
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   markSavedToday();
-  showToast("保存中です。保存先はOneDriveの「ゴミ収集データ／" + COURSE_NAME + "」フォルダを選んでください。");
+  showToast(reasonMessage + "保存先はOneDriveの「ゴミ収集データ／" + COURSE_NAME + "」フォルダを選んでください。");
+}
+
+document.getElementById("saveBtn").textContent = "本日の収集データをアップロード";
+
+document.getElementById("saveBtn").addEventListener("click", async () => {
+  if (stations.length === 0) {
+    showToast("このコースはまだ準備中です。");
+    return;
+  }
+  const csv = buildCsv();
+  const server = getAdminServer();
+  if (!server) {
+    downloadCsvFallback(csv, "送信先が未設定のため、ファイルをダウンロードしました。");
+    return;
+  }
+
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
+  btn.textContent = "アップロード中...";
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const url = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "") + "/api/collect";
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        courseId: COURSE_ID,
+        courseName: COURSE_NAME,
+        date: todayDateStr(),
+        csv: csv
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      throw new Error(data.error || "アップロードに失敗しました。");
+    }
+    markSavedToday();
+    showToast("事務所PCにアップロードしました！");
+  } catch (e) {
+    downloadCsvFallback(csv, "事務所PCに繋がらなかったため、ファイルをダウンロードしました。");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "本日の収集データをアップロード";
+  }
 });
 
 document.getElementById("copyBtn").addEventListener("click", async () => {
