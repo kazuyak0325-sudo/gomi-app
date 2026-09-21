@@ -22,15 +22,61 @@ document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + 
   }
 })();
 
-function openAdminServerSetting(){
-  showInputModal(
-    "事務所PCのアドレスを入力してください（管理ツール画面に表示されているものと同じです）",
-    getAdminServer(),
-    (v) => {
-      setAdminServer(v);
-      showToast(v ? "送信先を設定しました。" : "送信先の設定を消去しました。");
+const ADMIN_PIN = "0325";
+
+function askPin(onSuccess){
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  const p = document.createElement("p");
+  p.textContent = "管理者用の暗証番号を入力してください";
+  const input = document.createElement("input");
+  input.type = "tel";
+  input.inputMode = "numeric";
+  input.className = "field-input";
+  input.placeholder = "暗証番号";
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "キャンセル";
+  cancelBtn.addEventListener("click", () => overlay.remove());
+  const okBtn = document.createElement("button");
+  okBtn.className = "modal-btn-ok";
+  okBtn.textContent = "確認";
+  okBtn.addEventListener("click", () => {
+    if (input.value === ADMIN_PIN) {
+      overlay.remove();
+      onSuccess();
+    } else {
+      showToast("暗証番号が違います。");
+      input.value = "";
+      input.focus();
     }
-  );
+  });
+  actions.appendChild(cancelBtn);
+  actions.appendChild(okBtn);
+  box.appendChild(p);
+  box.appendChild(input);
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  input.focus();
+}
+
+function openAdminServerSetting(){
+  askPin(() => {
+    showInputModal(
+      "事務所PCのアドレスを入力してください（管理ツール画面に表示されているものと同じです）",
+      getAdminServer(),
+      (v) => {
+        setAdminServer(v);
+        showToast(v ? "送信先を設定しました。" : "送信先の設定を消去しました。");
+      }
+    );
+  });
 }
 
 (function(){

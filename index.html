@@ -183,7 +183,57 @@ function renderAdminAddr(){
 }
 renderAdminAddr();
 
-document.getElementById("editAdminBtn").addEventListener("click", () => {
+const ADMIN_PIN = "0325";
+
+function askPin(onSuccess){
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  const p = document.createElement("p");
+  p.textContent = "管理者用の暗証番号を入力してください";
+  const input = document.createElement("input");
+  input.type = "tel";
+  input.inputMode = "numeric";
+  input.placeholder = "暗証番号";
+  const err = document.createElement("p");
+  err.style.color = "#c0392b";
+  err.style.fontSize = "12px";
+  err.style.margin = "-8px 0 10px";
+  err.style.display = "none";
+  err.textContent = "暗証番号が違います。";
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "キャンセル";
+  cancelBtn.addEventListener("click", () => overlay.remove());
+  const okBtn = document.createElement("button");
+  okBtn.className = "modal-btn-ok";
+  okBtn.textContent = "確認";
+  okBtn.addEventListener("click", () => {
+    if (input.value === ADMIN_PIN) {
+      overlay.remove();
+      onSuccess();
+    } else {
+      err.style.display = "block";
+      input.value = "";
+      input.focus();
+    }
+  });
+  actions.appendChild(cancelBtn);
+  actions.appendChild(okBtn);
+  box.appendChild(p);
+  box.appendChild(input);
+  box.appendChild(err);
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  input.focus();
+}
+
+function openAdminEditModal(){
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
   const box = document.createElement("div");
@@ -218,6 +268,10 @@ document.getElementById("editAdminBtn").addEventListener("click", () => {
   document.body.appendChild(overlay);
   input.focus();
   input.select();
+}
+
+document.getElementById("editAdminBtn").addEventListener("click", () => {
+  askPin(openAdminEditModal);
 });
 
 try {
