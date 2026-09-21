@@ -195,7 +195,7 @@ function showInputModal(message, defaultValue, onSave){
   input.type = "text";
   input.className = "field-input";
   input.value = defaultValue || "";
-  input.placeholder = "例: 192.168.1.50:8787";
+  input.placeholder = "例: https://192.168.1.50:8788";
   const actions = document.createElement("div");
   actions.className = "modal-actions";
   const cancelBtn = document.createElement("button");
