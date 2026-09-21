@@ -102,6 +102,19 @@
 const TOP_VERSION = "v0.14";
 document.getElementById("versionTag").textContent = "バージョン " + TOP_VERSION;
 
+try {
+  if (sessionStorage.getItem("gomi_just_updated") === "1") {
+    sessionStorage.removeItem("gomi_just_updated");
+    const msg = document.createElement("p");
+    msg.textContent = "更新されました。";
+    msg.style.color = "#2c8c3f";
+    msg.style.fontWeight = "700";
+    msg.style.fontSize = "13px";
+    msg.style.margin = "0 0 10px";
+    document.getElementById("versionTag").insertAdjacentElement("afterend", msg);
+  }
+} catch (e) {}
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch(() => {});
@@ -128,6 +141,7 @@ document.getElementById("updateBtn").addEventListener("click", async () => {
       await Promise.all(keys.map(k => caches.delete(k)));
     }
   } catch (e) {}
+  try { sessionStorage.setItem("gomi_just_updated", "1"); } catch (e) {}
   location.reload();
 });
 </script>
