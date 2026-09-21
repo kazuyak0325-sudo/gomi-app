@@ -31,10 +31,13 @@ self.addEventListener("fetch", (event) => {
         const cached = await caches.match(event.request);
         if (cached) return cached;
         if (event.request.mode === "navigate") {
-          const shell = (await caches.match("./")) || (await caches.match("index.html"));
+          const shell = await caches.match(new URL("./", self.registration.scope).href);
           if (shell) return shell;
         }
-        return new Response("", { status: 504, statusText: "Offline" });
+        return new Response(
+          "オフラインです。このページを一度オンラインで開いてから、もう一度お試しください。",
+          { status: 504, statusText: "Offline", headers: { "Content-Type": "text/plain; charset=utf-8" } }
+        );
       })
   );
 });
