@@ -1,4 +1,5 @@
 ﻿const CACHE_NAME = "gomi-app-ao-getsumoku-1789952816";
+const CACHE_PREFIX = "gomi-app-ao-getsumoku-";
 const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1789952816", "../../app.js?v=1789952816"];
 
 self.addEventListener("install", (event) => {
@@ -13,7 +14,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME && k.startsWith(CACHE_PREFIX)).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

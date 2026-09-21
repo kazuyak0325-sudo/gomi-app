@@ -115,9 +115,34 @@ try {
   }
 } catch (e) {}
 
+const ALL_COLORS = ["murasaki", "midori", "kiiro", "ao", "kuro", "pink"];
+const ALL_SCHEDULES = ["getsumoku", "kakin", "pet1", "pet2"];
+
+async function precacheAllCourses(){
+  if (!navigator.onLine || !("serviceWorker" in navigator)) return;
+  const jobs = [];
+  ALL_COLORS.forEach((color) => {
+    jobs.push(navigator.serviceWorker.register(color + "/sw.js", { scope: color + "/" }).catch(() => {}));
+    ALL_SCHEDULES.forEach((schedule) => {
+      jobs.push(
+        navigator.serviceWorker
+          .register(color + "/" + schedule + "/sw.js", { scope: color + "/" + schedule + "/" })
+          .catch(() => {})
+      );
+    });
+  });
+  await Promise.all(jobs);
+  try { localStorage.setItem("gomi_precache_date", new Date().toDateString()); } catch (e) {}
+}
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch(() => {});
+    let last = null;
+    try { last = localStorage.getItem("gomi_precache_date"); } catch (e) {}
+    if (last !== new Date().toDateString()) {
+      precacheAllCourses();
+    }
   });
 }
 
@@ -141,6 +166,7 @@ document.getElementById("updateBtn").addEventListener("click", async () => {
       await Promise.all(keys.map(k => caches.delete(k)));
     }
   } catch (e) {}
+  try { localStorage.removeItem("gomi_precache_date"); } catch (e) {}
   try { sessionStorage.setItem("gomi_just_updated", "1"); } catch (e) {}
   location.reload();
 });
