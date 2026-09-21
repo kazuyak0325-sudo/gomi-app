@@ -110,6 +110,12 @@ if ("serviceWorker" in navigator) {
 
 document.getElementById("updateBtn").addEventListener("click", async () => {
   const btn = document.getElementById("updateBtn");
+  const originalText = btn.textContent;
+  if (!navigator.onLine) {
+    btn.textContent = "オンラインの時に押してください";
+    setTimeout(() => { btn.textContent = originalText; }, 3000);
+    return;
+  }
   btn.textContent = "更新中...";
   btn.disabled = true;
   try {
