@@ -181,7 +181,7 @@ main {
   color: #a0682b;
 }
 .time.cb-time.filled { color: #7a4f1f; }
-header h1.cardboard-mode { color: #ff5252; }
+#cbWord.cardboard-mode { color: #ff5252; }
 
 .violation-row {
   display: flex;

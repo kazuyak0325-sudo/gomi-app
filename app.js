@@ -580,6 +580,11 @@ function clearViolation(s){
 document.getElementById("filter").addEventListener("input", e => render(e.target.value));
 
 if (IS_CARDBOARD_COURSE) {
+  const h1ForWord = document.querySelector("header h1");
+  if (h1ForWord && h1ForWord.textContent.includes("ダンボール")) {
+    h1ForWord.innerHTML = h1ForWord.textContent.replace("ダンボール", '<span id="cbWord">ダンボール</span>');
+  }
+
   const progressEl = document.getElementById("progress");
   const filterBtn = document.createElement("button");
   filterBtn.id = "cardboardFilterBtn";
@@ -589,8 +594,8 @@ if (IS_CARDBOARD_COURSE) {
     cardboardFilterOn = !cardboardFilterOn;
     filterBtn.textContent = cardboardFilterOn ? "すべて表示に戻す" : "ダンボールありのみ表示";
     filterBtn.classList.toggle("on", cardboardFilterOn);
-    const h1 = document.querySelector("header h1");
-    if (h1) h1.classList.toggle("cardboard-mode", cardboardFilterOn);
+    const cbWord = document.getElementById("cbWord");
+    if (cbWord) cbWord.classList.toggle("cardboard-mode", cardboardFilterOn);
     render(document.getElementById("filter").value);
   });
   progressEl.insertAdjacentElement("afterend", filterBtn);
