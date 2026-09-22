@@ -22,79 +22,6 @@ document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + 
   }
 })();
 
-const ADMIN_PIN = "0325";
-
-function askPin(onSuccess){
-  const overlay = document.createElement("div");
-  overlay.className = "modal-overlay";
-  const box = document.createElement("div");
-  box.className = "modal-box";
-  const p = document.createElement("p");
-  p.textContent = "管理者用の暗証番号を入力してください";
-  const input = document.createElement("input");
-  input.type = "tel";
-  input.inputMode = "numeric";
-  input.className = "field-input";
-  input.placeholder = "暗証番号";
-  const actions = document.createElement("div");
-  actions.className = "modal-actions";
-  const cancelBtn = document.createElement("button");
-  cancelBtn.className = "modal-btn-cancel";
-  cancelBtn.textContent = "キャンセル";
-  cancelBtn.addEventListener("click", () => overlay.remove());
-  const okBtn = document.createElement("button");
-  okBtn.className = "modal-btn-ok";
-  okBtn.textContent = "確認";
-  okBtn.addEventListener("click", () => {
-    if (input.value === ADMIN_PIN) {
-      overlay.remove();
-      onSuccess();
-    } else {
-      showToast("暗証番号が違います。");
-      input.value = "";
-      input.focus();
-    }
-  });
-  actions.appendChild(cancelBtn);
-  actions.appendChild(okBtn);
-  box.appendChild(p);
-  box.appendChild(input);
-  box.appendChild(actions);
-  overlay.appendChild(box);
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
-  document.body.appendChild(overlay);
-  input.focus();
-}
-
-function openAdminServerSetting(){
-  askPin(() => {
-    showInputModal(
-      "事務所PCのアドレスを入力してください（管理ツール画面に表示されているものと同じです）",
-      getAdminServer(),
-      (v) => {
-        setAdminServer(v);
-        showToast(v ? "送信先を設定しました。" : "送信先の設定を消去しました。");
-      }
-    );
-  });
-}
-
-(function(){
-  const meta = document.getElementById("dateVersion");
-  if (meta) {
-    const link = document.createElement("a");
-    link.href = "#";
-    link.className = "back-link";
-    link.style.marginLeft = "10px";
-    link.textContent = "アップロード先設定";
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      openAdminServerSetting();
-    });
-    meta.insertAdjacentElement("afterend", link);
-  }
-})();
-
 function dateStrFor(d){
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
@@ -250,44 +177,6 @@ function setAdminServer(v){
   try {
     localStorage.setItem(adminServerKey(), v);
   } catch (e) {}
-}
-
-function showInputModal(message, defaultValue, onSave){
-  const overlay = document.createElement("div");
-  overlay.className = "modal-overlay";
-  const box = document.createElement("div");
-  box.className = "modal-box";
-  const p = document.createElement("p");
-  p.textContent = message;
-  const input = document.createElement("input");
-  input.type = "text";
-  input.className = "field-input";
-  input.value = defaultValue || "";
-  input.placeholder = "例: https://192.168.1.50:8788";
-  const actions = document.createElement("div");
-  actions.className = "modal-actions";
-  const cancelBtn = document.createElement("button");
-  cancelBtn.className = "modal-btn-cancel";
-  cancelBtn.textContent = "キャンセル";
-  cancelBtn.addEventListener("click", () => overlay.remove());
-  const okBtn = document.createElement("button");
-  okBtn.className = "modal-btn-ok";
-  okBtn.textContent = "保存";
-  okBtn.addEventListener("click", () => {
-    const v = input.value.trim();
-    overlay.remove();
-    onSave(v);
-  });
-  actions.appendChild(cancelBtn);
-  actions.appendChild(okBtn);
-  box.appendChild(p);
-  box.appendChild(input);
-  box.appendChild(actions);
-  overlay.appendChild(box);
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
-  document.body.appendChild(overlay);
-  input.focus();
-  input.select();
 }
 
 function showTextModal(message, text){
