@@ -166,7 +166,7 @@ main {
   margin-top: 2px;
 }
 .time {
-  width: 70px;
+  width: 78px;
   flex-shrink: 0;
   text-align: center;
   font-family: var(--font-mono);
@@ -177,10 +177,10 @@ main {
 }
 .time.filled { color: var(--done-text); }
 .time.cb-time {
-  width: 84px;
-  font-size: 15px;
+  width: 90px;
 }
 .time.cb-time.filled { color: #a0682b; }
+header h1.cardboard-mode { color: #ff5252; }
 
 .violation-row {
   display: flex;

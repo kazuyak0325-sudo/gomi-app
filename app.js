@@ -450,7 +450,7 @@ function render(filterText){
     rowMain.innerHTML =
       '<span class="no">' + s.no + '</span>' +
       '<span class="target">' + s.target + '<small>' + s.map + ' / ST' + s.st + '</small></span>' +
-      '<span class="time' + (time ? ' filled' : '') + '">' + (time || "--:--") + '</span>' +
+      '<span class="time' + (time ? ' filled' : '') + '">' + (IS_CARDBOARD_COURSE ? "🧴" : "") + (time || "--:--") + '</span>' +
       (IS_CARDBOARD_COURSE ? '<span class="time cb-time' + (cbTime ? ' filled' : '') + '">📦' + (cbTime || "--:--") + '</span>' : '');
     rowMain.addEventListener("click", () => onTap(s));
     li.appendChild(rowMain);
@@ -589,6 +589,8 @@ if (IS_CARDBOARD_COURSE) {
     cardboardFilterOn = !cardboardFilterOn;
     filterBtn.textContent = cardboardFilterOn ? "すべて表示に戻す" : "ダンボールありのみ表示";
     filterBtn.classList.toggle("on", cardboardFilterOn);
+    const h1 = document.querySelector("header h1");
+    if (h1) h1.classList.toggle("cardboard-mode", cardboardFilterOn);
     render(document.getElementById("filter").value);
   });
   progressEl.insertAdjacentElement("afterend", filterBtn);
