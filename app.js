@@ -95,35 +95,50 @@ function openAdminServerSetting(){
   }
 })();
 
-function todayDateStr(){
-  const d = new Date();
+function dateStrFor(d){
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
 
+function todayDateStr(){
+  return dateStrFor(new Date());
+}
+
+function keyFor(dateStr){ return "gomi_" + COURSE_ID + "_" + dateStr; }
+function violationKeyFor(dateStr){ return "gomi_v_" + COURSE_ID + "_" + dateStr; }
+function savedKeyFor(dateStr){ return "gomi_saved_" + COURSE_ID + "_" + dateStr; }
+
 function todayKey(){
-  return "gomi_" + COURSE_ID + "_" + todayDateStr();
+  return keyFor(todayDateStr());
 }
 
 function todayViolationKey(){
-  return "gomi_v_" + COURSE_ID + "_" + todayDateStr();
+  return violationKeyFor(todayDateStr());
 }
 
 function todaySavedKey(){
-  return "gomi_saved_" + COURSE_ID + "_" + todayDateStr();
+  return savedKeyFor(todayDateStr());
 }
 
-function markSavedToday(){
+function markSavedForDate(dateStr){
   try {
-    localStorage.setItem(todaySavedKey(), "1");
+    localStorage.setItem(savedKeyFor(dateStr), "1");
   } catch (e) {}
 }
 
-function isSavedToday(){
+function markSavedToday(){
+  markSavedForDate(todayDateStr());
+}
+
+function isSavedForDate(dateStr){
   try {
-    return localStorage.getItem(todaySavedKey()) === "1";
+    return localStorage.getItem(savedKeyFor(dateStr)) === "1";
   } catch (e) {
     return false;
   }
+}
+
+function isSavedToday(){
+  return isSavedForDate(todayDateStr());
 }
 
 function stationsOverrideKey(){
@@ -630,53 +645,47 @@ function csvField(v){
   return s;
 }
 
-function buildCsv(){
+function buildCsvFor(recordsObj, violationsObj){
   const rows = [["番号", "ST番号", "地図番号", "目標物", "収集時刻", "違反ゴミ個数"]];
   stations.forEach(s => {
-    const v = violations[s.st];
+    const v = violationsObj[s.st];
     rows.push([
       String(s.no),
       s.st,
       s.map,
       s.target,
-      records[s.st] || "",
+      recordsObj[s.st] || "",
       v ? String(v.count) : ""
     ]);
   });
   return "﻿" + rows.map(row => row.map(csvField).join(",")).join("\r\n");
 }
 
-function downloadCsvFallback(csv, reasonMessage){
+function buildCsv(){
+  return buildCsvFor(records, violations);
+}
+
+function downloadCsvFallback(csv, dateStr, reasonMessage){
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = COURSE_NAME + "_" + todayDateStr() + ".csv";
+  a.download = COURSE_NAME + "_" + dateStr + ".csv";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  markSavedToday();
+  markSavedForDate(dateStr);
   showToast(reasonMessage + "保存先はOneDriveの「ゴミ収集データ／" + COURSE_NAME + "」フォルダを選んでください。");
 }
 
-document.getElementById("saveBtn").textContent = "本日の収集データをアップロード";
-
-document.getElementById("saveBtn").addEventListener("click", async () => {
-  if (stations.length === 0) {
-    showToast("このコースはまだ準備中です。");
-    return;
-  }
-  const csv = buildCsv();
+async function uploadOrDownload(csv, dateStr, onDone){
   const server = getAdminServer();
   if (!server) {
-    downloadCsvFallback(csv, "送信先が未設定のため、ファイルをダウンロードしました。");
+    downloadCsvFallback(csv, dateStr, "送信先が未設定のため、ファイルをダウンロードしました。");
+    if (onDone) onDone(false);
     return;
   }
-
-  const btn = document.getElementById("saveBtn");
-  btn.disabled = true;
-  btn.textContent = "アップロード中...";
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
@@ -687,7 +696,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       body: JSON.stringify({
         courseId: COURSE_ID,
         courseName: COURSE_NAME,
-        date: todayDateStr(),
+        date: dateStr,
         csv: csv
       }),
       signal: controller.signal
@@ -697,15 +706,70 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     if (!res.ok || data.error) {
       throw new Error(data.error || "アップロードに失敗しました。");
     }
-    markSavedToday();
-    showToast("事務所PCにアップロードしました！");
+    markSavedForDate(dateStr);
+    showToast(dateStr + "分を事務所PCにアップロードしました！");
+    if (onDone) onDone(true);
   } catch (e) {
-    downloadCsvFallback(csv, "事務所PCに繋がらなかったため、ファイルをダウンロードしました。");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "本日の収集データをアップロード";
+    downloadCsvFallback(csv, dateStr, "事務所PCに繋がらなかったため、ファイルをダウンロードしました。");
+    if (onDone) onDone(false);
   }
+}
+
+document.getElementById("saveBtn").textContent = "本日の収集データをアップロード";
+
+document.getElementById("saveBtn").addEventListener("click", async () => {
+  if (stations.length === 0) {
+    showToast("このコースはまだ準備中です。");
+    return;
+  }
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
+  btn.textContent = "アップロード中...";
+  await uploadOrDownload(buildCsv(), todayDateStr());
+  btn.disabled = false;
+  btn.textContent = "本日の収集データをアップロード";
 });
+
+function findUnsentPastDates(){
+  const found = [];
+  for (let i = 1; i <= 14; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = dateStrFor(d);
+    if (isSavedForDate(dateStr)) continue;
+    let recs = {};
+    try { recs = JSON.parse(localStorage.getItem(keyFor(dateStr)) || "{}"); } catch (e) {}
+    if (Object.keys(recs).length > 0) found.push(dateStr);
+  }
+  return found;
+}
+
+function checkUnsentPastData(){
+  const dates = findUnsentPastDates();
+  if (dates.length === 0) return;
+  const header = document.querySelector("header");
+  if (!header) return;
+  const banner = document.createElement("div");
+  banner.className = "past-data-banner";
+  banner.textContent =
+    dates.length + "日分（" + dates.join("、") + "）の未送信データがあります。";
+  const btn = document.createElement("button");
+  btn.className = "past-data-btn";
+  btn.textContent = "送信する";
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    btn.textContent = "送信中...";
+    for (const dateStr of dates) {
+      const recs = JSON.parse(localStorage.getItem(keyFor(dateStr)) || "{}");
+      const viols = JSON.parse(localStorage.getItem(violationKeyFor(dateStr)) || "{}");
+      await uploadOrDownload(buildCsvFor(recs, viols), dateStr);
+    }
+    banner.remove();
+  });
+  banner.appendChild(btn);
+  header.insertBefore(banner, header.firstChild);
+}
+checkUnsentPastData();
 
 document.getElementById("copyBtn").addEventListener("click", async () => {
   const lines = stations.map(s => records[s.st] || "");

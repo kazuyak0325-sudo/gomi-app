@@ -35,6 +35,31 @@ header {
   text-decoration: none;
   border-bottom: 1px solid currentColor;
 }
+
+.past-data-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.92);
+  color: #8a4b00;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.past-data-btn {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #c0392b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.past-data-btn:disabled { opacity: 0.6; }
 header h1 {
   margin: 0 0 2px;
   font-size: 17px;
