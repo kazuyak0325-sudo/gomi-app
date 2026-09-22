@@ -208,6 +208,42 @@ main {
   border-color: var(--border);
   color: var(--text-muted);
 }
+.cardboard-row {
+  display: flex;
+  margin-top: 8px;
+}
+.cardboard-btn {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  border: 1px solid #a0682b;
+  border-radius: 8px;
+  background: transparent;
+  color: #a0682b;
+}
+.cardboard-btn.on {
+  background: #a0682b;
+  color: #fff;
+}
+.cardboard-filter-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 9px 6px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  color: var(--accent-contrast);
+}
+.cardboard-filter-btn.on {
+  background: #fff;
+  color: var(--accent);
+}
 .edit-row {
   display: flex;
   align-items: center;

@@ -33,6 +33,9 @@ function todayDateStr(){
 function keyFor(dateStr){ return "gomi_" + COURSE_ID + "_" + dateStr; }
 function violationKeyFor(dateStr){ return "gomi_v_" + COURSE_ID + "_" + dateStr; }
 function savedKeyFor(dateStr){ return "gomi_saved_" + COURSE_ID + "_" + dateStr; }
+function cardboardKeyFor(dateStr){ return "gomi_cb_" + COURSE_ID + "_" + dateStr; }
+
+const IS_CARDBOARD_COURSE = /-pet\d/.test(COURSE_ID);
 
 function todayKey(){
   return keyFor(todayDateStr());
@@ -116,6 +119,15 @@ try {
   violations = {};
 }
 
+let cardboard = {};
+try {
+  cardboard = JSON.parse(localStorage.getItem(cardboardKeyFor(todayDateStr())) || "{}");
+} catch (e) {
+  cardboard = {};
+}
+
+let cardboardFilterOn = false;
+
 function save(){
   try {
     localStorage.setItem(todayKey(), JSON.stringify(records));
@@ -126,6 +138,22 @@ function saveViolations(){
   try {
     localStorage.setItem(todayViolationKey(), JSON.stringify(violations));
   } catch (e) {}
+}
+
+function saveCardboard(){
+  try {
+    localStorage.setItem(cardboardKeyFor(todayDateStr()), JSON.stringify(cardboard));
+  } catch (e) {}
+}
+
+function toggleCardboard(s){
+  if (cardboard[s.st]) {
+    delete cardboard[s.st];
+  } else {
+    cardboard[s.st] = true;
+  }
+  saveCardboard();
+  render(document.getElementById("filter").value);
 }
 
 function fmtTime(d){
@@ -380,17 +408,21 @@ function render(filterText){
   let doneCount = 0;
   let violationStations = 0;
   let violationItems = 0;
+  let cardboardCount = 0;
   const ft = (filterText || "").trim();
 
   stations.forEach((s, idx) => {
     const time = records[s.st];
     const v = violations[s.st];
+    const hasCardboard = !!cardboard[s.st];
     if (time) doneCount++;
     if (v) {
       violationStations++;
       violationItems += v.count;
     }
+    if (hasCardboard) cardboardCount++;
     if (ft && !(s.target.includes(ft) || String(s.st).includes(ft) || String(s.no).includes(ft))) return;
+    if (IS_CARDBOARD_COURSE && cardboardFilterOn && !hasCardboard) return;
 
     const li = document.createElement("li");
     li.className = "item" + (time ? " done" : "") + (v ? " violation" : "");
@@ -433,6 +465,20 @@ function render(filterText){
     }
     li.appendChild(vRow);
 
+    if (IS_CARDBOARD_COURSE) {
+      const cbRow = document.createElement("div");
+      cbRow.className = "cardboard-row";
+      const cbBtn = document.createElement("button");
+      cbBtn.className = "cardboard-btn" + (hasCardboard ? " on" : "");
+      cbBtn.textContent = hasCardboard ? "ダンボールあり" : "ダンボールなし";
+      cbBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleCardboard(s);
+      });
+      cbRow.appendChild(cbBtn);
+      li.appendChild(cbRow);
+    }
+
     if (editMode) {
       const editRow = document.createElement("div");
       editRow.className = "edit-row";
@@ -456,7 +502,8 @@ function render(filterText){
   }
 
   document.getElementById("progress").textContent =
-    doneCount + " / " + stations.length + " 完了　違反ゴミ " + violationStations + "箇所（計" + violationItems + "個）";
+    doneCount + " / " + stations.length + " 完了　違反ゴミ " + violationStations + "箇所（計" + violationItems + "個）" +
+    (IS_CARDBOARD_COURSE ? "　ダンボールあり " + cardboardCount + "箇所" : "");
 }
 
 function onTap(s){
@@ -495,6 +542,21 @@ function clearViolation(s){
 
 document.getElementById("filter").addEventListener("input", e => render(e.target.value));
 
+if (IS_CARDBOARD_COURSE) {
+  const progressEl = document.getElementById("progress");
+  const filterBtn = document.createElement("button");
+  filterBtn.id = "cardboardFilterBtn";
+  filterBtn.className = "cardboard-filter-btn";
+  filterBtn.textContent = "ダンボールありのみ表示";
+  filterBtn.addEventListener("click", () => {
+    cardboardFilterOn = !cardboardFilterOn;
+    filterBtn.textContent = cardboardFilterOn ? "すべて表示に戻す" : "ダンボールありのみ表示";
+    filterBtn.classList.toggle("on", cardboardFilterOn);
+    render(document.getElementById("filter").value);
+  });
+  progressEl.insertAdjacentElement("afterend", filterBtn);
+}
+
 const fabAdd = document.createElement("button");
 fabAdd.className = "fab-add";
 fabAdd.textContent = "＋";
@@ -513,8 +575,10 @@ document.getElementById("editBtn").addEventListener("click", () => {
 function doReset(){
   records = {};
   violations = {};
+  cardboard = {};
   save();
   saveViolations();
+  saveCardboard();
   render(document.getElementById("filter").value);
 }
 

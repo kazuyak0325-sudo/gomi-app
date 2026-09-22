@@ -1,6 +1,6 @@
 ﻿{
-  "name": "紫コース（ペット①） 回収記録",
-  "short_name": "紫コース（ペット①）",
+  "name": "紫コース（ペット・ダンボール①） 回収記録",
+  "short_name": "紫コース（ペット・ダンボール①）",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
