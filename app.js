@@ -34,6 +34,7 @@ function keyFor(dateStr){ return "gomi_" + COURSE_ID + "_" + dateStr; }
 function violationKeyFor(dateStr){ return "gomi_v_" + COURSE_ID + "_" + dateStr; }
 function savedKeyFor(dateStr){ return "gomi_saved_" + COURSE_ID + "_" + dateStr; }
 function cardboardKeyFor(dateStr){ return "gomi_cb_" + COURSE_ID + "_" + dateStr; }
+function cardboardTimeKeyFor(dateStr){ return "gomi_ct_" + COURSE_ID + "_" + dateStr; }
 
 const IS_CARDBOARD_COURSE = /-pet\d/.test(COURSE_ID);
 
@@ -126,6 +127,13 @@ try {
   cardboard = {};
 }
 
+let cardboardTimes = {};
+try {
+  cardboardTimes = JSON.parse(localStorage.getItem(cardboardTimeKeyFor(todayDateStr())) || "{}");
+} catch (e) {
+  cardboardTimes = {};
+}
+
 let cardboardFilterOn = false;
 
 function save(){
@@ -143,6 +151,12 @@ function saveViolations(){
 function saveCardboard(){
   try {
     localStorage.setItem(cardboardKeyFor(todayDateStr()), JSON.stringify(cardboard));
+  } catch (e) {}
+}
+
+function saveCardboardTimes(){
+  try {
+    localStorage.setItem(cardboardTimeKeyFor(todayDateStr()), JSON.stringify(cardboardTimes));
   } catch (e) {}
 }
 
@@ -409,30 +423,35 @@ function render(filterText){
   let violationStations = 0;
   let violationItems = 0;
   let cardboardCount = 0;
+  let cardboardDoneCount = 0;
   const ft = (filterText || "").trim();
 
   stations.forEach((s, idx) => {
     const time = records[s.st];
     const v = violations[s.st];
     const hasCardboard = !!cardboard[s.st];
+    const cbTime = cardboardTimes[s.st];
     if (time) doneCount++;
     if (v) {
       violationStations++;
       violationItems += v.count;
     }
     if (hasCardboard) cardboardCount++;
+    if (cbTime) cardboardDoneCount++;
     if (ft && !(s.target.includes(ft) || String(s.st).includes(ft) || String(s.no).includes(ft))) return;
     if (IS_CARDBOARD_COURSE && cardboardFilterOn && !hasCardboard) return;
 
+    const isDone = (IS_CARDBOARD_COURSE && cardboardFilterOn) ? !!cbTime : !!time;
     const li = document.createElement("li");
-    li.className = "item" + (time ? " done" : "") + (v ? " violation" : "");
+    li.className = "item" + (isDone ? " done" : "") + (v ? " violation" : "");
 
     const rowMain = document.createElement("div");
     rowMain.className = "row-main";
     rowMain.innerHTML =
       '<span class="no">' + s.no + '</span>' +
       '<span class="target">' + s.target + '<small>' + s.map + ' / ST' + s.st + '</small></span>' +
-      '<span class="time">' + (time || "--:--") + '</span>';
+      '<span class="time' + (time ? ' filled' : '') + '">' + (time || "--:--") + '</span>' +
+      (IS_CARDBOARD_COURSE ? '<span class="time cb-time' + (cbTime ? ' filled' : '') + '">📦' + (cbTime || "--:--") + '</span>' : '');
     rowMain.addEventListener("click", () => onTap(s));
     li.appendChild(rowMain);
 
@@ -503,10 +522,14 @@ function render(filterText){
 
   document.getElementById("progress").textContent =
     doneCount + " / " + stations.length + " 完了　違反ゴミ " + violationStations + "箇所（計" + violationItems + "個）" +
-    (IS_CARDBOARD_COURSE ? "　ダンボールあり " + cardboardCount + "箇所" : "");
+    (IS_CARDBOARD_COURSE ? "　ダンボール " + cardboardDoneCount + " / " + cardboardCount + "箇所 回収済み" : "");
 }
 
 function onTap(s){
+  if (IS_CARDBOARD_COURSE && cardboardFilterOn) {
+    onTapCardboardTime(s);
+    return;
+  }
   if (records[s.st]) {
     showConfirm('「' + s.target + '」の記録(' + records[s.st] + ')を取り消しますか？', () => {
       delete records[s.st];
@@ -517,6 +540,20 @@ function onTap(s){
   }
   records[s.st] = fmtTime(new Date());
   save();
+  render(document.getElementById("filter").value);
+}
+
+function onTapCardboardTime(s){
+  if (cardboardTimes[s.st]) {
+    showConfirm('「' + s.target + '」のダンボール回収時刻(' + cardboardTimes[s.st] + ')を取り消しますか？', () => {
+      delete cardboardTimes[s.st];
+      saveCardboardTimes();
+      render(document.getElementById("filter").value);
+    });
+    return;
+  }
+  cardboardTimes[s.st] = fmtTime(new Date());
+  saveCardboardTimes();
   render(document.getElementById("filter").value);
 }
 
@@ -576,9 +613,11 @@ function doReset(){
   records = {};
   violations = {};
   cardboard = {};
+  cardboardTimes = {};
   save();
   saveViolations();
   saveCardboard();
+  saveCardboardTimes();
   render(document.getElementById("filter").value);
 }
 

@@ -175,7 +175,12 @@ main {
   font-weight: 700;
   color: var(--text-muted);
 }
-.item.done .time { color: var(--done-text); }
+.time.filled { color: var(--done-text); }
+.time.cb-time {
+  width: 84px;
+  font-size: 15px;
+}
+.time.cb-time.filled { color: #a0682b; }
 
 .violation-row {
   display: flex;
