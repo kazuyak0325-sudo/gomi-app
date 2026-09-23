@@ -168,8 +168,13 @@
   <button id="updateBtn">最新版に更新する</button>
 </div>
 <script>
-const TOP_VERSION = "v0.20";
+const TOP_VERSION = "v0.21";
 document.getElementById("versionTag").textContent = "バージョン " + TOP_VERSION;
+
+const ADMIN_PRESETS = [
+  { label: "常務のPC", url: "https://192.168.11.34:8788" },
+  { label: "サブPC", url: "https://192.168.11.16:8788" }
+];
 
 function getAdminServer(){
   try { return localStorage.getItem("gomi_admin_server") || ""; } catch (e) { return ""; }
@@ -179,7 +184,8 @@ function setAdminServer(v){
 }
 function renderAdminAddr(){
   const addr = getAdminServer();
-  document.getElementById("adminAddrText").textContent = addr || "未設定";
+  const preset = ADMIN_PRESETS.find(p => p.url === addr);
+  document.getElementById("adminAddrText").textContent = preset ? preset.label : (addr || "未設定");
 }
 renderAdminAddr();
 
@@ -239,11 +245,44 @@ function openAdminEditModal(){
   const box = document.createElement("div");
   box.className = "modal-box";
   const p = document.createElement("p");
-  p.textContent = "事務所PCのアドレスを入力してください（管理ツール画面に表示されているものと同じです）";
-  const input = document.createElement("input");
-  input.type = "text";
-  input.value = getAdminServer();
-  input.placeholder = "例: https://192.168.1.50:8788";
+  p.textContent = "アップロード先を選んでください";
+  const select = document.createElement("select");
+  select.style.width = "100%";
+  select.style.padding = "10px";
+  select.style.fontSize = "16px";
+  select.style.marginBottom = "8px";
+  select.style.borderRadius = "8px";
+  ADMIN_PRESETS.forEach(preset => {
+    const opt = document.createElement("option");
+    opt.value = preset.url;
+    opt.textContent = preset.label;
+    select.appendChild(opt);
+  });
+  const otherOpt = document.createElement("option");
+  otherOpt.value = "__other__";
+  otherOpt.textContent = "その他（手入力）";
+  select.appendChild(otherOpt);
+
+  const customInput = document.createElement("input");
+  customInput.type = "text";
+  customInput.placeholder = "例: https://192.168.1.50:8788";
+
+  const currentAddr = getAdminServer();
+  const matchedPreset = ADMIN_PRESETS.find(preset => preset.url === currentAddr);
+  if (matchedPreset) {
+    select.value = matchedPreset.url;
+    customInput.style.display = "none";
+    customInput.value = currentAddr;
+  } else {
+    select.value = "__other__";
+    customInput.style.display = "block";
+    customInput.value = currentAddr;
+  }
+  select.addEventListener("change", () => {
+    customInput.style.display = select.value === "__other__" ? "block" : "none";
+    if (select.value === "__other__") customInput.focus();
+  });
+
   const actions = document.createElement("div");
   actions.className = "modal-actions";
   const cancelBtn = document.createElement("button");
@@ -254,20 +293,20 @@ function openAdminEditModal(){
   okBtn.className = "modal-btn-ok";
   okBtn.textContent = "保存";
   okBtn.addEventListener("click", () => {
-    setAdminServer(input.value.trim());
+    const value = select.value === "__other__" ? customInput.value.trim() : select.value;
+    setAdminServer(value);
     renderAdminAddr();
     overlay.remove();
   });
   actions.appendChild(cancelBtn);
   actions.appendChild(okBtn);
   box.appendChild(p);
-  box.appendChild(input);
+  box.appendChild(select);
+  box.appendChild(customInput);
   box.appendChild(actions);
   overlay.appendChild(box);
   overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
-  input.focus();
-  input.select();
 }
 
 document.getElementById("editAdminBtn").addEventListener("click", () => {
