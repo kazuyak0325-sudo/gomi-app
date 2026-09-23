@@ -177,6 +177,12 @@ main {
   color: var(--text-muted);
 }
 .time.filled { color: var(--done-text); }
+.pet-icon-img {
+  width: 16px;
+  height: 16px;
+  vertical-align: -2px;
+  margin-right: 2px;
+}
 .time.cb-time {
   color: #a0682b;
 }

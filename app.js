@@ -450,7 +450,7 @@ function render(filterText){
     rowMain.innerHTML =
       '<span class="no">' + s.no + '</span>' +
       '<span class="target">' + s.target + '<small>' + s.map + ' / ST' + s.st + '</small></span>' +
-      '<span class="time' + (time ? ' filled' : '') + '">' + (IS_CARDBOARD_COURSE ? "🧴" : "") + (time || "--:--") + '</span>' +
+      '<span class="time' + (time ? ' filled' : '') + '">' + (IS_CARDBOARD_COURSE ? '<img src="../../pet-icon.png" class="pet-icon-img" alt="">' : "") + (time || "--:--") + '</span>' +
       (IS_CARDBOARD_COURSE ? '<span class="time cb-time' + (cbTime ? ' filled' : '') + '">📦' + (cbTime || "--:--") + '</span>' : '');
     rowMain.addEventListener("click", () => onTap(s));
     li.appendChild(rowMain);
@@ -644,24 +644,31 @@ function csvField(v){
   return s;
 }
 
-function buildCsvFor(recordsObj, violationsObj){
-  const rows = [["番号", "ST番号", "地図番号", "目標物", "収集時刻", "違反ゴミ個数"]];
+function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj){
+  const headers = ["番号", "ST番号", "地図番号", "目標物", "収集時刻", "違反ゴミ個数"];
+  if (IS_CARDBOARD_COURSE) headers.push("ダンボールあり", "ダンボール回収時刻");
+  const rows = [headers];
   stations.forEach(s => {
     const v = violationsObj[s.st];
-    rows.push([
+    const row = [
       String(s.no),
       s.st,
       s.map,
       s.target,
       recordsObj[s.st] || "",
       v ? String(v.count) : ""
-    ]);
+    ];
+    if (IS_CARDBOARD_COURSE) {
+      row.push((cardboardObj && cardboardObj[s.st]) ? "あり" : "");
+      row.push((cardboardTimesObj && cardboardTimesObj[s.st]) || "");
+    }
+    rows.push(row);
   });
   return "﻿" + rows.map(row => row.map(csvField).join(",")).join("\r\n");
 }
 
 function buildCsv(){
-  return buildCsvFor(records, violations);
+  return buildCsvFor(records, violations, cardboard, cardboardTimes);
 }
 
 function downloadCsvFallback(csv, dateStr, reasonMessage){
@@ -761,7 +768,9 @@ function checkUnsentPastData(){
     for (const dateStr of dates) {
       const recs = JSON.parse(localStorage.getItem(keyFor(dateStr)) || "{}");
       const viols = JSON.parse(localStorage.getItem(violationKeyFor(dateStr)) || "{}");
-      await uploadOrDownload(buildCsvFor(recs, viols), dateStr);
+      const cbs = JSON.parse(localStorage.getItem(cardboardKeyFor(dateStr)) || "{}");
+      const cbTimes = JSON.parse(localStorage.getItem(cardboardTimeKeyFor(dateStr)) || "{}");
+      await uploadOrDownload(buildCsvFor(recs, viols, cbs, cbTimes), dateStr);
     }
     banner.remove();
   });
