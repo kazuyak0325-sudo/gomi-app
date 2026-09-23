@@ -22,6 +22,41 @@ document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + 
   }
 })();
 
+(function(){
+  const header = document.querySelector("header");
+  const actions1 = document.querySelector(".actions:not(.actions-2)");
+  const actions2 = document.querySelector(".actions-2");
+  if (!header || !actions1 || !actions2) return;
+
+  const menuToggle = document.createElement("button");
+  menuToggle.className = "menu-toggle";
+  menuToggle.setAttribute("aria-label", "メニュー");
+  menuToggle.textContent = "☰";
+
+  const menuPanel = document.createElement("div");
+  menuPanel.className = "menu-panel";
+  menuPanel.appendChild(actions1);
+  menuPanel.appendChild(actions2);
+
+  header.appendChild(menuToggle);
+  header.appendChild(menuPanel);
+
+  menuToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menuPanel.classList.toggle("open");
+  });
+  menuPanel.addEventListener("click", (e) => {
+    if (e.target.tagName === "BUTTON") {
+      menuPanel.classList.remove("open");
+    }
+  });
+  document.addEventListener("click", (e) => {
+    if (!menuPanel.contains(e.target) && e.target !== menuToggle) {
+      menuPanel.classList.remove("open");
+    }
+  });
+})();
+
 function dateStrFor(d){
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }

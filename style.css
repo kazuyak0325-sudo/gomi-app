@@ -21,11 +21,55 @@ body {
   color: var(--text);
 }
 header {
+  position: relative;
   background: var(--accent);
   color: var(--accent-contrast);
   padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
+.menu-toggle {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.16);
+  color: var(--accent-contrast);
+  font-size: 22px;
+  line-height: 1;
+  z-index: 20;
+}
+.menu-toggle:active { background: rgba(255,255,255,0.28); }
+.menu-panel {
+  display: none;
+  position: absolute;
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  right: 12px;
+  width: 230px;
+  background: var(--surface);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  padding: 10px;
+  z-index: 30;
+}
+.menu-panel.open { display: block; }
+.menu-panel .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.menu-panel .actions-2 { margin-top: 8px; }
+.menu-panel .actions button {
+  flex: none;
+  background: #f2f0f5;
+  color: var(--text);
+  text-align: center;
+  padding: 12px 10px;
+  font-size: 15px;
+}
+.menu-panel .actions button:active { background: #e5e1ec; }
 .back-link {
   display: inline-block;
   margin-bottom: 8px;
@@ -285,10 +329,10 @@ main {
 .fab-add {
   display: none;
   position: fixed;
-  top: calc(12px + env(safe-area-inset-top, 0px));
-  right: 12px;
-  width: 46px;
-  height: 46px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  right: 16px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   border: none;
   background: var(--accent);
