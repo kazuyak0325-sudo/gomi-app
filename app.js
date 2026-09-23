@@ -74,6 +74,90 @@ function cardboardViolationKeyFor(dateStr){ return "gomi_cv_" + COURSE_ID + "_" 
 
 const IS_CARDBOARD_COURSE = /-pet\d/.test(COURSE_ID);
 
+const PHOTO_DB_NAME = "gomi_photos";
+const PHOTO_STORE = "photos";
+
+function openPhotoDb(){
+  return new Promise((resolve, reject) => {
+    if (!("indexedDB" in window)) { reject(new Error("indexedDB unsupported")); return; }
+    const req = indexedDB.open(PHOTO_DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      req.result.createObjectStore(PHOTO_STORE);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function photoKey(dateStr, st){
+  return COURSE_ID + "|" + dateStr + "|" + st;
+}
+
+async function savePhoto(dateStr, st, blob){
+  const db = await openPhotoDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, "readwrite");
+    tx.objectStore(PHOTO_STORE).put(blob, photoKey(dateStr, st));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getPhoto(dateStr, st){
+  const db = await openPhotoDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, "readonly");
+    const req = tx.objectStore(PHOTO_STORE).get(photoKey(dateStr, st));
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function deletePhoto(dateStr, st){
+  const db = await openPhotoDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, "readwrite");
+    tx.objectStore(PHOTO_STORE).delete(photoKey(dateStr, st));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function listPhotoStationsForDate(dateStr){
+  const db = await openPhotoDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, "readonly");
+    const req = tx.objectStore(PHOTO_STORE).getAllKeys();
+    req.onsuccess = () => {
+      const prefix = COURSE_ID + "|" + dateStr + "|";
+      resolve(req.result.filter(k => k.startsWith(prefix)).map(k => k.slice(prefix.length)));
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function compressImage(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const maxW = 1000;
+      const scale = Math.min(1, maxW / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(img.width * scale));
+      canvas.height = Math.max(1, Math.round(img.height * scale));
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(url);
+        if (blob) resolve(blob); else reject(new Error("compress failed"));
+      }, "image/jpeg", 0.7);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image load failed")); };
+    img.src = url;
+  });
+}
+
 function todayKey(){
   return keyFor(todayDateStr());
 }
@@ -181,6 +265,33 @@ let cardboardFilterOn = false;
 
 function activeViolations(){
   return (IS_CARDBOARD_COURSE && cardboardFilterOn) ? cardboardViolations : violations;
+}
+
+let photoStations = new Set();
+listPhotoStationsForDate(todayDateStr()).then(sts => {
+  photoStations = new Set(sts);
+  render(document.getElementById("filter").value);
+}).catch(() => {});
+
+function openCameraFor(s){
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.capture = "environment";
+  input.addEventListener("change", async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    try {
+      const blob = await compressImage(file);
+      await savePhoto(todayDateStr(), s.st, blob);
+      photoStations.add(s.st);
+      showToast('「' + s.target + '」の写真を保存しました。');
+      render(document.getElementById("filter").value);
+    } catch (e) {
+      showToast("写真の保存に失敗しました。");
+    }
+  });
+  input.click();
 }
 
 function save(){
@@ -547,6 +658,15 @@ function render(filterText){
         clearViolation(s);
       });
       vRow.appendChild(clearBtn);
+      const hasPhoto = photoStations.has(s.st);
+      const photoBtn = document.createElement("button");
+      photoBtn.className = "photo-btn" + (hasPhoto ? " has-photo" : "");
+      photoBtn.textContent = hasPhoto ? "📷あり" : "📷撮影";
+      photoBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openCameraFor(s);
+      });
+      vRow.appendChild(photoBtn);
     } else {
       const markBtn = document.createElement("button");
       markBtn.className = "mark-btn";
@@ -773,6 +893,25 @@ function downloadCsvFallback(csv, dateStr, reasonMessage){
   showToast(reasonMessage + "保存先はOneDriveの「ゴミ収集データ／" + COURSE_NAME + "」フォルダを選んでください。");
 }
 
+async function uploadPhotosForDate(dateStr, server){
+  let sts = [];
+  try { sts = await listPhotoStationsForDate(dateStr); } catch (e) { return; }
+  const base = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "");
+  for (const st of sts) {
+    let blob = null;
+    try { blob = await getPhoto(dateStr, st); } catch (e) {}
+    if (!blob) continue;
+    try {
+      const url = base + "/api/collect-photo" +
+        "?courseId=" + encodeURIComponent(COURSE_ID) +
+        "&courseName=" + encodeURIComponent(COURSE_NAME) +
+        "&date=" + encodeURIComponent(dateStr) +
+        "&st=" + encodeURIComponent(st);
+      await fetch(url, { method: "POST", body: blob });
+    } catch (e) {}
+  }
+}
+
 async function uploadOrDownload(csv, dateStr, onDone){
   const server = getAdminServer();
   if (!server) {
@@ -802,6 +941,7 @@ async function uploadOrDownload(csv, dateStr, onDone){
     }
     markSavedForDate(dateStr);
     showToast(dateStr + "分を事務所PCにアップロードしました！");
+    await uploadPhotosForDate(dateStr, server);
     if (onDone) onDone(true);
   } catch (e) {
     downloadCsvFallback(csv, dateStr, "事務所PCに繋がらなかったため、ファイルをダウンロードしました。");

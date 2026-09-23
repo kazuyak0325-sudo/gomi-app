@@ -264,6 +264,20 @@ main {
   border-color: var(--border);
   color: var(--text-muted);
 }
+.photo-btn {
+  padding: 6px 11px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+}
+.photo-btn.has-photo {
+  border-color: #2c8c3f;
+  color: #2c8c3f;
+  background: #e3f6e6;
+}
 .cardboard-row {
   display: flex;
   margin-top: 8px;
