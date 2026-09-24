@@ -3,35 +3,137 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>ピンクコース（ペット・ダンボール①）</title>
-<link rel="icon" href="../icon.png">
+<title>ピンクコース（ペット・ダンボール①） 回収記録</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ピンクコース（ペット・ダンボール①）">
 <meta name="theme-color" content="#d6336c">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../style.css?v=1790223186">
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: #f5f5f5;
-    color: #222;
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
-    text-align: center;
-  }
-  a.back {
-    display: inline-block;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: #555;
-    text-decoration: none;
-    border-bottom: 1px solid #999;
-  }
-  h1 { font-size: 17px; margin: 0 0 12px; }
-  p { color: #777; font-size: 14px; line-height: 1.7; }
+  :root { --accent: #d6336c; --accent-contrast: #ffffff; --surface-done: #fbe4ec; --done-text: #c02359; }
 </style>
 </head>
 <body>
-<a class="back" href="../">← 日程選択に戻る</a>
-<h1>ピンクコース（ペット・ダンボール①）</h1>
-<p>このコースはまだ準備中です。<br>ステーションデータが追加されるとここで使えるようになります。</p>
+<header>
+  <h1>ピンクコース（ペット・ダンボール①）</h1>
+  <p class="sub">回収したステーションをタップして時刻を記録</p>
+  <p class="meta" id="dateVersion"></p>
+  <div id="progress">0 / 0 完了</div>
+  <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
+  <div class="actions">
+    <button id="copyBtn">時刻を一覧コピー</button>
+    <button id="resetBtn">今日の記録をリセット</button>
+  </div>
+  <div class="actions actions-2">
+    <button id="editBtn">ステーションを編集</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
+  </div>
+</header>
+<main>
+  <ul id="list"></ul>
+</main>
+
+<script>
+const COURSE_ID = "pink-pet1";
+const COURSE_NAME = "ピンクコース（ペット・ダンボール①）";
+const APP_VERSION = "v0.26";
+
+const DEFAULT_STATIONS = [
+  {no:1,st:"363",map:"52-D-2",target:"佐藤興業さき"},
+  {no:2,st:"126",map:"38-A-4",target:"内装前十字路"},
+  {no:3,st:"125",map:"37-G-5",target:"長倉公民館"},
+  {no:4,st:"124",map:"37-F-2",target:"木立公民館"},
+  {no:5,st:"123",map:"37-B-3",target:"谷中記念館 2041"},
+  {no:6,st:"74",map:"26-J-4",target:"大永交通先ﾊﾞｯｸ"},
+  {no:7,st:"73",map:"26-H-4",target:"妙徳寺たい肥置き場"},
+  {no:8,st:"75",map:"27-F-3",target:"共育学園手前　坂"},
+  {no:9,st:"45",map:"21-H-5",target:"那須共育学園①"},
+  {no:10,st:"46",map:"21-H-5",target:"那須共育学園②"},
+  {no:11,st:"44",map:"21-J-4",target:"ｿｰﾗｰ発電"},
+  {no:12,st:"47",map:"22-H-1",target:"松本自動車先"},
+  {no:13,st:"16",map:"10-H-4",target:"長嶋ﾓｰﾀｰｽ"},
+  {no:14,st:"15",map:"10-D-3",target:"羽田公民館"},
+  {no:15,st:"27",map:"15-C-2",target:"羽田小前交差点"},
+  {no:16,st:"26",map:"15-B-1",target:"羽田小学校"},
+  {no:17,st:"14",map:"9-J-1",target:"藤形公民館"},
+  {no:18,st:"5",map:"5-A-5",target:"倉庫"},
+  {no:19,st:"4",map:"4-H-2",target:"六町歩公民館"},
+  {no:20,st:"11",map:"8-H-3",target:"久保集会所"},
+  {no:21,st:"13",map:"9-C-5",target:"後藤養魚所"},
+  {no:22,st:"12",map:"8-J-5",target:"稲荷神社おく"},
+  {no:23,st:"23",map:"13-G-2",target:"助川労務先"},
+  {no:24,st:"25",map:"14-D-3",target:"ｷﾝｸﾞﾌｨｯｼｬｰ"},
+  {no:25,st:"43",map:"14-H-3",target:"ｽｰﾊﾟｰ白井(移動)"},
+  {no:26,st:"1413",map:"21-E-1",target:"小滝苑"},
+  {no:27,st:"40",map:"21-E-2",target:"小滝苑公民館"},
+  {no:28,st:"41",map:"21-D-3",target:"ﾌｼﾞ鉄筋"},
+  {no:29,st:"42",map:"21-B-4",target:"ﾔﾏｷｼｽﾞﾑ"},
+  {no:30,st:"72",map:"26-J-1",target:"小滝集落ｾﾝﾀｰ"},
+  {no:31,st:"71",map:"26-F-1",target:"栃北炊飯前"},
+  {no:32,st:"70",map:"26-E-2",target:"ﾌｧﾐﾏ横ﾗｲｽﾗｲﾝAP"},
+  {no:33,st:"122",map:"36-H-2",target:"小滝ﾗｲｽﾗｲﾝ"},
+  {no:34,st:"121",map:"36-E-3",target:"坂の途中"},
+  {no:35,st:"115",map:"35-J-3",target:"田んぼ"},
+  {no:36,st:"1440",map:"35-E-4",target:"ｾｼﾞｰﾙ1"},
+  {no:37,st:"1480",map:"35-F-4",target:"ｾｼﾞｰﾙ3"},
+  {no:38,st:"1506",map:"35-F-4",target:"ｾｼﾞｰﾙ2"},
+  {no:39,st:"1399",map:"44-C-1",target:"信号手前"},
+  {no:40,st:"191",map:"44-C-2",target:"信号右　壁"},
+  {no:41,st:"119",map:"36-B-2",target:"松本表具店前"},
+  {no:42,st:"118",map:"36-A-2",target:"住宅地　白いST"},
+  {no:43,st:"1623",map:"36-A-2",target:"東地区公園ST"},
+  {no:44,st:"117",map:"36-A-1",target:"ｶﾑﾙ"},
+  {no:45,st:"116",map:"36-A-1",target:"竹林"},
+  {no:46,st:"69",map:"26-A-3",target:"やおいち前"},
+  {no:47,st:"68",map:"26-A-2",target:"電柱横"},
+  {no:48,st:"67",map:"26-A-1",target:"金田北中学校正面"},
+  {no:49,st:"38",map:"20-A-5",target:"相馬自動車"},
+  {no:50,st:"37",map:"20-A-4",target:"北條光学　裏"},
+  {no:51,st:"35",map:"20-B-3",target:"通行止め　ﾊﾞｯｸ"},
+  {no:52,st:"33",map:"20-B-2",target:"歩道"},
+  {no:53,st:"21",map:"13-B-5",target:"柳の木ﾎﾎｴﾐｾﾝﾀｰ"},
+  {no:54,st:"22",map:"13-A-5",target:"川永建設右折ます池"},
+  {no:55,st:"19",map:"13-C-3",target:"電柱　横"},
+  {no:56,st:"8",map:"8-E-5",target:"渡辺自販機民家裏"},
+  {no:57,st:"2",map:"3-H-2",target:"鴻巣平　入口"},
+  {no:58,st:"1447",map:"3-J-3",target:"鴻巣平　分譲地"},
+  {no:59,st:"1651",map:"3-F-3",target:"鴻巣平　新設"},
+  {no:60,st:"1",map:"3-H-4",target:"鴻巣平　出口"},
+  {no:61,st:"6",map:"7-G-1",target:"宝屋商店前"},
+  {no:62,st:"7",map:"7-H-2",target:"鴻巣公民館"},
+  {no:63,st:"10",map:"8-F-3",target:"クレヨン美容室"},
+  {no:64,st:"9",map:"8-F-3",target:"歩道ST"},
+  {no:65,st:"20",map:"13-C-3",target:"竹義建設資材置場"},
+  {no:66,st:"1640",map:"13-F-2",target:"竹義建設　先"},
+  {no:67,st:"24",map:"13-G-5",target:"さくら大田原工場前"},
+  {no:68,st:"39",map:"20-H-3",target:"津久井花木右折"},
+  {no:69,st:"34",map:"20-B-3",target:"市野沢NT"},
+  {no:70,st:"36",map:"20-B-4",target:"後藤襖向い　ｺﾒﾘ"},
+  {no:71,st:"1527",map:"26-A-3",target:"やおいち隣"},
+  {no:72,st:"1411",map:"19-J-4",target:"金田北公民館"},
+  {no:73,st:"51",map:"25-I-1",target:"先の分譲地"},
+  {no:74,st:"1543",map:"25-I-1",target:"市野沢小　隣分譲"},
+  {no:75,st:"55",map:"25-J-1",target:"市野沢小学校"},
+  {no:76,st:"54",map:"25-J-1",target:"金田北中学校"},
+  {no:77,st:"53",map:"25-I-1",target:"しまｺｰﾎﾟ"},
+  {no:78,st:"52-①",map:"25-I-1",target:"金田北中交差点角"},
+  {no:79,st:"53-②",map:"25-I-2",target:"金田北中交差点角"},
+  {no:80,st:"1412",map:"19-I-5",target:"左側　分譲地"},
+  {no:81,st:"1403",map:"19-I-5",target:"右側分譲地"},
+  {no:82,st:"1442",map:"19-I-4",target:"川ごみST"},
+  {no:83,st:"18",map:"12-H-3",target:"寺方公民館"},
+  {no:84,st:"17",map:"12-D-4",target:"野田ｵﾌﾟﾃｨｶﾙ"},
+  {no:85,st:"31",map:"19-F-1",target:"県道手前"},
+  {no:86,st:"32",map:"19-H-2",target:"松原農村生活ｾﾝﾀｰ"},
+  {no:87,st:"30",map:"19-C-4",target:"船山公民館"},
+  {no:88,st:"50",map:"25-B-4",target:"荒井公民館"},
+  {no:89,st:"96",map:"33-H-1",target:"町島公民館"}
+];
+</script>
+<script src="../../app.js?v=1790223186"></script>
 </body>
 </html>
