@@ -3,35 +3,168 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>青コース（ペット・ダンボール①）</title>
-<link rel="icon" href="../icon.png">
+<title>青コース（ペット・ダンボール①） 回収記録</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="青コース（ペット・ダンボール①）">
 <meta name="theme-color" content="#1565c0">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../style.css?v=1790223214">
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: #f5f5f5;
-    color: #222;
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
-    text-align: center;
-  }
-  a.back {
-    display: inline-block;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: #555;
-    text-decoration: none;
-    border-bottom: 1px solid #999;
-  }
-  h1 { font-size: 17px; margin: 0 0 12px; }
-  p { color: #777; font-size: 14px; line-height: 1.7; }
+  :root { --accent: #1565c0; --accent-contrast: #ffffff; --surface-done: #e3edfa; --done-text: #1565c0; }
 </style>
 </head>
 <body>
-<a class="back" href="../">← 日程選択に戻る</a>
-<h1>青コース（ペット・ダンボール①）</h1>
-<p>このコースはまだ準備中です。<br>ステーションデータが追加されるとここで使えるようになります。</p>
+<header>
+  <h1>青コース（ペット・ダンボール①）</h1>
+  <p class="sub">回収したステーションをタップして時刻を記録</p>
+  <p class="meta" id="dateVersion"></p>
+  <div id="progress">0 / 0 完了</div>
+  <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
+  <div class="actions">
+    <button id="copyBtn">時刻を一覧コピー</button>
+    <button id="resetBtn">今日の記録をリセット</button>
+  </div>
+  <div class="actions actions-2">
+    <button id="editBtn">ステーションを編集</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
+  </div>
+</header>
+<main>
+  <ul id="list"></ul>
+</main>
+
+<script>
+const COURSE_ID = "ao-pet1";
+const COURSE_NAME = "青コース（ペット・ダンボール①）";
+const APP_VERSION = "v0.26";
+
+const DEFAULT_STATIONS = [
+  {no:1,st:"120",map:"36-C-3",target:"下深田公民館"},
+  {no:2,st:"112",map:"34-F-4",target:"二本松公民館手前"},
+  {no:3,st:"110",map:"34-F-3",target:"出口歩道"},
+  {no:4,st:"66",map:"34-I-1",target:"つつい接骨院"},
+  {no:5,st:"65",map:"25-I-5",target:"勝田屋前　砂利"},
+  {no:6,st:"1580",map:"25-H-5",target:"丸正精肉店さき"},
+  {no:7,st:"109",map:"34-G-2",target:"郡司自動車"},
+  {no:8,st:"111",map:"34-I-3",target:"先左折　分譲地"},
+  {no:9,st:"1397",map:"25-G-5",target:"くもん塾"},
+  {no:10,st:"63",map:"25-G-5",target:"その先ST"},
+  {no:11,st:"62",map:"25-G-5",target:"県営住宅1号棟"},
+  {no:12,st:"61",map:"25-G-5",target:"県営住宅2号棟"},
+  {no:13,st:"60",map:"25-G-5",target:"丸山精肉店前"},
+  {no:14,st:"57",map:"25-F-5",target:"徳原商店"},
+  {no:15,st:"56",map:"25-F-5",target:"ｵｱｼｽ美容室"},
+  {no:16,st:"58",map:"25-G-5",target:"徳原商店先"},
+  {no:17,st:"99",map:"34-B-1",target:"市営住宅公民館"},
+  {no:18,st:"98",map:"34-A-2",target:"市営住宅1　Uﾀｰﾝ"},
+  {no:19,st:"59",map:"25-G-5",target:"市営住宅3 ﾌﾞﾛｯｸ"},
+  {no:20,st:"64",map:"25-G-5",target:"市営住宅4ﾎﾞｯｸｽ裏"},
+  {no:21,st:"100",map:"34-C-1",target:"市営住宅2　ﾎﾞｯｸｽ"},
+  {no:22,st:"102",map:"34-C-1",target:"橋手前　ﾌﾞﾛｯｸ"},
+  {no:23,st:"103",map:"34-D-2",target:"ｸﾞﾘｰﾝﾊﾟｰｸ"},
+  {no:24,st:"104",map:"34-D-2",target:"ｻﾝﾓｰﾙ"},
+  {no:25,st:"105",map:"34-D-2",target:"ｻﾆｰﾌﾗｯﾄ"},
+  {no:26,st:"106",map:"34-E-3",target:"ｴｸｾﾙ"},
+  {no:27,st:"107",map:"34-E-3",target:"ｱﾈｯｸｽ"},
+  {no:28,st:"108",map:"34-C-4",target:"シャトーハイツ"},
+  {no:29,st:"187",map:"43ーI-2",target:"いなみの倉庫先ST"},
+  {no:30,st:"1453",map:"33－J-5",target:"砂利バック"},
+  {no:31,st:"114",map:"35-B-2",target:"JA倉庫"},
+  {no:32,st:"113",map:"35-B-1",target:"明宿公民館"},
+  {no:33,st:"1476",map:"33-J-2",target:"すぐ向いAP①"},
+  {no:34,st:"1476",map:"",target:"すぐ向いAP②"},
+  {no:35,st:"1476",map:"",target:"すぐ向いAP③"},
+  {no:36,st:"97",map:"33-J-2",target:"清水印刷"},
+  {no:37,st:"1555",map:"33-J-2",target:"町島分譲地　新設"},
+  {no:38,st:"1639",map:"33-I-2",target:"町島分譲地 新設2"},
+  {no:39,st:"172",map:"41-J-2",target:"坂を下りるｳｲｽﾃﾘｱ"},
+  {no:40,st:"1557",map:"42-A-4",target:"阿Q　隣"},
+  {no:41,st:"175",map:"41-J-4",target:"紫塚交差点まで1"},
+  {no:42,st:"174",map:"41-J-3",target:"紫塚交差点まで2"},
+  {no:43,st:"173",map:"41-J-3",target:"紫塚交差点まで3"},
+  {no:44,st:"171",map:"41-I-2",target:"紫塚交差点まで4"},
+  {no:45,st:"1524",map:"32-G-5",target:"星野測量　分譲地"},
+  {no:46,st:"87",map:"32-H-5",target:"星野測量ﾊﾟﾙﾃｰﾙ"},
+  {no:47,st:"83",map:"32-I-2",target:"右側　空地"},
+  {no:48,st:"91",map:"32-H-2",target:"小川工務店 ﾊﾞｯｸ"},
+  {no:49,st:"1452",map:"29-J-5",target:"戸邉食品 奥 ﾊﾞｯｸ"},
+  {no:50,st:"1497",map:"29-G-5",target:"ﾎﾝﾀﾞ向　分譲地"},
+  {no:51,st:"76",map:"29-E-1",target:"紫塚NT2"},
+  {no:52,st:"77",map:"29-E-2",target:"紫塚NT1"},
+  {no:53,st:"49",map:"24-C-1",target:"岡十文字"},
+  {no:54,st:"48",map:"24-C-1",target:"岡公民館"},
+  {no:55,st:"29",map:"18-G-3",target:"戸野内公民館"},
+  {no:56,st:"28",map:"18-C-2",target:"バイク屋イワモト先"},
+  {no:57,st:"1388",map:"17-F-5",target:"蛇尾川　田んぼ"},
+  {no:58,st:"78",map:"29-G-3",target:"聖医ﾒﾃﾞｨｶﾙｸﾘﾆｯｸ"},
+  {no:59,st:"92",map:"33-A-4",target:"蕪中川1"},
+  {no:60,st:"93",map:"33-B-4",target:"蕪中川　木の扉 U"},
+  {no:61,st:"94",map:"33-A-5",target:"住宅地ST  U"},
+  {no:62,st:"1625",map:"33-A-4",target:"AP　ﾈｯﾄ"},
+  {no:63,st:"84",map:"32-J-3",target:"建設協会1"},
+  {no:64,st:"1436",map:"32-J-3",target:"建設協会2"},
+  {no:65,st:"1567",map:"42-C-1",target:"ｿﾌｨｱ･ﾋﾙｽﾞ"},
+  {no:66,st:"182",map:"42-B-2",target:"左折　急坂"},
+  {no:67,st:"181",map:"42-C-2",target:"ｻﾝﾊﾟﾚｽ紫塚"},
+  {no:68,st:"180",map:"42-C-1",target:"高圧鉄塔下"},
+  {no:69,st:"85",map:"32-J-4",target:"紫塚ハイム"},
+  {no:70,st:"86",map:"32-I-4",target:"坂段差ST　Uﾀｰﾝ"},
+  {no:71,st:"90",map:"32-I-5",target:"だいなﾘﾊﾋﾞﾘ向い"},
+  {no:72,st:"1409",map:"41-H-1",target:"ﾉｰｽ･ｱﾍﾞﾆｭｰⅡⅢ"},
+  {no:73,st:"88",map:"32-G-5",target:"森林組合宿舎"},
+  {no:74,st:"1434",map:"41-F-1",target:"分譲地1"},
+  {no:75,st:"1404",map:"41-G-1",target:"分譲地2"},
+  {no:76,st:"170",map:"41-G-1",target:"ﾉｰｽ･ｱﾍﾞﾆｭｰ"},
+  {no:77,st:"179",map:"41-F-2",target:"奈良ｽﾎﾟｰﾂ裏"},
+  {no:78,st:"1582",map:"41-D-3",target:"黄色ﾈｯﾄﾎﾞｯｸｽ新設"},
+  {no:79,st:"166",map:"41-A-4",target:"紫塚ﾒｿﾞﾝ　鬼ﾊﾞｯｸ"},
+  {no:80,st:"167",map:"41-B-5",target:"ｻﾆｰｺｰﾎﾟ　住研"},
+  {no:81,st:"163",map:"41-B-4",target:"紫塚ﾚｼﾞﾃﾞﾝｽ"},
+  {no:82,st:"162",map:"41-C-4",target:"きよみず裏　運ぶ"},
+  {no:83,st:"1541",map:"41-D-3",target:"大高さきｸﾞﾗﾝﾃﾗｽ"},
+  {no:84,st:"82",map:"32-D-5",target:"大高　体育館裏"},
+  {no:85,st:"81",map:"32-D-4",target:"住宅地ST　U"},
+  {no:86,st:"80",map:"32-E-3",target:"渡辺電機製作所"},
+  {no:87,st:"89",map:"32-F-4",target:"住宅地ST"},
+  {no:88,st:"1592",map:"32-F-5",target:"ｹﾞﾗﾝﾃﾗｽ紫塚ⅠⅡ U"},
+  {no:89,st:"1584",map:"41-E-1",target:"ﾌｧﾐﾏ前　新設"},
+  {no:90,st:"160",map:"41-E-2",target:"ﾌｧﾐﾏ横むぎくらDIﾊｲﾂ"},
+  {no:91,st:"158",map:"41-B-2",target:"すゞや食堂　前"},
+  {no:92,st:"157",map:"41-C-1",target:"大田原高校(裏から)"},
+  {no:93,st:"146",map:"40-J-1",target:"紫塚小学校1(学校側)"},
+  {no:94,st:"146",map:"40-J-1",target:"紫塚小学校2(給食ｾﾝﾀｰ側)"},
+  {no:95,st:"145",map:"40-I-1",target:"石海ｱﾊﾟｰﾄ跡地"},
+  {no:96,st:"79",map:"31-J-5",target:"紫塚公民館"},
+  {no:97,st:"156",map:"32-A-5",target:"狭い道出口ﾌﾞﾛｯｸ裏"},
+  {no:98,st:"159",map:"41-B-3",target:"川沿い"},
+  {no:99,st:"1629",map:"40-J-3",target:"※追加　分譲地"},
+  {no:100,st:"151",map:"40-I-3",target:"とんくん先　空地"},
+  {no:101,st:"150",map:"40-I-3",target:"ﾆｭｳｨﾝｸﾞ羽石"},
+  {no:102,st:"149",map:"40-H-3",target:"ぽっぽ通り手前"},
+  {no:103,st:"147",map:"40-H-2",target:"住宅ST"},
+  {no:104,st:"148",map:"40-G-2",target:"猪瀬ﾚｼﾞﾃﾞﾝｽ"},
+  {no:105,st:"144",map:"40-G-1",target:"クランク　ネット"},
+  {no:106,st:"130",map:"40-B-1",target:"大一不動産M"},
+  {no:107,st:"143",map:"40-E-2",target:"ｻﾝﾗｲｽﾞｶﾞｰﾃﾞﾝ"},
+  {no:108,st:"152",map:"40-I-4",target:"ｲｻｵﾚｯｶｰ　裏M"},
+  {no:109,st:"237",map:"46-C-1",target:"大田原警察署 前 ﾈｯﾄ"},
+  {no:110,st:"238",map:"46-D-1",target:"ﾀｶﾊｼ床屋裏"},
+  {no:111,st:"217",map:"46-E-1",target:"住吉ﾚｼﾞﾃﾞﾝｽ裏"},
+  {no:112,st:"218",map:"46-E-1",target:"メゾン南風"},
+  {no:113,st:"168",map:"41-D-5",target:"住吉レジデンス"},
+  {no:114,st:"164",map:"41-C-4",target:"橋本測量　向い"},
+  {no:115,st:"165",map:"41-D-4",target:"ｳｲｽﾃﾘｱ･ﾒｿﾞﾝ"},
+  {no:116,st:"190",map:"41-F-5",target:"ﾎﾟｯﾎﾟ通り"},
+  {no:117,st:"1456",map:"41-E-4",target:"ｱﾐﾃｨ紫塚"},
+  {no:118,st:"1407",map:"41-G-4",target:"ｾﾚﾌﾞﾘｯﾂ　U"},
+  {no:119,st:"178",map:"41-G-4",target:"出て　ﾌｪﾝｽ沿い"},
+  {no:120,st:"161",map:"41-E-3",target:"GYﾀｲﾔ前"}
+];
+</script>
+<script src="../../app.js?v=1790223214"></script>
 </body>
 </html>
