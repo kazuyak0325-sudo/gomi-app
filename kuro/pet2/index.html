@@ -3,35 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>黒コース（ペット・ダンボール②）</title>
-<link rel="icon" href="../icon.png">
+<title>黒コース（ペット・ダンボール②） 回収記録</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="黒コース（ペット・ダンボール②）">
 <meta name="theme-color" content="#2b2b2b">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../style.css?v=1790222958">
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: #f5f5f5;
-    color: #222;
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
-    text-align: center;
-  }
-  a.back {
-    display: inline-block;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: #555;
-    text-decoration: none;
-    border-bottom: 1px solid #999;
-  }
-  h1 { font-size: 17px; margin: 0 0 12px; }
-  p { color: #777; font-size: 14px; line-height: 1.7; }
+  :root { --accent: #2b2b2b; --accent-contrast: #ffffff; --surface-done: #e8e8e8; --done-text: #444444; }
 </style>
 </head>
 <body>
-<a class="back" href="../">← 日程選択に戻る</a>
-<h1>黒コース（ペット・ダンボール②）</h1>
-<p>このコースはまだ準備中です。<br>ステーションデータが追加されるとここで使えるようになります。</p>
+<header>
+  <h1>黒コース（ペット・ダンボール②）</h1>
+  <p class="sub">回収したステーションをタップして時刻を記録</p>
+  <p class="meta" id="dateVersion"></p>
+  <div id="progress">0 / 0 完了</div>
+  <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
+  <div class="actions">
+    <button id="copyBtn">時刻を一覧コピー</button>
+    <button id="resetBtn">今日の記録をリセット</button>
+  </div>
+  <div class="actions actions-2">
+    <button id="editBtn">ステーションを編集</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
+  </div>
+</header>
+<main>
+  <ul id="list"></ul>
+</main>
+
+<script>
+const COURSE_ID = "kuro-pet2";
+const COURSE_NAME = "黒コース（ペット・ダンボール②）";
+const APP_VERSION = "v0.26";
+
+const DEFAULT_STATIONS = [
+  {no:1,st:"1253",map:"121-I-2",target:"野崎NT　ｾﾌﾞﾝ裏"},
+  {no:2,st:"1252",map:"121-H-2",target:"野崎NT　第6公園"},
+  {no:3,st:"1220",map:"118-I-5",target:"野崎NT　扉1つ"},
+  {no:4,st:"1251",map:"121-H-1",target:"野崎NT　第1公園"},
+  {no:5,st:"1250",map:"121-E-1",target:"野崎NT　第4公園"},
+  {no:6,st:"1217",map:"118-G-5",target:"野崎NT　ｻﾝｸﾞﾘｰﾝ"},
+  {no:7,st:"1218",map:"118-G-5",target:"野崎NT　扉1"},
+  {no:8,st:"1219",map:"118-G-5",target:"野崎NT　扉2"},
+  {no:9,st:"1254",map:"121-J-1",target:"住宅地ST"},
+  {no:10,st:"1255",map:"122-A-3",target:"SIKﾒｿﾞﾝ"},
+  {no:11,st:"1257",map:"122-C-4",target:"板"},
+  {no:12,st:"1478",map:"132-G-1",target:"ｻﾆｰﾊｳｽ"},
+  {no:13,st:"1293",map:"132-H-1",target:"晴風園"},
+  {no:14,st:"1260",map:"122-H-4",target:"養鶏所1"},
+  {no:15,st:"1261",map:"122-H-4",target:"養鶏所2"},
+  {no:16,st:"1294",map:"133-C-1",target:"実取公民館"},
+  {no:17,st:"1295",map:"133-J-4",target:"親園ﾎﾎｴﾐｾﾝﾀｰ"},
+  {no:18,st:"1298",map:"134-A-4",target:"介護施設つばさ"},
+  {no:19,st:"1299",map:"134-B-3",target:"親園小学校"},
+  {no:20,st:"1297",map:"134-A-2",target:"渡辺床屋"},
+  {no:21,st:"1296",map:"134-A-1",target:"磯実家前ST(こころ)"},
+  {no:22,st:"1268",map:"124-B-5",target:"親園北区公民館"},
+  {no:23,st:"1267",map:"124-A-4",target:"元田代魚店前"},
+  {no:24,st:"1645",map:"109-A-5",target:"ﾎﾞﾇｰﾙ手前新設分譲"},
+  {no:25,st:"1181",map:"109-B-4",target:"ｸﾛｰﾊﾞｰﾎﾞﾇｰﾙ奥"},
+  {no:26,st:"1180",map:"109-A-4",target:"桜並木　最後ﾊﾞｯｸ"},
+  {no:27,st:"1266",map:"124-B-1",target:"鉄の箱"},
+  {no:28,st:"1574",map:"123-I-1",target:"親園分譲地"},
+  {no:29,st:"1172",map:"108-H-5",target:"親園〒奥ﾊﾞｯｸ"},
+  {no:30,st:"1171",map:"108-H-5",target:"すぐAP　ｶﾙﾄｾｿﾞﾝ"},
+  {no:31,st:"1562",map:"108-G-4",target:"神山設備"},
+  {no:32,st:"1169",map:"108-H-3",target:"桜並木対面　2"},
+  {no:33,st:"1170",map:"108-H-3",target:"桜並木対面　1"},
+  {no:34,st:"1168",map:"108-G-3",target:"桜並木　3すぐ先"},
+  {no:35,st:"1512",map:"108-F-2",target:"桜並木　分譲地"},
+  {no:36,st:"1173",map:"108-F-1",target:"桜並木右側　自販機"},
+  {no:37,st:"1174",map:"108-F-1",target:"右折1"},
+  {no:38,st:"998",map:"82-C-5",target:"右折2"},
+  {no:39,st:"997",map:"82-E-4",target:"右折3"},
+  {no:40,st:"994",map:"82-C-3",target:"右折4　小堀建設"},
+  {no:41,st:"1475",map:"82-D-1",target:"やぶしげ隣AP"},
+  {no:42,st:"850",map:"75-E-5",target:"礒床屋　奥ﾌﾞﾛｯｸ"},
+  {no:43,st:"1631",map:"75-E-4",target:"フェリス浅香"},
+  {no:44,st:"1546",map:"75-D-5",target:"新設　分譲地"},
+  {no:45,st:"1601",map:"75-D-4",target:"浅香二丁目開発"},
+  {no:46,st:"1433",map:"82-D-1",target:"通り手前"},
+  {no:47,st:"992",map:"82-D-2",target:"ﾊﾙﾁｮﾝ　坂"},
+  {no:48,st:"990",map:"82-C-1",target:"先　ﾊﾞｯｸ"},
+  {no:49,st:"853",map:"75-B-5",target:"小高宅　前"},
+  {no:50,st:"852",map:"75-C-5",target:"小高宅　奥公園"},
+  {no:51,st:"1620",map:"75-B-4",target:"新分譲地"},
+  {no:52,st:"851",map:"75-B-4",target:"ｾﾝﾁｭﾘｰｺｰﾎﾟ"},
+  {no:53,st:"991",map:"82-C-2",target:"前田倉庫　裏"},
+  {no:54,st:"988",map:"82-A-2",target:"松本ｺｰﾎﾟ"},
+  {no:55,st:"1519",map:"82-B-1",target:"分譲地　1"},
+  {no:56,st:"1579",map:"74-A-5",target:"一番奥AP　U"},
+  {no:57,st:"987",map:"82-A-1",target:"田んぼ角"},
+  {no:58,st:"836",map:"74-J-5",target:"笹乃井裏"},
+  {no:59,st:"835",map:"74-I-5",target:"住宅地奥ST"},
+  {no:60,st:"1485",map:"82-B-1",target:"分譲地 2　U"},
+  {no:61,st:"855",map:"75-A-5",target:"公園　ﾌｪﾝｽ"},
+  {no:62,st:"854",map:"75-A-5",target:"木製扉ST"},
+  {no:63,st:"830",map:"74-J-3",target:"ﾗﾌｨｰﾈ浅香"},
+  {no:64,st:"828",map:"74-J-3",target:"焼肉　吉　裏"},
+  {no:65,st:"829",map:"74-J-3",target:"角　ﾌｪﾝｽ"},
+  {no:66,st:"831",map:"74-J-4",target:"公園　右側黒ST"},
+  {no:67,st:"833",map:"74-I-4",target:"YHﾌﾟﾚｼｬｽ"},
+  {no:68,st:"832",map:"74-I-3",target:"こども食堂"},
+  {no:69,st:"1525",map:"74-H-4",target:"安心野菜あさか横"},
+  {no:70,st:"834",map:"74-H-4",target:"静かにｼｵﾝｽｸｴｱ"},
+  {no:71,st:"816",map:"74-E-5",target:"げんき足もみ"},
+  {no:72,st:"1561",map:"74-F-4",target:"新設　ﾎﾟﾝﾃ"},
+  {no:73,st:"1432",map:"74-H-5",target:"走ってﾒｿﾞﾝﾋﾗｿｰﾙ"},
+  {no:74,st:"838",map:"74-G-5",target:"ﾌﾟﾗｲﾄﾃﾗｽ"},
+  {no:75,st:"837",map:"74-H-5",target:"住宅地奥ﾊﾞｯｸ"},
+  {no:76,st:"978",map:"81-F-1",target:"奥ｱｳﾞｨｵﾝﾄﾀﾝﾄ"},
+  {no:77,st:"979",map:"81-G-1",target:"金子鍼灸院前"},
+  {no:78,st:"980",map:"81-J-2",target:"ｱｳﾞｧｱﾝｾ浅香"},
+  {no:79,st:"981",map:"81-I-2",target:"住宅地　ﾌﾞﾛｯｸ塀"},
+  {no:80,st:"1569",map:"81-I-2",target:"ｱﾝﾀﾚｽ"},
+  {no:81,st:"983",map:"81-I-3",target:"酒井歯科　先"},
+  {no:82,st:"984",map:"81-I-4",target:"桜並木1　Vﾓﾝｷｰ"},
+  {no:83,st:"1009",map:"81-F-2",target:"川沿い1　黒ST"},
+  {no:84,st:"977",map:"81-D-1",target:"川沿い2　ｴﾘｱ21"},
+  {no:85,st:"976",map:"81-D-1",target:"川沿い3 ﾎﾟﾝﾋﾟｴｰﾙ"},
+  {no:86,st:"975",map:"81-C-1",target:"川沿い4　緑ST"},
+  {no:87,st:"985",map:"81-G-5",target:"取りずらい木下"},
+  {no:88,st:"986",map:"81-F-5",target:"ﾚｵﾊﾟﾚｽ"},
+  {no:89,st:"1395",map:"108-C-1",target:"十字手前　ｼｬﾙﾏﾝ"},
+  {no:90,st:"1495",map:"81-D-5",target:"右折　分譲地"},
+  {no:91,st:"1331",map:"81-C-5",target:"鉄のﾌﾀ吉川ｱﾊﾟｰﾄ"},
+  {no:92,st:"1644",map:"81-C-5",target:"新設　分譲地"},
+  {no:93,st:"971",map:"80-J-2",target:"美容室ﾊｰﾄ　P"},
+  {no:94,st:"972",map:"81-B-4",target:"ｶﾜﾁ通り 40㎞"},
+  {no:95,st:"973",map:"81-C-4",target:"ﾒｿﾞﾝｼｬﾙﾏﾝ①"},
+  {no:96,st:"1627",map:"81-C-4",target:"ﾒｿﾞﾝｼｬﾙﾏﾝ②"},
+  {no:97,st:"1642",map:"81-D-5",target:"ﾒｿﾞﾝｼｬﾙﾏﾝ③"},
+  {no:98,st:"974",map:"81-D-5",target:"ﾒｿﾞﾝｼｬﾙﾏﾝ④"},
+  {no:99,st:"1162",map:"108-A-1",target:"木下電工"},
+  {no:100,st:"1148",map:"105-I-3",target:"扉壊れST"},
+  {no:101,st:"1149",map:"105-G-5",target:"ﾌｧﾐﾏ奥1"},
+  {no:102,st:"1161",map:"107-J-4",target:"ﾌｧﾐﾏ奥2"},
+  {no:103,st:"1265",map:"123-D-3",target:"ﾌｧﾐﾏ奥3"},
+  {no:104,st:"1532",map:"107-G-1",target:"ﾌｧﾐﾏ奥4"},
+  {no:105,st:"1158",map:"107-E-1",target:"森商店　ﾊﾞｯｸ"},
+  {no:106,st:"1159",map:"107-E-3",target:"ﾆｺﾝ前1"},
+  {no:107,st:"1160",map:"107-F-5",target:"ﾆｺﾝ前2"},
+  {no:108,st:"1264",map:"122-H-1",target:"さらに奥ST"},
+  {no:109,st:"1263",map:"122-I-3",target:"ﾎﾟﾝﾌﾟ小屋"},
+  {no:110,st:"1262",map:"122-H-4",target:"ｻﾝ･ﾒｿﾞﾝ"},
+  {no:111,st:"1150",map:"107-B-3",target:"実取団地1 ﾎﾞｯｸｽ"},
+  {no:112,st:"1156",map:"107-D-2",target:"実取団地5号棟"},
+  {no:113,st:"1155",map:"107-D-2",target:"実取団地6号棟↑"},
+  {no:114,st:"1157",map:"107-D-2",target:"実取団地4号棟↓"},
+  {no:115,st:"1151",map:"107-C-3",target:"実取団地7号棟"},
+  {no:116,st:"1152",map:"107-C-3",target:"実取団地3号棟↑"},
+  {no:117,st:"1153",map:"107-C-2",target:"実取団地2号棟"},
+  {no:118,st:"1154",map:"107-C-2",target:"実取団地1号棟↓"},
+  {no:119,st:"1163",map:"108-C-1",target:"物置ST"},
+  {no:120,st:"1164",map:"108-C-1",target:"溝口ｺｰﾎﾟ①"},
+  {no:121,st:"1165",map:"108-C-1",target:"溝口ｺｰﾎﾟ②"},
+  {no:122,st:"1492",map:"108-C-1",target:"溝口ｺｰﾎﾟ③"},
+  {no:123,st:"1493",map:"108-C-1",target:"すぐ向かいST"},
+  {no:124,st:"1095",map:"108-C-1",target:"ｿﾚｲﾙC　ﾌﾞﾛｯｸ"},
+  {no:125,st:"1552",map:"108-E-2",target:"新設　分譲地"},
+  {no:126,st:"1166",map:"108-E-2",target:"ｿｼｱﾙｺｰﾎﾟ1"},
+  {no:127,st:"1167",map:"108-E-2",target:"ｿｼｱﾙｺｰﾎﾟ2"},
+  {no:128,st:"1459",map:"108-D-1",target:"ｿｼｱﾙｺｰﾎﾟ3"},
+  {no:129,st:"1659",map:"81-J-4",target:"ライブシティ加治屋"},
+  {no:130,st:"982",map:"81-J-3",target:"歩道　1"},
+  {no:131,st:"989",map:"82-B-3",target:"歩道　2"}
+];
+</script>
+<script src="../../app.js?v=1790222958"></script>
 </body>
 </html>
