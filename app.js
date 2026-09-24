@@ -633,8 +633,9 @@ function render(filterText){
 
     const rowMain = document.createElement("div");
     rowMain.className = "row-main";
+    const noHighlight = (COURSE_ID === "youpura_kiiro-higashi" && s.no >= 282) ? " no-highlight" : "";
     rowMain.innerHTML =
-      '<span class="no">' + s.no + '</span>' +
+      '<span class="no' + noHighlight + '">' + s.no + '</span>' +
       '<span class="target">' + s.target + '<small>' + s.map + ' / ST' + s.st + '</small></span>' +
       '<span class="time' + (time ? ' filled' : '') + '">' + (IS_CARDBOARD_COURSE ? '<img src="../../pet-icon.png" class="pet-icon-img" alt="">' : "") + (time || "--:--") + '</span>' +
       (IS_CARDBOARD_COURSE ? '<span class="time cb-time' + (cbTime ? ' filled' : '') + '">📦' + (cbTime || "--:--") + '</span>' : '');

@@ -196,6 +196,9 @@ main {
   color: var(--text-muted);
   font-size: 15px;
 }
+.no.no-highlight {
+  color: #c0392b;
+}
 .target {
   flex: 1;
   font-size: 18px;
