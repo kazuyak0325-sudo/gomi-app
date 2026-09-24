@@ -3,35 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>緑コース（ペット・ダンボール②）</title>
-<link rel="icon" href="../icon.png">
+<title>緑コース（ペット・ダンボール②） 回収記録</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="緑コース（ペット・ダンボール②）">
 <meta name="theme-color" content="#2e7d32">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../style.css?v=1790222893">
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: #f5f5f5;
-    color: #222;
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
-    text-align: center;
-  }
-  a.back {
-    display: inline-block;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: #555;
-    text-decoration: none;
-    border-bottom: 1px solid #999;
-  }
-  h1 { font-size: 17px; margin: 0 0 12px; }
-  p { color: #777; font-size: 14px; line-height: 1.7; }
+  :root { --accent: #2e7d32; --accent-contrast: #ffffff; --surface-done: #e3f6e6; --done-text: #2c8c3f; }
 </style>
 </head>
 <body>
-<a class="back" href="../">← 日程選択に戻る</a>
-<h1>緑コース（ペット・ダンボール②）</h1>
-<p>このコースはまだ準備中です。<br>ステーションデータが追加されるとここで使えるようになります。</p>
+<header>
+  <h1>緑コース（ペット・ダンボール②）</h1>
+  <p class="sub">回収したステーションをタップして時刻を記録</p>
+  <p class="meta" id="dateVersion"></p>
+  <div id="progress">0 / 0 完了</div>
+  <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
+  <div class="actions">
+    <button id="copyBtn">時刻を一覧コピー</button>
+    <button id="resetBtn">今日の記録をリセット</button>
+  </div>
+  <div class="actions actions-2">
+    <button id="editBtn">ステーションを編集</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
+  </div>
+</header>
+<main>
+  <ul id="list"></ul>
+</main>
+
+<script>
+const COURSE_ID = "midori-pet2";
+const COURSE_NAME = "緑コース（ペット・ダンボール②）";
+const APP_VERSION = "v0.26";
+
+const DEFAULT_STATIONS = [
+  {no:1,st:"1020",map:"83-G-4",target:"武蔵ｵｲﾙｼｰﾙP歩道"},
+  {no:2,st:"913",map:"76-H-5",target:"あさかｸﾘﾆｯｸ"},
+  {no:3,st:"918",map:"76-H-3",target:"津久井自動車"},
+  {no:4,st:"920",map:"76-H-2",target:"あさひ理容　奥"},
+  {no:5,st:"686",map:"63-H-5",target:"伊藤乳業DI石井"},
+  {no:6,st:"1504",map:"63-I-5",target:"シェリーメゾン"},
+  {no:7,st:"680",map:"63-H-3",target:"室井病院前"},
+  {no:8,st:"673",map:"63-H-2",target:"太陽ｽﾎﾟｰﾂ"},
+  {no:9,st:"655",map:"63-E-2",target:"ｻﾝｹｲ機器向かい"},
+  {no:10,st:"659",map:"63-C-3",target:"原眼科　ﾊﾟﾅﾊｲﾂ"},
+  {no:11,st:"660",map:"63-C-4",target:"原眼科　P荷台"},
+  {no:12,st:"661",map:"63-D-3",target:"末広ﾘｯﾌﾟﾙ"},
+  {no:13,st:"677",map:"63-F-3",target:"佐貫治療院　前"},
+  {no:14,st:"675",map:"63-G-2",target:"大阪屋農機倉庫U"},
+  {no:15,st:"662",map:"63-E-3",target:"大岩建設P隣り"},
+  {no:16,st:"663",map:"63-D-4",target:"原眼科　P角"},
+  {no:17,st:"664",map:"63-D-4",target:"ﾃｨｱﾗ　1"},
+  {no:18,st:"1498",map:"63-D-4",target:"ﾃｨｱﾗ　2"},
+  {no:19,st:"665",map:"63-C-5",target:"わかでん奥AP"},
+  {no:20,st:"666",map:"63-B-5",target:"墓地前ｿﾙ・ﾃﾞｳﾞｨﾝﾁ"},
+  {no:21,st:"667",map:"63-B-5",target:"すぐ先　ST"},
+  {no:22,st:"668",map:"63-B-5",target:"由田ｺｰﾎﾟ"},
+  {no:23,st:"1581",map:"76-A-1",target:"新設 ﾗﾙｰﾅ向かい"},
+  {no:24,st:"883",map:"76-B-1",target:"ラルーナ浅香"},
+  {no:25,st:"881",map:"76-A-2",target:"ﾋﾞｭｰﾗｰあさか"},
+  {no:26,st:"880",map:"76-A-1",target:"斜め奥"},
+  {no:27,st:"859",map:"75-J-1",target:"高木AP前"},
+  {no:28,st:"858",map:"75-J-1",target:"ﾊﾟｰﾃｨﾗｲﾌ高木"},
+  {no:29,st:"635",map:"62-I-5",target:"司事務所　角"},
+  {no:30,st:"636",map:"62-J-5",target:"分譲地　奥"},
+  {no:31,st:"638",map:"62-I-4",target:"ﾚｽﾄﾗﾝ松坂"},
+  {no:32,st:"657",map:"63-A-3",target:"青少年ﾎｰﾑ"},
+  {no:33,st:"1437",map:"63-C-3",target:"原眼科前植え込み裏"},
+  {no:34,st:"658",map:"63-C-3",target:"ﾊｰﾃｨﾗｲﾌ高木"},
+  {no:35,st:"672",map:"63-F-1",target:"タクセル横"},
+  {no:36,st:"653",map:"63-C-2",target:"その先　新設"},
+  {no:37,st:"1515",map:"63-C-2",target:"ｻﾆｰｺｰﾎﾟ末広2"},
+  {no:38,st:"652",map:"63-C-2",target:"墓地　前"},
+  {no:39,st:"650",map:"63-C-1",target:"ｻﾆｰｺｰﾎﾟ末広"},
+  {no:40,st:"1502",map:"63-E-1",target:"大慶　奥ｵﾚﾝｼﾞﾐｭｳ"},
+  {no:41,st:"654",map:"63-E-1",target:"向かい　DIﾌﾚﾝｽﾞ"},
+  {no:42,st:"651",map:"63-E-1",target:"大慶　奥DIﾌﾚﾝｽﾞ"},
+  {no:43,st:"1634",map:"63-G-1",target:"大慶　奥DI山崎"},
+  {no:44,st:"1310",map:"62-J-4",target:"大田原塗装P"},
+  {no:45,st:"637",map:"62-I-5",target:"砂利P"},
+  {no:46,st:"634",map:"62-H-5",target:"ソフトバンク裏"},
+  {no:47,st:"882",map:"76-A-1",target:"うすい美容室"},
+  {no:48,st:"884",map:"76-B-1",target:"川上AP"},
+  {no:49,st:"885",map:"76-B-1",target:"ｵｰﾘｽﾖｼﾀﾞ壱番館"},
+  {no:50,st:"886",map:"76-D-1",target:"ﾒｰﾌﾟﾙ越沼"},
+  {no:51,st:"888",map:"76-D-1",target:"ｸﾞﾘｰﾝﾊｲﾂ"},
+  {no:52,st:"889",map:"76-E-1",target:"ﾒｿﾞﾈｯﾄﾀｰｸ"},
+  {no:53,st:"1591",map:"76-E-1",target:"ﾒｿﾞﾝﾄﾞｼﾌｫﾝ"},
+  {no:54,st:"887",map:"76-D-1",target:"ﾒﾛｰﾊﾞﾙ"},
+  {no:55,st:"669",map:"63-F-5",target:"分譲地　奥"},
+  {no:56,st:"890",map:"76-E-1",target:"礒ｺｰﾎﾟ"},
+  {no:57,st:"925",map:"76-F-1",target:"信栄工測手前"},
+  {no:58,st:"924",map:"76-G-1",target:"先　ﾌﾞﾛｯｸ"},
+  {no:59,st:"1507",map:"76-G-1",target:"ﾍﾞﾙ･ｺﾛﾅ"},
+  {no:60,st:"1499",map:"76-H-1",target:"伊藤乳業裏"},
+  {no:61,st:"919",map:"76-G-3",target:"おひさま歯科裏"},
+  {no:62,st:"1513",map:"76-E-2",target:"建具屋前"},
+  {no:63,st:"891",map:"76-D-2",target:"T字路前　3419"},
+  {no:64,st:"895",map:"76-E-3",target:"公園　Uﾀｰﾝ"},
+  {no:65,st:"1616",map:"76-D-3",target:"新設ST"},
+  {no:66,st:"894",map:"76-D-3",target:"ネット"},
+  {no:67,st:"893",map:"76-D-3",target:"ブロック"},
+  {no:68,st:"1390",map:"76-B-3",target:"ｺﾓﾝｼﾃｨｰ"},
+  {no:69,st:"902",map:"76-C-4",target:"ｴｰﾙ浅香"},
+  {no:70,st:"1585",map:"76-D-4",target:"クレセント浅香"},
+  {no:71,st:"903",map:"76-D-4",target:"東京靴　裏"},
+  {no:72,st:"898",map:"76-C-3",target:"T字路手前"},
+  {no:73,st:"897",map:"76-C-2",target:"すぐ先　ﾋﾞｭｰﾗｰ"},
+  {no:74,st:"896",map:"76-C-2",target:"十字路角"},
+  {no:75,st:"892",map:"76-D-2",target:"野ばら第3ｺｰﾎﾟ前"},
+  {no:76,st:"899",map:"76-A-3",target:"331ﾊﾞｯｸ"},
+  {no:77,st:"904",map:"76-E-4",target:"東京靴　奥AP"},
+  {no:78,st:"912",map:"76-F-5",target:"足銀裏　ﾗｾｿﾞﾝ"},
+  {no:79,st:"1019",map:"83-F-5",target:"ﾗｲｼﾞﾝｸﾞｻﾝ1武蔵前AP"},
+  {no:80,st:"1471",map:"83-F-4",target:"ﾗｲｼﾞﾝｸﾞｻﾝ2"},
+  {no:81,st:"1018",map:"83-E-4",target:"ﾚｵﾊﾟﾚｽ・ｱﾍﾞﾆｰﾙ"},
+  {no:82,st:"1017",map:"83-E-4",target:"千代田機工　奥"},
+  {no:83,st:"1650",map:"83-D-1",target:"ﾔﾏﾀﾞ裏　①"},
+  {no:84,st:"1500",map:"83-D-1",target:"ﾔﾏﾀﾞ裏　②"},
+  {no:85,st:"1016",map:"83-B-3",target:"ｻﾝﾊﾟﾃｨｰｸ"},
+  {no:86,st:"1015",map:"83-A-3",target:"ｱﾑｰﾙﾘｱﾝ中いに入る"},
+  {no:87,st:"1010",map:"83-A-2",target:"左折　住宅地"},
+  {no:88,st:"1014",map:"83-B-2",target:"雇用促進住宅"},
+  {no:89,st:"1011",map:"83-A-2",target:"川口AP"},
+  {no:90,st:"1619",map:"83-B-1",target:"ﾙﾅ・ﾊﾟﾚｽ向かい"},
+  {no:91,st:"1428",map:"83-C-1",target:"奥ﾌﾞﾛｯｸ"},
+  {no:92,st:"1494",map:"83-C-1",target:"ｺｰﾎﾟ幸"},
+  {no:93,st:"1012",map:"83-B-1",target:"ﾙﾅパレスⅣ"},
+  {no:94,st:"907",map:"76-B-5",target:"越沼AP平屋ﾌﾞﾛｯｸ"},
+  {no:95,st:"908",map:"76-B-5",target:"ﾚｵﾊﾟﾚｽ"},
+  {no:96,st:"909",map:"76-C-5",target:"介護施設"},
+  {no:97,st:"910",map:"76-B-5",target:"ﾌﾚｸﾞﾗﾝｽ"},
+  {no:98,st:"911",map:"76-C-5",target:"のふうぞ"},
+  {no:99,st:"906",map:"76-A-5",target:"右折浅香製作所前"},
+  {no:100,st:"905",map:"76-A-5",target:"ﾙﾅﾊﾟﾚｽ　角"},
+  {no:101,st:"874",map:"75-J-5",target:"ﾙﾈｻﾝｽ21"},
+  {no:102,st:"873",map:"75-J-4",target:"ﾌﾞﾛｯｸ塀"},
+  {no:103,st:"872",map:"75-J-4",target:"福祉センター"},
+  {no:104,st:"900",map:"75-J-4",target:"住宅ﾌｪﾝｽ　左"},
+  {no:105,st:"901",map:"75-J-4",target:"住宅地ST　右"},
+  {no:106,st:"864",map:"75-J-3",target:"信号手前　移動"},
+  {no:107,st:"870",map:"75-J-5",target:"公園　ST1"},
+  {no:108,st:"869",map:"75-I-4",target:"公園　ST2"},
+  {no:109,st:"868",map:"75-H-3",target:"通り手前"},
+  {no:110,st:"867",map:"75-G-3",target:"奥　少しﾊﾞｯｸ"},
+  {no:111,st:"876",map:"75-H-5",target:"ｾﾌﾞﾝ前"},
+  {no:112,st:"1396",map:"75-H-5",target:"先　ﾌﾞﾛｯｸ"},
+  {no:113,st:"1003",map:"82-I-1",target:"ﾄﾞﾙﾌ浅香"},
+  {no:114,st:"1007",map:"82-J-2",target:"一般住宅前ﾌﾞﾛｯｸ"},
+  {no:115,st:"1006",map:"82-J-2",target:"自販機先　ﾌﾞﾛｯｸ"},
+  {no:116,st:"1005",map:"82-J-2",target:"JA手前ﾒｿﾞﾝﾎﾞﾇｰﾙ"},
+  {no:117,st:"1004",map:"82-J-1",target:"右折　さくら公園"},
+  {no:118,st:"1547",map:"82-I-1",target:"ｳｴｽﾄｻｲﾄﾞﾅｶﾉ"},
+  {no:119,st:"1002",map:"82-I-1",target:"左折　黒ST"},
+  {no:120,st:"1531",map:"82-I-1",target:"ｵｶ看板　角"},
+  {no:121,st:"877",map:"75-H-5",target:"セブン 手前"},
+  {no:122,st:"878",map:"75-G-5",target:"向かい合わせ1"},
+  {no:123,st:"879",map:"75-G-5",target:"向かい合わせ2"},
+  {no:124,st:"871",map:"75-G-4",target:"篠崎精肉店"},
+  {no:125,st:"862",map:"75-H-2",target:"ｶﾝｾｷ裏2"},
+  {no:126,st:"861",map:"75-H-2",target:"ｶﾝｾｷ裏1"},
+  {no:127,st:"860",map:"75-H-1",target:"ｻﾝﾗｲｽﾞ"},
+  {no:128,st:"1588",map:"75-G-2",target:"黒沢宅前"},
+  {no:129,st:"863",map:"75-G-2",target:"ﾒｿﾞﾝ浅香"},
+  {no:130,st:"857",map:"75-G-1",target:"ﾏｯｸ裏　塀"},
+  {no:131,st:"1467",map:"75-H-1",target:"ｱｲﾌﾙ"},
+  {no:132,st:"856",map:"75-F-1",target:"GU　前"},
+  {no:133,st:"839",map:"75-E-1",target:"靴のｲｼﾄﾞ前　石注意"},
+  {no:134,st:"840",map:"75-E-1",target:"鍵のﾅｶｼﾞﾏ前"},
+  {no:135,st:"841",map:"75-C-2",target:"栃木家 先"},
+  {no:136,st:"844",map:"75-B-3",target:"胡丹　ﾎﾟﾃﾄﾊｳｽ"},
+  {no:137,st:"845",map:"75-B-3",target:"公園　ST"},
+  {no:138,st:"846",map:"75-C-3",target:"百村川沿い1"},
+  {no:139,st:"847",map:"75-D-3",target:"百村川沿い2"},
+  {no:140,st:"849",map:"75-E-2",target:"阿Q　P"},
+  {no:141,st:"1610",map:"75-D-2",target:"阿Q　ﾊﾞｯｸ②"},
+  {no:142,st:"848",map:"75-E-2",target:"阿Q　ﾊﾞｯｸ①"},
+  {no:143,st:"1479",map:"75-E-3",target:"向かいAP"},
+  {no:144,st:"865",map:"75-F-3",target:"けんもくｽｸｰﾙ"},
+  {no:145,st:"866",map:"75-F-3",target:"牛乳屋　鉄の箱"},
+  {no:146,st:"1001",map:"82-G-1",target:"ｼﾃｨﾊｲﾑ浅香"},
+  {no:147,st:"1633",map:"75-F-5",target:"新設 リアン"},
+  {no:148,st:"993",map:"82-E-2",target:"ﾐﾔ商事通り1"},
+  {no:149,st:"995",map:"82-D-3",target:"ﾐﾔ商事通り2大型"},
+  {no:150,st:"1523",map:"82-E-3",target:"ﾐﾔ商事通り3ﾗﾋﾞﾀ"},
+  {no:151,st:"996",map:"82-E-3",target:"ﾐﾔ商事通り4"},
+  {no:152,st:"999",map:"82-F-3",target:"ﾐﾔ商事通り5"},
+  {no:153,st:"1000",map:"82-F-5",target:"ﾐﾔ商事通り6"},
+  {no:154,st:"1587",map:"82-G-5",target:"ﾐﾔ商事通り7"},
+  {no:155,st:"1604",map:"82-H-4",target:"川沿いAP　4"},
+  {no:156,st:"1472",map:"82-H-5",target:"川沿いAP　3"},
+  {no:157,st:"1443",map:"82-I-5",target:"川沿いAP　2"},
+  {no:158,st:"1008",map:"82-J-5",target:"川沿いAP　1"},
+  {no:159,st:"1175",map:"109-B-1",target:"ﾀﾞﾝｽｽｸｰﾙ奥"},
+  {no:160,st:"1179",map:"109-C-3",target:"原田ﾌﾟﾛﾊﾟﾝ歩道1"},
+  {no:161,st:"1178",map:"109-C-2",target:"原田ﾌﾟﾛﾊﾟﾝ歩道2"},
+  {no:162,st:"1176",map:"109-C-1",target:"ﾋﾞｰﾙ缶ST"}
+];
+</script>
+<script src="../../app.js?v=1790222893"></script>
 </body>
 </html>
