@@ -633,7 +633,7 @@ function render(filterText){
 
     const rowMain = document.createElement("div");
     rowMain.className = "row-main";
-    const noHighlight = (COURSE_ID === "youpura_kiiro-higashi" && s.no >= 282) ? " no-highlight" : "";
+    const noHighlight = (COURSE_ID === "youpura_kiiro-higashi" && s.no >= 283) ? " no-highlight" : "";
     rowMain.innerHTML =
       '<span class="no' + noHighlight + '">' + s.no + '</span>' +
       '<span class="target">' + s.target + '<small>' + s.map + ' / ST' + s.st + '</small></span>' +
