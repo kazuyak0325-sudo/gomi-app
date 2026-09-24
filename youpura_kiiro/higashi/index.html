@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="容プラ(黄)コース（東地区）">
 <meta name="theme-color" content="#c99a1e">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1790233562">
+<link rel="stylesheet" href="../../style.css?v=1790236981">
 <style>
   :root { --accent: #c99a1e; --accent-contrast: #ffffff; --surface-done: #faf1d9; --done-text: #9c7a17; }
 </style>
@@ -324,52 +324,53 @@ const DEFAULT_STATIONS = [
   {no:279,st:"178",map:"41-G-4",target:"出て　ﾌｪﾝｽ沿い"},
   {no:280,st:"161",map:"41-E-3",target:"GYﾀｲﾔ前"},
   {no:281,st:"1582",map:"41-D-3",target:"黄色ﾈｯﾄﾎﾞｯｸｽ新設"},
-  {no:282,st:"1524",map:"32-G-5",target:"星野測量　分譲地"},
-  {no:283,st:"87",map:"32-H-5",target:"星野測量ﾊﾟﾙﾃｰﾙ"},
-  {no:284,st:"91",map:"32-H-2",target:"小川工務店"},
-  {no:285,st:"1497",map:"29-G-5",target:"ﾎﾝﾀﾞ向　分譲地"},
-  {no:286,st:"77",map:"29-E-2",target:"紫塚NT1"},
-  {no:287,st:"76",map:"29-E-1",target:"紫塚NT2"},
-  {no:288,st:"78",map:"29-G-3",target:"聖医ﾒﾃﾞｨｶﾙｸﾘﾆｯｸ"},
-  {no:289,st:"1452",map:"29-J-5",target:"戸邉食品　奥"},
-  {no:290,st:"83",map:"32-I-2",target:"右側　空地"},
-  {no:291,st:"84",map:"32-J-3",target:"建設協会1"},
-  {no:292,st:"1436",map:"32-J-3",target:"建設協会2"},
-  {no:293,st:"1625",map:"33-A-4",target:"AP ネット"},
-  {no:294,st:"94",map:"33-A-5",target:"住宅地ST"},
-  {no:295,st:"1567",map:"42-C-1",target:"ｿﾌｨｱ･ﾋﾙｽﾞ"},
-  {no:296,st:"180",map:"42-C-1",target:"高圧鉄塔下"},
-  {no:297,st:"182",map:"42-B-2",target:"左折　急坂"},
-  {no:298,st:"181",map:"42-C-2",target:"ｻﾝﾊﾟﾚｽ紫塚"},
-  {no:299,st:"85",map:"32-J-4",target:"紫塚ﾊｲﾑ"},
-  {no:300,st:"86",map:"32-I-4",target:"坂段差ST　Uﾀｰﾝ"},
-  {no:301,st:"90",map:"32-I-5",target:"だいなﾘﾊﾋﾞﾘ向い"},
-  {no:302,st:"172",map:"41-J-2",target:"坂を下りるｳｲｽﾃﾘｱ"},
-  {no:303,st:"1557",map:"42-A-4",target:"阿Q　隣"},
-  {no:304,st:"176",map:"41-J-4",target:"阿Q　向い"},
-  {no:305,st:"175",map:"41-J-4",target:"紫塚交差点まで1"},
-  {no:306,st:"174",map:"41-J-3",target:"紫塚交差点まで2"},
-  {no:307,st:"173",map:"41-J-3",target:"紫塚交差点まで3"},
-  {no:308,st:"171",map:"41-I-2",target:"紫塚交差点まで4"},
-  {no:309,st:"1409",map:"41-H-1",target:"ﾉｰｽ･ｱﾍﾞﾆｭｰⅡⅢ"},
-  {no:310,st:"88",map:"32-G-5",target:"森林組合宿舎"},
-  {no:311,st:"1434",map:"41-F-1",target:"分譲地1"},
-  {no:312,st:"170",map:"41-G-1",target:"ﾉｰｽ･ｱﾍﾞﾆｭｰ"},
-  {no:313,st:"1404",map:"41-G-1",target:"分譲地2"},
-  {no:314,st:"179",map:"41-F-2",target:"奈良ｽﾎﾟｰﾂ裏"},
-  {no:315,st:"82",map:"32-D-5",target:"大高　体育館裏"},
-  {no:316,st:"81",map:"32-D-4",target:"住宅地ST"},
-  {no:317,st:"80",map:"32-E-3",target:"渡辺電機製作所"},
-  {no:318,st:"89",map:"32-F-4",target:"住宅地ST"},
-  {no:319,st:"1592",map:"32-F-5",target:"ｸﾞﾗﾝﾃﾗｽ紫塚ⅠⅡ"},
-  {no:320,st:"1584",map:"41-E-1",target:"ﾌｧﾐﾏ前　新設"},
-  {no:321,st:"160",map:"41-E-2",target:"ﾌｧﾐﾏ横むぎくらDIﾊｲﾂ"},
-  {no:322,st:"241",map:"46-H-2",target:"横断歩道 手前"},
-  {no:323,st:"1544",map:"46-J-2",target:"丸亀　横　ﾘｾﾌﾞﾘｽ"},
-  {no:324,st:"239",map:"46-I-1",target:"会社P"},
-  {no:325,st:"240",map:"46-H-1",target:"保険ｾﾝﾀｰ裏"}
+  {no:282,st:"1541",map:"41-D-3",target:"大高さきｸﾞﾗﾝﾃﾗｽ"},
+  {no:283,st:"1524",map:"32-G-5",target:"星野測量　分譲地"},
+  {no:284,st:"87",map:"32-H-5",target:"星野測量ﾊﾟﾙﾃｰﾙ"},
+  {no:285,st:"91",map:"32-H-2",target:"小川工務店"},
+  {no:286,st:"1497",map:"29-G-5",target:"ﾎﾝﾀﾞ向　分譲地"},
+  {no:287,st:"77",map:"29-E-2",target:"紫塚NT1"},
+  {no:288,st:"76",map:"29-E-1",target:"紫塚NT2"},
+  {no:289,st:"78",map:"29-G-3",target:"聖医ﾒﾃﾞｨｶﾙｸﾘﾆｯｸ"},
+  {no:290,st:"1452",map:"29-J-5",target:"戸邉食品　奥"},
+  {no:291,st:"83",map:"32-I-2",target:"右側　空地"},
+  {no:292,st:"84",map:"32-J-3",target:"建設協会1"},
+  {no:293,st:"1436",map:"32-J-3",target:"建設協会2"},
+  {no:294,st:"1625",map:"33-A-4",target:"AP ネット"},
+  {no:295,st:"94",map:"33-A-5",target:"住宅地ST"},
+  {no:296,st:"1567",map:"42-C-1",target:"ｿﾌｨｱ･ﾋﾙｽﾞ"},
+  {no:297,st:"180",map:"42-C-1",target:"高圧鉄塔下"},
+  {no:298,st:"182",map:"42-B-2",target:"左折　急坂"},
+  {no:299,st:"181",map:"42-C-2",target:"ｻﾝﾊﾟﾚｽ紫塚"},
+  {no:300,st:"85",map:"32-J-4",target:"紫塚ﾊｲﾑ"},
+  {no:301,st:"86",map:"32-I-4",target:"坂段差ST　Uﾀｰﾝ"},
+  {no:302,st:"90",map:"32-I-5",target:"だいなﾘﾊﾋﾞﾘ向い"},
+  {no:303,st:"172",map:"41-J-2",target:"坂を下りるｳｲｽﾃﾘｱ"},
+  {no:304,st:"1557",map:"42-A-4",target:"阿Q　隣"},
+  {no:305,st:"176",map:"41-J-4",target:"阿Q　向い"},
+  {no:306,st:"175",map:"41-J-4",target:"紫塚交差点まで1"},
+  {no:307,st:"174",map:"41-J-3",target:"紫塚交差点まで2"},
+  {no:308,st:"173",map:"41-J-3",target:"紫塚交差点まで3"},
+  {no:309,st:"171",map:"41-I-2",target:"紫塚交差点まで4"},
+  {no:310,st:"1409",map:"41-H-1",target:"ﾉｰｽ･ｱﾍﾞﾆｭｰⅡⅢ"},
+  {no:311,st:"88",map:"32-G-5",target:"森林組合宿舎"},
+  {no:312,st:"1434",map:"41-F-1",target:"分譲地1"},
+  {no:313,st:"170",map:"41-G-1",target:"ﾉｰｽ･ｱﾍﾞﾆｭｰ"},
+  {no:314,st:"1404",map:"41-G-1",target:"分譲地2"},
+  {no:315,st:"179",map:"41-F-2",target:"奈良ｽﾎﾟｰﾂ裏"},
+  {no:316,st:"82",map:"32-D-5",target:"大高　体育館裏"},
+  {no:317,st:"81",map:"32-D-4",target:"住宅地ST"},
+  {no:318,st:"80",map:"32-E-3",target:"渡辺電機製作所"},
+  {no:319,st:"89",map:"32-F-4",target:"住宅地ST"},
+  {no:320,st:"1592",map:"32-F-5",target:"ｸﾞﾗﾝﾃﾗｽ紫塚ⅠⅡ"},
+  {no:321,st:"1584",map:"41-E-1",target:"ﾌｧﾐﾏ前　新設"},
+  {no:322,st:"160",map:"41-E-2",target:"ﾌｧﾐﾏ横むぎくらDIﾊｲﾂ"},
+  {no:323,st:"241",map:"46-H-2",target:"横断歩道 手前"},
+  {no:324,st:"1544",map:"46-J-2",target:"丸亀　横　ﾘｾﾌﾞﾘｽ"},
+  {no:325,st:"239",map:"46-I-1",target:"会社P"},
+  {no:326,st:"240",map:"46-H-1",target:"保険ｾﾝﾀｰ裏"}
 ];
 </script>
-<script src="../../app.js?v=1790233562"></script>
+<script src="../../app.js?v=1790236981"></script>
 </body>
 </html>
