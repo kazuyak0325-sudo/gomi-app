@@ -3,35 +3,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>緑コース（ペット・ダンボール①）</title>
-<link rel="icon" href="../icon.png">
+<title>緑コース（ペット・ダンボール①） 回収記録</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="緑コース（ペット・ダンボール①）">
 <meta name="theme-color" content="#2e7d32">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../style.css?v=1790223126">
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: #f5f5f5;
-    color: #222;
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
-    text-align: center;
-  }
-  a.back {
-    display: inline-block;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: #555;
-    text-decoration: none;
-    border-bottom: 1px solid #999;
-  }
-  h1 { font-size: 17px; margin: 0 0 12px; }
-  p { color: #777; font-size: 14px; line-height: 1.7; }
+  :root { --accent: #2e7d32; --accent-contrast: #ffffff; --surface-done: #e3f6e6; --done-text: #2c8c3f; }
 </style>
 </head>
 <body>
-<a class="back" href="../">← 日程選択に戻る</a>
-<h1>緑コース（ペット・ダンボール①）</h1>
-<p>このコースはまだ準備中です。<br>ステーションデータが追加されるとここで使えるようになります。</p>
+<header>
+  <h1>緑コース（ペット・ダンボール①）</h1>
+  <p class="sub">回収したステーションをタップして時刻を記録</p>
+  <p class="meta" id="dateVersion"></p>
+  <div id="progress">0 / 0 完了</div>
+  <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
+  <div class="actions">
+    <button id="copyBtn">時刻を一覧コピー</button>
+    <button id="resetBtn">今日の記録をリセット</button>
+  </div>
+  <div class="actions actions-2">
+    <button id="editBtn">ステーションを編集</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
+  </div>
+</header>
+<main>
+  <ul id="list"></ul>
+</main>
+
+<script>
+const COURSE_ID = "midori-pet1";
+const COURSE_NAME = "緑コース（ペット・ダンボール①）";
+const APP_VERSION = "v0.26";
+
+const DEFAULT_STATIONS = [
+  {no:1,st:"1177",map:"109-D-1",target:"NOAH看板左奥"},
+  {no:2,st:"1630",map:"83-G-4",target:"エクセレント前"},
+  {no:3,st:"1649",map:"83-J-5",target:"ｴｸｾﾚﾝﾄ黄色ﾈｯﾄ"},
+  {no:4,st:"1021",map:"83-J-5",target:"ｴｸｾﾚﾝﾄ(左側)"},
+  {no:5,st:"1023",map:"84-A-4",target:"左折ｼﾞｰﾙ"},
+  {no:6,st:"1613",map:"84-A-2",target:"富士見分譲地"},
+  {no:7,st:"1022",map:"84-A-2",target:"富士山下公民館"},
+  {no:8,st:"1603",map:"84-B-2",target:"分譲地"},
+  {no:9,st:"1024",map:"84-E-2",target:"歩道ﾊﾞｯｸST ﾊﾞｯｸ"},
+  {no:10,st:"1025",map:"84-F-2",target:"ﾗ･ｾｿﾞﾝ　ﾊﾞｯｸ"},
+  {no:11,st:"927",map:"77-E-5",target:"ﾗ･ｻﾗｿﾗ　Uﾀｰﾝ"},
+  {no:12,st:"1035",map:"84-F-4",target:"ｴﾙｻﾝﾓｰﾙ"},
+  {no:13,st:"309",map:"84-F-4",target:"出てすぐ左ﾌﾞﾛｯｸ"},
+  {no:14,st:"1037",map:"84-H-5",target:"ﾊﾟﾙﾃﾉﾝ富士見"},
+  {no:15,st:"1036",map:"84-G-5",target:"すぐ向かいｱﾈｼｽ"},
+  {no:16,st:"1034",map:"84-I-4",target:"ｼﾊﾞﾀﾏﾝｼｮﾝ"},
+  {no:17,st:"1032",map:"84-H-3",target:"ﾁｬﾍﾟﾋﾙ"},
+  {no:18,st:"1033",map:"84-H-3",target:"角 U"},
+  {no:19,st:"1030",map:"84-G-2",target:"ﾊﾞｯｸ"},
+  {no:20,st:"1031",map:"84-H-3",target:"出口"},
+  {no:21,st:"1027",map:"84-G-1",target:"DI　ﾍﾟﾗﾝｷﾞ"},
+  {no:22,st:"1026",map:"84-G-1",target:"DI　ﾌﾞｷﾞｯﾄﾌｼﾞ"},
+  {no:23,st:"101",map:"77-G-5",target:"プリムヴェール"},
+  {no:24,st:"951",map:"77-G-5",target:"ﾌﾟﾙﾘｵﾝ富士見3"},
+  {no:25,st:"950",map:"77-F-4",target:"ﾌﾟﾙﾘｵﾝ富士見2"},
+  {no:26,st:"949",map:"77-F-4",target:"ﾓﾝﾃﾍﾞﾙﾃﾞDI"},
+  {no:27,st:"1427",map:"77-G-4",target:"ﾌｧﾐﾏ前DI富士見"},
+  {no:28,st:"946",map:"77-G-4",target:"ｻﾝﾋﾙｽﾞDI　1"},
+  {no:29,st:"947",map:"77-G-4",target:"ｻﾝﾋﾙｽﾞDI　2"},
+  {no:30,st:"952",map:"77-G-5",target:"ﾔﾏﾄ向かいDI富士"},
+  {no:31,st:"953",map:"77-H-5",target:"住宅街　公園"},
+  {no:32,st:"1611",map:"77-H-5",target:"ﾗﾎﾟｰﾙ　緑ﾈｯﾄ"},
+  {no:33,st:"1028",map:"84-H-1",target:"消防ﾎｰｽﾎﾞｯｸｽ"},
+  {no:34,st:"1029",map:"84-H-2",target:"坂道ﾊﾞｯｸST"},
+  {no:35,st:"1632",map:"84-I-2",target:"石澤表具店先左折"},
+  {no:36,st:"1429",map:"84-I-5",target:"小林内科外科前"},
+  {no:37,st:"1038",map:"84-J-5",target:"ﾋﾙｻｲﾄﾞDI"},
+  {no:38,st:"1039",map:"84-J-5",target:"にちにちそう"},
+  {no:39,st:"1183",map:"110-A-1",target:"富士見山7公民館"},
+  {no:40,st:"1182",map:"110-A-1",target:"富士見山6　ﾄﾞｱ2"},
+  {no:41,st:"1637",map:"110-B-1",target:"富士見山 新設ST"},
+  {no:42,st:"1043",map:"85-B-5",target:"富士見山5　公園"},
+  {no:43,st:"1040",map:"85-C-3",target:"富士見山4ﾄﾞｱ片方"},
+  {no:44,st:"1041",map:"85-C-4",target:"富士見山3"},
+  {no:45,st:"1042",map:"85-D-4",target:"富士見山2　三角"},
+  {no:46,st:"1044",map:"85-D-5",target:"富士見山1"},
+  {no:47,st:"1051",map:"85-I-5",target:"大田原火葬場"},
+  {no:48,st:"1052",map:"85-J-4",target:"ﾌﾟｰﾙ裏①"},
+  {no:49,st:"1657",map:"85-J-4",target:"ﾌﾟｰﾙ裏②　新設"},
+  {no:50,st:"1057",map:"86-A-2",target:"右折　空地ST"},
+  {no:51,st:"1058",map:"86-D-2",target:"家族葬つむぎ　奥"},
+  {no:52,st:"1059",map:"86-D-3",target:"日の出　寮"},
+  {no:53,st:"1188",map:"70-I-1",target:"共和直線ST"},
+  {no:54,st:"1061",map:"87-A-5",target:"千丈橋住宅地１"},
+  {no:55,st:"1060",map:"86-I-2",target:"千丈橋住宅地２"},
+  {no:56,st:"1189",map:"111-C-1",target:"北大和久"},
+  {no:57,st:"1190",map:"111-C-3",target:"やすらぎの里"},
+  {no:58,st:"1191",map:"111-D-5",target:"田んぼ沿い"},
+  {no:59,st:"1184",map:"110-E-2",target:"墓地前　離れたST"},
+  {no:60,st:"1050",map:"85-F-4",target:"ﾚｵﾊﾟﾚｽつくい"},
+  {no:61,st:"1049",map:"85-G-3",target:"市営若草団地1"},
+  {no:62,st:"597",map:"85-F-4",target:"市営若草1.5"},
+  {no:63,st:"1048",map:"85-F-3",target:"市営若草団地2"},
+  {no:64,st:"1046",map:"85-E-2",target:"市営若草団地３"},
+  {no:65,st:"1047",map:"85-G-2",target:"ｾﾞﾌﾞﾗ電子ﾌｪﾝｽ1"},
+  {no:66,st:"1055",map:"85-G-2",target:"ｾﾞﾌﾞﾗ電子ﾌｪﾝｽ2"},
+  {no:67,st:"1056",map:"85-I-1",target:"ｾﾞﾌﾞﾗ電子ﾌｪﾝｽ3"},
+  {no:68,st:"1054",map:"85-I-2",target:"東地区公民館前"},
+  {no:69,st:"1053",map:"85-I-3",target:"ﾌﾟﾘﾏﾍﾞｰﾗ大徳運送"},
+  {no:70,st:"1474",map:"85-H-4",target:"緑新　分譲地1"},
+  {no:71,st:"1477",map:"85-G-5",target:"緑新　分譲地2"},
+  {no:72,st:"1045",map:"85-E-3",target:"若草園"},
+  {no:73,st:"957",map:"78-D-2",target:"藤原第1ｺｰﾎﾟ"},
+  {no:74,st:"745",map:"65-B-4",target:"大女高向かい"},
+  {no:75,st:"721",map:"65-A-2",target:"丸正京染店"},
+  {no:76,st:"720",map:"64-J-2",target:"空地ﾌﾞﾛｯｸ"},
+  {no:77,st:"719",map:"64-J-2",target:"橋本内科ｸﾘﾆｯｸ"},
+  {no:78,st:"737",map:"65-A-1",target:"左折ﾌﾚﾝﾄﾞ"},
+  {no:79,st:"738",map:"65-A-1",target:"右ﾈｯﾄ"},
+  {no:80,st:"718",map:"64-J-2",target:"鈴木ｻｲｸﾙ裏"},
+  {no:81,st:"739",map:"65-B-1",target:"大女高角　右折"},
+  {no:82,st:"744",map:"65-C-4",target:"大女高グランド1"},
+  {no:83,st:"743",map:"65-C-3",target:"大女高グランド2"},
+  {no:84,st:"741",map:"65-C-3",target:"大女高ﾌｪﾝｽ"},
+  {no:85,st:"756",map:"65-B-2",target:"大女高　U"},
+  {no:86,st:"742",map:"65-E-3",target:"精米所手前"},
+  {no:87,st:"762",map:"65-G-2",target:"ﾗ･ﾌｫｰﾚ元町"},
+  {no:88,st:"761",map:"65-H-2",target:"ﾃﾞｨｱｽ元町"},
+  {no:89,st:"954",map:"78-A-1",target:"ひまわり歩道ﾊﾞｯｸ"},
+  {no:90,st:"955",map:"78-B-2",target:"ﾌｫﾝﾃｰﾇDI"},
+  {no:91,st:"1533",map:"78-C-2",target:"JA分譲地"},
+  {no:92,st:"956",map:"78-B-3",target:"国際福祉大学寮"},
+  {no:93,st:"1614",map:"77-J-3",target:"若草分譲地  隣"},
+  {no:94,st:"1596",map:"77-J-3",target:"若草分譲地  新設"},
+  {no:95,st:"945",map:"77-J-3",target:"TUTAYADI若草"},
+  {no:96,st:"944",map:"77-J-3",target:"TUTAYA裏角  U"},
+  {no:97,st:"1617",map:"78-E-2",target:"若草新設分譲地②"},
+  {no:98,st:"959",map:"78-E-4",target:"川の上ｶﾞｰﾄﾞﾚｰﾙ"},
+  {no:99,st:"962",map:"78-J-5",target:"ｼﾞｭﾈｽﾛﾏﾝｸﾛｰﾊﾞｰ"},
+  {no:100,st:"964",map:"79-C-5",target:"ペットスクエア"},
+  {no:101,st:"965",map:"79-C-5",target:"旧平林公民館"},
+  {no:102,st:"1450",map:"78-J-3",target:"給食ｾﾝﾀｰ"},
+  {no:103,st:"963",map:"79-A-2",target:"体育館側"},
+  {no:104,st:"771",map:"66-A-5",target:"横関宅前"},
+  {no:105,st:"679",map:"66-A-5",target:"横関宅先 左"},
+  {no:106,st:"767",map:"65-J-5",target:"太陽光　Uﾀｰﾝ"},
+  {no:107,st:"681",map:"66-B-5",target:"横関宅先 右"},
+  {no:108,st:"770",map:"66-B-4",target:"千保宅前"},
+  {no:109,st:"769",map:"66-A-4",target:"Cent大田原"},
+  {no:110,st:"768",map:"66-A-3",target:"住宅地ST"},
+  {no:111,st:"766",map:"65-I-3",target:"DI　ｴｸｾﾙ"},
+  {no:112,st:"765",map:"65-I-3",target:"DI　ｸﾞﾚｰｽ　ﾊﾞｯｸ"},
+  {no:113,st:"764",map:"65-I-3",target:"ｺｰﾎﾟｾｿﾞﾝ"},
+  {no:114,st:"763",map:"65-G-3",target:"電源機器前"},
+  {no:115,st:"1424",map:"65-G-5",target:"奥の住宅地"},
+  {no:116,st:"1425",map:"65-F-4",target:"ｸﾘﾀｺｰﾎﾟ"},
+  {no:117,st:"751",map:"65-E-4",target:"ｸﾞﾚｰｽﾏﾝｼｮﾝﾊﾞｯｸ"},
+  {no:118,st:"752",map:"65-D-5",target:"左折　ﾚｵﾊﾟﾚｽ"},
+  {no:119,st:"753",map:"65-D-5",target:"伊勢巧　ﾌｪﾝｽ"},
+  {no:120,st:"754",map:"65-E-5",target:"ｶﾄﾙｶｰﾙ若草"},
+  {no:121,st:"755",map:"65-E-5",target:"ﾚｵﾊﾟﾚｽ　ﾘｼﾞｪｰﾙ"},
+  {no:122,st:"960",map:"78-G-2",target:"七浦建設前ST"},
+  {no:123,st:"961",map:"78-H-3",target:"ﾙﾏｰﾊﾞｸﾞｽ"}
+];
+</script>
+<script src="../../app.js?v=1790223126"></script>
 </body>
 </html>
