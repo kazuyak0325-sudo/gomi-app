@@ -416,33 +416,6 @@ function setAdminServer(v){
   } catch (e) {}
 }
 
-function showTextModal(message, text){
-  const overlay = document.createElement("div");
-  overlay.className = "modal-overlay";
-  const box = document.createElement("div");
-  box.className = "modal-box";
-  const p = document.createElement("p");
-  p.textContent = message;
-  const ta = document.createElement("textarea");
-  ta.className = "modal-textarea";
-  ta.value = text;
-  ta.readOnly = true;
-  const actions = document.createElement("div");
-  actions.className = "modal-actions";
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "modal-btn-cancel";
-  closeBtn.textContent = "閉じる";
-  closeBtn.addEventListener("click", () => overlay.remove());
-  actions.appendChild(closeBtn);
-  box.appendChild(p);
-  box.appendChild(ta);
-  box.appendChild(actions);
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-  ta.focus();
-  ta.select();
-}
-
 function showToast(message){
   const t = document.createElement("div");
   t.className = "toast";
@@ -1042,17 +1015,6 @@ function checkUnsentPastData(){
   header.insertBefore(banner, header.firstChild);
 }
 checkUnsentPastData();
-
-document.getElementById("copyBtn").addEventListener("click", async () => {
-  const lines = stations.map(s => records[s.st] || "");
-  const text = lines.join("\n");
-  try {
-    await navigator.clipboard.writeText(text);
-    showToast("時刻を上から順にコピーしました。Excelの時刻列に貼り付けできます。");
-  } catch (e) {
-    showTextModal("自動コピーできませんでした。下の内容を手動でコピーしてください:", text);
-  }
-});
 
 render("");
 
