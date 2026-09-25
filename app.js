@@ -56,6 +56,18 @@ document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + 
   menuPanel.appendChild(actions1);
   menuPanel.appendChild(actions2);
 
+  const violationFilterBtn = document.createElement("button");
+  violationFilterBtn.id = "violationFilterBtn";
+  violationFilterBtn.className = "violation-filter-btn";
+  violationFilterBtn.textContent = "違反ステーションを表示する";
+  violationFilterBtn.addEventListener("click", () => {
+    violationFilterOn = !violationFilterOn;
+    violationFilterBtn.textContent = violationFilterOn ? "すべて表示に戻す" : "違反ステーションを表示する";
+    violationFilterBtn.classList.toggle("on", violationFilterOn);
+    render(document.getElementById("filter").value);
+  });
+  menuPanel.appendChild(violationFilterBtn);
+
   header.appendChild(menuToggle);
   header.appendChild(menuPanel);
 
@@ -280,6 +292,7 @@ try {
 }
 
 let cardboardFilterOn = false;
+let violationFilterOn = false;
 
 function activeViolations(){
   return (IS_CARDBOARD_COURSE && cardboardFilterOn) ? cardboardViolations : violations;
@@ -644,6 +657,7 @@ function render(filterText){
     if (cbTime) cardboardDoneCount++;
     if (ft && !(s.target.includes(ft) || String(s.st).includes(ft) || String(s.no).includes(ft))) return;
     if (IS_CARDBOARD_COURSE && cardboardFilterOn && !hasCardboard) return;
+    if (violationFilterOn && !v) return;
 
     const isDone = (IS_CARDBOARD_COURSE && cardboardFilterOn) ? !!cbTime : !!time;
     const li = document.createElement("li");

@@ -70,6 +70,25 @@ header {
   font-size: 15px;
 }
 .menu-panel .actions button:active { background: #e5e1ec; }
+.menu-panel .violation-filter-btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 10px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  border: none;
+  border-radius: 8px;
+  background: #f2f0f5;
+  color: var(--text);
+  text-align: center;
+}
+.menu-panel .violation-filter-btn:active { background: #e5e1ec; }
+.menu-panel .violation-filter-btn.on {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
 .back-link {
   display: inline-block;
   margin-bottom: 8px;
