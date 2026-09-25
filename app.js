@@ -3,16 +3,25 @@ function playTapSound(){
   try {
     if (!tapAudioCtx) tapAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (tapAudioCtx.state === "suspended") tapAudioCtx.resume();
-    const osc = tapAudioCtx.createOscillator();
+    const duration = 0.025;
+    const sampleCount = Math.floor(tapAudioCtx.sampleRate * duration);
+    const buffer = tapAudioCtx.createBuffer(1, sampleCount, tapAudioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < sampleCount; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / sampleCount, 4);
+    }
+    const noise = tapAudioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = tapAudioCtx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 2800;
+    filter.Q.value = 1.1;
     const gain = tapAudioCtx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(880, tapAudioCtx.currentTime);
-    gain.gain.setValueAtTime(0.15, tapAudioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, tapAudioCtx.currentTime + 0.12);
-    osc.connect(gain);
+    gain.gain.value = 0.6;
+    noise.connect(filter);
+    filter.connect(gain);
     gain.connect(tapAudioCtx.destination);
-    osc.start();
-    osc.stop(tapAudioCtx.currentTime + 0.12);
+    noise.start();
   } catch (e) {}
 }
 
