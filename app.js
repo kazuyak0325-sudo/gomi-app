@@ -1,3 +1,21 @@
+let tapAudioCtx = null;
+function playTapSound(){
+  try {
+    if (!tapAudioCtx) tapAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (tapAudioCtx.state === "suspended") tapAudioCtx.resume();
+    const osc = tapAudioCtx.createOscillator();
+    const gain = tapAudioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, tapAudioCtx.currentTime);
+    gain.gain.setValueAtTime(0.15, tapAudioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, tapAudioCtx.currentTime + 0.12);
+    osc.connect(gain);
+    gain.connect(tapAudioCtx.destination);
+    osc.start();
+    osc.stop(tapAudioCtx.currentTime + 0.12);
+  } catch (e) {}
+}
+
 function formatDateJp(d){
   const days = ["日","月","火","水","木","金","土"];
   return d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日(" + days[d.getDay()] + ")";
@@ -736,6 +754,7 @@ function onTap(s){
   }
   records[s.st] = fmtTime(new Date());
   save();
+  playTapSound();
   render(document.getElementById("filter").value);
 }
 
@@ -750,6 +769,7 @@ function onTapCardboardTime(s){
   }
   cardboardTimes[s.st] = fmtTime(new Date());
   saveCardboardTimes();
+  playTapSound();
   render(document.getElementById("filter").value);
 }
 
