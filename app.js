@@ -304,25 +304,90 @@ listPhotoStationsForDate(todayDateStr()).then(sts => {
   render(document.getElementById("filter").value);
 }).catch(() => {});
 
-function openCameraFor(s){
+async function savePhotoBlob(s, blob){
+  try {
+    const compressed = await compressImage(blob);
+    await savePhoto(todayDateStr(), s.st, compressed);
+    photoStations.add(s.st);
+    showToast('「' + s.target + '」の写真を保存しました。');
+    render(document.getElementById("filter").value);
+  } catch (e) {
+    showToast("写真の保存に失敗しました。");
+  }
+}
+
+function openCameraFileFallback(s){
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
   input.capture = "environment";
-  input.addEventListener("change", async () => {
+  input.addEventListener("change", () => {
     const file = input.files && input.files[0];
-    if (!file) return;
-    try {
-      const blob = await compressImage(file);
-      await savePhoto(todayDateStr(), s.st, blob);
-      photoStations.add(s.st);
-      showToast('「' + s.target + '」の写真を保存しました。');
-      render(document.getElementById("filter").value);
-    } catch (e) {
-      showToast("写真の保存に失敗しました。");
-    }
+    if (file) savePhotoBlob(s, file);
   });
   input.click();
+}
+
+async function openCameraFor(s){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    openCameraFileFallback(s);
+    return;
+  }
+
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+  } catch (e) {
+    openCameraFileFallback(s);
+    return;
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay camera-overlay";
+  const box = document.createElement("div");
+  box.className = "camera-box";
+
+  const video = document.createElement("video");
+  video.autoplay = true;
+  video.playsInline = true;
+  video.muted = true;
+  video.srcObject = stream;
+  box.appendChild(video);
+
+  const actions = document.createElement("div");
+  actions.className = "camera-actions";
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "キャンセル";
+  const shotBtn = document.createElement("button");
+  shotBtn.className = "camera-shutter-btn";
+  shotBtn.textContent = "📷 撮影";
+  actions.appendChild(cancelBtn);
+  actions.appendChild(shotBtn);
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  function closeCamera(){
+    stream.getTracks().forEach(t => t.stop());
+    overlay.remove();
+  }
+
+  cancelBtn.addEventListener("click", closeCamera);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeCamera(); });
+
+  shotBtn.addEventListener("click", () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    closeCamera();
+    canvas.toBlob((blob) => {
+      if (blob) savePhotoBlob(s, blob);
+      else showToast("撮影に失敗しました。");
+    }, "image/jpeg", 0.9);
+  });
 }
 
 function save(){
