@@ -342,6 +342,17 @@ async function openCameraFor(s){
     return;
   }
 
+  let devices = [];
+  let deviceIndex = 0;
+  try {
+    devices = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput");
+    const activeId = stream.getVideoTracks()[0] && stream.getVideoTracks()[0].getSettings().deviceId;
+    if (activeId) {
+      const idx = devices.findIndex(d => d.deviceId === activeId);
+      if (idx >= 0) deviceIndex = idx;
+    }
+  } catch (e) {}
+
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay camera-overlay";
   const box = document.createElement("div");
@@ -359,10 +370,14 @@ async function openCameraFor(s){
   const cancelBtn = document.createElement("button");
   cancelBtn.className = "modal-btn-cancel";
   cancelBtn.textContent = "キャンセル";
+  const switchBtn = document.createElement("button");
+  switchBtn.className = "camera-switch-btn";
+  switchBtn.textContent = "🔄 カメラ切替";
   const shotBtn = document.createElement("button");
   shotBtn.className = "camera-shutter-btn";
   shotBtn.textContent = "📷 撮影";
   actions.appendChild(cancelBtn);
+  if (devices.length > 1) actions.appendChild(switchBtn);
   actions.appendChild(shotBtn);
   box.appendChild(actions);
   overlay.appendChild(box);
@@ -375,6 +390,18 @@ async function openCameraFor(s){
 
   cancelBtn.addEventListener("click", closeCamera);
   overlay.addEventListener("click", (e) => { if (e.target === overlay) closeCamera(); });
+
+  switchBtn.addEventListener("click", async () => {
+    if (devices.length < 2) return;
+    deviceIndex = (deviceIndex + 1) % devices.length;
+    stream.getTracks().forEach(t => t.stop());
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: devices[deviceIndex].deviceId } }, audio: false });
+      video.srcObject = stream;
+    } catch (e) {
+      showToast("カメラを切り替えられませんでした。");
+    }
+  });
 
   shotBtn.addEventListener("click", () => {
     const canvas = document.createElement("canvas");

@@ -506,6 +506,16 @@ main {
   border-radius: 8px;
   font-size: 15px;
 }
+.camera-switch-btn {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
 .camera-shutter-btn {
   flex: 1;
   padding: 16px;
