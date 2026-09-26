@@ -225,7 +225,8 @@ main {
 }
 .target {
   flex: 1;
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 700;
   line-height: 1.35;
   padding-right: 8px;
   min-width: 0;
@@ -233,7 +234,8 @@ main {
 .target small {
   display: block;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 700;
   margin-top: 2px;
 }
 .time {
@@ -243,7 +245,7 @@ main {
   text-align: center;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 700;
   color: var(--text-muted);
 }
