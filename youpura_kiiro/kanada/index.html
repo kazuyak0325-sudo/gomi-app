@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>容プラ(黄)コース（金田地区・親園・野崎） 回収記録</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="容プラ(黄)コース（金田地区・親園・野崎）">
+<meta name="theme-color" content="#c99a1e">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../style.css?v=1790549089">
+<style>
+  :root { --accent: #c99a1e; --accent-contrast: #ffffff; --surface-done: #faf1d9; --done-text: #9c7a17; }
+</style>
+</head>
+<body>
+<header>
+  <h1>容プラ(黄)コース（金田地区・親園・野崎）</h1>
+  <p class="sub">回収したステーションをタップして時刻を記録</p>
+  <p class="meta" id="dateVersion"></p>
+  <div id="progress">0 / 0 完了</div>
+  <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
+  <div class="actions">
+    <button id="resetBtn">今日の記録をリセット</button>
+  </div>
+  <div class="actions actions-2">
+    <button id="editBtn">ステーションを編集</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
+  </div>
+</header>
+<main>
+  <ul id="list"></ul>
+</main>
+
+<script>
+const COURSE_ID = "youpura_kiiro-kanada";
+const COURSE_NAME = "容プラ(黄)コース（金田地区・親園・野崎）";
+const APP_VERSION = "v0.38";
+
+const DEFAULT_STATIONS = [
+  {no:1,st:"1293",map:"132-H-1",target:"晴風園"},
+  {no:2,st:"1292",map:"132-G-1",target:"アパート手前"},
+  {no:3,st:"1478",map:"132-G-1",target:"アパート"},
+  {no:4,st:"1260",map:"122-H-4",target:"養鶏所1"},
+  {no:5,st:"1261",map:"122-H-4",target:"養鶏所2"},
+  {no:6,st:"1257",map:"122-C-4",target:"板"},
+  {no:7,st:"1258",map:"122-E-5",target:"ｽﾀﾝﾄﾞ右折"},
+  {no:8,st:"1288",map:"130-C-3",target:"信号手前"},
+  {no:9,st:"1291",map:"132-B-5",target:"平沢公民館"},
+  {no:10,st:"1312",map:"138-E-2",target:"平沢ﾊｲﾂ"},
+  {no:11,st:"1311",map:"138-D-2",target:"ｺｰﾎﾟ平沢"},
+  {no:12,st:"1313",map:"138-E-3",target:"段差ST"},
+  {no:13,st:"1314",map:"138-J-3",target:"田んぼﾊﾞｯｸ"},
+  {no:14,st:"1315",map:"139-D-4",target:"滝沢公民館"},
+  {no:15,st:"1316",map:"139-G-5",target:"大阪屋裏"},
+  {no:16,st:"1317",map:"139-G-4",target:"鉄工所跡地"},
+  {no:17,st:"1319",map:"139-F-2",target:"ます池"},
+  {no:18,st:"1318",map:"139-H-2",target:"秋元商店先"},
+  {no:19,st:"1320",map:"140-D-4",target:"橋の上の荷台"},
+  {no:20,st:"1354",map:"148-G-1",target:"松原集落ｾﾝﾀｰ"},
+  {no:21,st:"1355",map:"148-J-1",target:"滝岡公民館"},
+  {no:22,st:"1321",map:"140-G-4",target:"親園集荷場卍"},
+  {no:23,st:"1322",map:"140-J-2",target:"長泉寺手前"},
+  {no:24,st:"1303",map:"135-A-5",target:"ﾄﾗｸﾀｰﾃﾝﾄ手前"},
+  {no:25,st:"948",map:"135-E-4",target:"農村改善ｾﾝﾀｰ"},
+  {no:26,st:"1302",map:"135-B-2",target:"石碑先　奥ﾊﾞｯｸ"},
+  {no:27,st:"1301",map:"134-I-1",target:"Y字ST"},
+  {no:28,st:"1272",map:"124-H-5",target:"中学裏ｶﾞｰﾄﾞﾚｰﾙ"},
+  {no:29,st:"1271",map:"124-G-5",target:"親園中学校"},
+  {no:30,st:"1300",map:"134-E-1",target:"太陽光発電前"},
+  {no:31,st:"1299",map:"134-B-3",target:"親園小学校"},
+  {no:32,st:"1298",map:"134-A-4",target:"介護施設つばさ"},
+  {no:33,st:"1295",map:"133-J-4",target:"親園ﾎﾎｴﾐｾﾝﾀｰ"},
+  {no:34,st:"1297",map:"134-A-2",target:"渡辺床屋"},
+  {no:35,st:"1296",map:"134-A-1",target:"磯　実家前ST"},
+  {no:36,st:"1268",map:"124-B-5",target:"親園北区公民館"},
+  {no:37,st:"1267",map:"124-A-4",target:"元田代魚店前"},
+  {no:38,st:"1574",map:"123-I-1",target:"新設　分譲地"},
+  {no:39,st:"1172",map:"108-H-5",target:"親園〒奥ﾊﾞｯｸ"},
+  {no:40,st:"1171",map:"108-H-5",target:"すぐAPｶﾙﾄｾｿﾞﾝ"},
+  {no:41,st:"1266",map:"124-B-1",target:"鉄の箱"},
+  {no:42,st:"1269",map:"124-D-3",target:"鍵0921"},
+  {no:43,st:"1641",map:"109-I-4",target:"新設ST"},
+  {no:44,st:"1270",map:"124-I-1",target:"手塚商店　前ST"},
+  {no:45,st:"1273",map:"125-C-4",target:"STのうえに石"},
+  {no:46,st:"1280",map:"125-B-1",target:"君島　実家裏"},
+  {no:47,st:"1186",map:"110-D-5",target:"ｺﾓ･ﾓﾛｯｿ"},
+  {no:48,st:"1185",map:"110-D-5",target:"ｶﾌﾟﾘﾁｮｰ･ﾌﾟﾘｯｻ"},
+  {no:49,st:"1275",map:"125-D-2",target:"宇田川NT　1"},
+  {no:50,st:"1274",map:"125-E-2",target:"宇田川NT　2"},
+  {no:51,st:"1277",map:"125-F-2",target:"宇田川NT　3"},
+  {no:52,st:"1276",map:"125-E-1",target:"宇田川NT　4"},
+  {no:53,st:"1187",map:"110-G-5",target:"田んぼｶﾞｰﾄﾞﾚｰﾙ"},
+  {no:54,st:"1278",map:"125-J-4",target:"石碑　ｶｰﾌﾞﾐﾗｰ"},
+  {no:55,st:"1279",map:"125-J-4",target:"宇田川小学校"},
+  {no:56,st:"1304",map:"136-A-1",target:"川沿い物置"},
+  {no:57,st:"1305",map:"136-B-1",target:"宇田川十字路"},
+  {no:58,st:"1326",map:"141-J-2",target:"川沿いﾊﾞｯｸ"},
+  {no:59,st:"1323",map:"141-E-3",target:"墓地バック"},
+  {no:60,st:"1325",map:"141-H-4",target:"ﾌｧﾐﾏ奥1"},
+  {no:61,st:"1324",map:"141-H-5",target:"ﾌｧﾐﾏ奥2"},
+  {no:62,st:"1356",map:"149-F-5",target:"佐久山取り出し"},
+  {no:63,st:"1306",map:"153-F-1",target:"ｶｰﾌﾞ左"},
+  {no:64,st:"1360",map:"153-B-1",target:"前坂信号手前　右"},
+  {no:65,st:"1359",map:"153-A-2",target:"きみのゆ上り坂緑"},
+  {no:66,st:"1358",map:"153-A-1",target:"佐久山入口前坂下り"},
+  {no:67,st:"1353",map:"147-I-4",target:"荒町公民館"},
+  {no:68,st:"1352",map:"147-I-4",target:"ｲｼｻﾞｷｽﾄｱ前"},
+  {no:69,st:"1351",map:"147-G-3",target:"電柱"},
+  {no:70,st:"1350",map:"147-H-3",target:"ｸﾗﾝｸ鉄ｶｺﾞ"},
+  {no:71,st:"1349",map:"147-F-3",target:"旧和気精肉店"},
+  {no:72,st:"1348",map:"147-F-3",target:"石碑前"},
+  {no:73,st:"1343",map:"147-E-2",target:"公衆トイレ"},
+  {no:74,st:"1342",map:"147-C-2",target:"和気精肉店"},
+  {no:75,st:"1341",map:"147-B-1",target:"上田豆腐店向"},
+  {no:76,st:"1340",map:"147-B-1",target:"上田豆腐店横"},
+  {no:77,st:"1339",map:"147-A-1",target:"駐車場P"},
+  {no:78,st:"1338",map:"146-G-5",target:"与一温泉"},
+  {no:79,st:"1337",map:"147-A-2",target:"T字右折ST"},
+  {no:80,st:"1344",map:"147-A-3",target:"佐久山小学校"},
+  {no:81,st:"1345",map:"147-B-3",target:"学童保育館あすなろ"},
+  {no:82,st:"1346",map:"147-B-5",target:"市営佐久山団地"},
+  {no:83,st:"1347",map:"147-E-4",target:"坂　ﾊﾞｯｸ"},
+  {no:84,st:"1550",map:"153-F-5",target:"平山公民館"},
+  {no:85,st:"1549",map:"158-G-1",target:"墓地前"},
+  {no:86,st:"1380",map:"158-J-2",target:"千成ｺﾞﾙﾌ入口"},
+  {no:87,st:"1381",map:"159-C-2",target:"上天梅ﾊﾞｽ停ﾌﾞﾛｯｸ"},
+  {no:88,st:"1382",map:"159-F-3",target:"下天梅鉄のｶｺﾞ"},
+  {no:89,st:"1383",map:"160-B-3",target:"種入伊藤家畑ST"},
+  {no:90,st:"1384",map:"160-E-3",target:"清水建設　先ST"},
+  {no:91,st:"1385",map:"160-E-2",target:"ｶﾞｰﾄﾞﾚｰﾙ市境ST"},
+  {no:92,st:"1386",map:"160-A-1",target:"柴山　土手のかげ"},
+  {no:93,st:"875",map:"155-F-5",target:"ｺﾞﾙﾌ場うら"},
+  {no:94,st:"1367",map:"155-G-2",target:"砂利P"},
+  {no:95,st:"1366",map:"115-F-1",target:"西村板金手前"},
+  {no:96,st:"1368",map:"155-H-2",target:"鳥居先"},
+  {no:97,st:"1369",map:"155-I-2",target:"出ない　資源"},
+  {no:98,st:"1371",map:"156-C-3",target:"坂Uﾀｰﾝ"},
+  {no:99,st:"1370",map:"155-J-2",target:"福原信号手前"},
+  {no:100,st:"1364",map:"155-A-1",target:"八幡宮手前"},
+  {no:101,st:"1365",map:"155-A-3",target:"ふれあいの丘"},
+  {no:102,st:"1379",map:"158-J-4",target:"田んぼ沿い1"},
+  {no:103,st:"1378",map:"158-H-4",target:"田んぼ沿い2"},
+  {no:104,st:"1377",map:"158-F-4",target:"田んぼ沿い3"},
+  {no:105,st:"1376",map:"158-C-3",target:"田んぼ沿い4"},
+  {no:106,st:"1387",map:"161-H-4",target:"琵琶池公民館"},
+  {no:107,st:"1375",map:"158-B-3",target:"琵琶池GC"},
+  {no:108,st:"1373",map:"157-J-1",target:"田んぼ沿い5"},
+  {no:109,st:"1374",map:"157-I-5",target:"武藤酒店先ﾊﾞｯｸ"},
+  {no:110,st:"1372",map:"157-F-3",target:"佐久山ﾌｧﾐﾏ先ST"},
+  {no:111,st:"1357",map:"152-E-5",target:"ﾄｳﾓﾛｺｼ畑前ST"},
+  {no:112,st:"1362",map:"151-J-2",target:"農家の横"},
+  {no:113,st:"1327",map:"143-H-5",target:"田んぼ沿い"},
+  {no:114,st:"1328",map:"143-I-4",target:"農家の前"},
+  {no:115,st:"1335",map:"144-G-5",target:"2つ並んでいる"},
+  {no:116,st:"1329",map:"144-H-5",target:"墓地　ﾊﾞｯｸ"},
+  {no:117,st:"1336",map:"146-I-1",target:"星輪店前"},
+  {no:118,st:"1330",map:"144-J-5",target:"正浄寺横"},
+  {no:119,st:"1334",map:"145-A-3",target:"岩井橋手前"},
+  {no:120,st:"1294",map:"133-C-1",target:"実取公民館"},
+  {no:121,st:"1158",map:"107-E-1",target:"森商店　ﾊﾞｯｸ"},
+  {no:122,st:"1159",map:"107-E-3",target:"ﾆｺﾝ前1"},
+  {no:123,st:"1160",map:"107-F-5",target:"ﾆｺﾝ前2"},
+  {no:124,st:"1264",map:"122-H-1",target:"さらに奥ST"},
+  {no:125,st:"1263",map:"122-I-3",target:"ﾎﾟﾝﾌﾟ小屋"},
+  {no:126,st:"1262",map:"122-H-4",target:"ｻﾝ･ﾒｿﾞﾝ"},
+  {no:127,st:"1150",map:"107-B-3",target:"実取団地1 ﾎﾞｯｸｽ"},
+  {no:128,st:"1155",map:"107-D-2",target:"実取団地6号棟↑"},
+  {no:129,st:"1156",map:"107-D-2",target:"実取団地5号棟"},
+  {no:130,st:"1157",map:"107-D-2",target:"実取団地4号棟↓"},
+  {no:131,st:"1151",map:"107-C-3",target:"実取団地7号棟"},
+  {no:132,st:"1152",map:"107-C-3",target:"実取団地3号棟↑"},
+  {no:133,st:"1153",map:"107-C-2",target:"実取団地2号棟"},
+  {no:134,st:"1154",map:"107-C-2",target:"実取団地1号棟↓"},
+  {no:135,st:"1149",map:"105-G-5",target:"ﾌｧﾐﾏ奥1"},
+  {no:136,st:"1532",map:"107-G-1",target:"ﾌｧﾐﾏ奥4"},
+  {no:137,st:"1265",map:"123-D-3",target:"ﾌｧﾐﾏ奥3"},
+  {no:138,st:"1161",map:"107-J-4",target:"ﾌｧﾐﾏ奥2"},
+  {no:139,st:"1654",map:"130-G-2",target:"itayama"}
+];
+</script>
+<script src="../../app.js?v=1790549089"></script>
+</body>
+</html>
