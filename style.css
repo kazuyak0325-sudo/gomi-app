@@ -183,6 +183,11 @@ main {
   max-width: 720px;
   margin: 0 auto;
 }
+@media (orientation: landscape) {
+  main {
+    max-width: none;
+  }
+}
 #list {
   list-style: none;
   margin: 0;
