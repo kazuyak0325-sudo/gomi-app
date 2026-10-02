@@ -68,6 +68,15 @@ document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + 
   });
   menuPanel.appendChild(violationFilterBtn);
 
+  const historyBtn = document.createElement("button");
+  historyBtn.id = "historyBtn";
+  historyBtn.className = "violation-filter-btn";
+  historyBtn.textContent = "過去の記録を見る";
+  historyBtn.addEventListener("click", () => {
+    showHistoryList();
+  });
+  menuPanel.appendChild(historyBtn);
+
   header.appendChild(menuToggle);
   header.appendChild(menuPanel);
 
@@ -485,6 +494,126 @@ function showConfirm(message, onConfirm){
   actions.appendChild(okBtn);
   box.appendChild(p);
   box.appendChild(actions);
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function getHistoryDates(){
+  const found = [];
+  for (let i = 1; i <= 14; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = dateStrFor(d);
+    let recs = {};
+    let viols = {};
+    try { recs = JSON.parse(localStorage.getItem(keyFor(dateStr)) || "{}"); } catch (e) {}
+    try { viols = JSON.parse(localStorage.getItem(violationKeyFor(dateStr)) || "{}"); } catch (e) {}
+    const doneCount = Object.keys(recs).length;
+    const violationCount = Object.keys(viols).length;
+    if (doneCount === 0 && violationCount === 0) continue;
+    found.push({ dateStr, date: d, doneCount, violationCount, saved: isSavedForDate(dateStr) });
+  }
+  return found;
+}
+
+function showHistoryList(){
+  const dates = getHistoryDates();
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box history-box";
+  const title = document.createElement("p");
+  title.textContent = "過去の収集記録（直近14日）";
+  box.appendChild(title);
+
+  if (dates.length === 0) {
+    const empty = document.createElement("p");
+    empty.textContent = "過去14日分の記録はありません。";
+    box.appendChild(empty);
+  } else {
+    const ul = document.createElement("ul");
+    ul.className = "history-date-list";
+    dates.forEach(info => {
+      const li = document.createElement("li");
+      li.className = "history-date-item";
+      const left = document.createElement("div");
+      left.innerHTML =
+        '<div class="history-date-label">' + formatDateJp(info.date) + '</div>' +
+        '<div class="history-date-sub">' + info.doneCount + ' / ' + stations.length + ' 件完了' +
+        (info.violationCount ? '　違反' + info.violationCount + '箇所' : '') + '</div>';
+      const badge = document.createElement("span");
+      badge.className = "history-badge " + (info.saved ? "saved" : "unsaved");
+      badge.textContent = info.saved ? "送信済み" : "未送信";
+      li.appendChild(left);
+      li.appendChild(badge);
+      li.addEventListener("click", () => {
+        overlay.remove();
+        showHistoryDetail(info.dateStr);
+      });
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+  }
+
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "modal-btn-cancel";
+  closeBtn.textContent = "閉じる";
+  closeBtn.addEventListener("click", () => overlay.remove());
+  actions.appendChild(closeBtn);
+  box.appendChild(actions);
+
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function showHistoryDetail(dateStr){
+  let recs = {};
+  let viols = {};
+  try { recs = JSON.parse(localStorage.getItem(keyFor(dateStr)) || "{}"); } catch (e) {}
+  try { viols = JSON.parse(localStorage.getItem(violationKeyFor(dateStr)) || "{}"); } catch (e) {}
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box history-box";
+  const title = document.createElement("p");
+  const d = new Date(dateStr + "T00:00:00");
+  title.textContent = formatDateJp(d) + "の記録";
+  box.appendChild(title);
+
+  const ul = document.createElement("ul");
+  ul.className = "history-detail-list";
+  stations.forEach(s => {
+    const time = recs[s.st];
+    const v = viols[s.st];
+    const li = document.createElement("li");
+    li.className = "history-row" + (v ? " h-violation" : "");
+    li.innerHTML =
+      '<span class="h-target">' + s.target + '<br><small>' + s.map + ' / ST' + s.st + '</small></span>' +
+      '<span class="h-time">' + (time || "--:--") + '</span>' +
+      (v ? '<span class="h-violation-count">違反' + v.count + '個</span>' : '');
+    ul.appendChild(li);
+  });
+  box.appendChild(ul);
+
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const backBtn = document.createElement("button");
+  backBtn.className = "modal-btn-cancel";
+  backBtn.textContent = "一覧に戻る";
+  backBtn.addEventListener("click", () => { overlay.remove(); showHistoryList(); });
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "modal-btn-ok";
+  closeBtn.textContent = "閉じる";
+  closeBtn.addEventListener("click", () => overlay.remove());
+  actions.appendChild(backBtn);
+  actions.appendChild(closeBtn);
+  box.appendChild(actions);
+
   overlay.appendChild(box);
   overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
