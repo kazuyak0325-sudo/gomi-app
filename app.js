@@ -549,15 +549,19 @@ function localRowsFor(dateStr){
   }));
 }
 
+function colorLabelOfCourse(){
+  return COURSE_NAME.split("（")[0].replace(/コース$/, "");
+}
+
 function localHistoryDays(){
   return getHistoryDates().map(info => ({
     dateStr: info.dateStr,
     date: info.date,
-    courses: [{ name: COURSE_NAME, rows: localRowsFor(info.dateStr), saved: info.saved }]
+    courses: [{ color: colorLabelOfCourse(), name: COURSE_NAME, rows: localRowsFor(info.dateStr), saved: info.saved }]
   }));
 }
 
-async function fetchServerHistoryDays(){
+async function fetchServerHistory(){
   const server = getAdminServer();
   if (!server) return null;
   const controller = new AbortController();
@@ -568,10 +572,11 @@ async function fetchServerHistoryDays(){
     const res = await fetch(url, { signal: controller.signal });
     const data = await res.json();
     if (!res.ok || data.error) return null;
-    return toArrayOrEmpty(data.days).map(day => ({
+    const days = toArrayOrEmpty(data.days).map(day => ({
       dateStr: day.date,
       date: new Date(day.date + "T00:00:00"),
       courses: toArrayOrEmpty(day.courses).map(c => ({
+        color: c.color,
         name: c.name,
         saved: true,
         rows: toArrayOrEmpty(c.rows).map(r => ({
@@ -582,15 +587,15 @@ async function fetchServerHistoryDays(){
           time: r["収集時刻"] || "",
           violation: r["違反ゴミ個数"] || ""
         }))
-      })).sort((a, b) => courseSortRank(a.name) - courseSortRank(b.name))
+      }))
     }));
+    return { ownColor: data.ownColor || "", days };
   } catch (e) {
     return null;
   } finally {
     clearTimeout(timeoutId);
   }
 }
-
 async function showHistoryList(){
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
@@ -606,30 +611,67 @@ async function showHistoryList(){
   overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
 
-  const serverDays = await fetchServerHistoryDays();
-  const fromServer = serverDays !== null;
-  const days = fromServer ? serverDays : localHistoryDays();
-  const entries = [];
-  days.forEach(day => {
-    day.courses.forEach(c => {
-      if (!c.rows.some(r => r.time || r.violation)) return;
-      entries.push({ dateStr: day.dateStr, date: day.date || new Date(day.dateStr + "T00:00:00"), name: c.name, rows: c.rows, saved: c.saved });
-    });
-  });
+  const fetched = await fetchServerHistory();
+  const fromServer = fetched !== null;
+  let days;
+  let ownColor;
+  if (fromServer) {
+    days = fetched.days;
+    ownColor = fetched.ownColor;
+  } else {
+    days = localHistoryDays();
+    ownColor = colorLabelOfCourse();
+  }
   loading.remove();
 
   const note = document.createElement("p");
   note.className = "history-source-note";
   note.textContent = fromServer
-    ? "管理PCに保存された記録を、この色の全コースで表示しています。"
+    ? "管理PCに保存された記録を表示しています。"
     : "管理PCに接続できないため、このタブレット内の記録のみ表示しています。";
   box.appendChild(note);
 
-  if (entries.length === 0) {
-    const empty = document.createElement("p");
-    empty.textContent = "過去14日分の記録はありません。";
-    box.appendChild(empty);
-  } else {
+  let showAll = false;
+  const toggle = document.createElement("div");
+  toggle.className = "history-scope-toggle";
+  const ownBtn = document.createElement("button");
+  const allBtn = document.createElement("button");
+  ownBtn.textContent = ownColor ? "この色（" + ownColor + "）" : "この色";
+  allBtn.textContent = "全コース";
+  toggle.appendChild(ownBtn);
+  toggle.appendChild(allBtn);
+  box.appendChild(toggle);
+
+  const listArea = document.createElement("div");
+  box.appendChild(listArea);
+
+  function renderList(){
+    ownBtn.classList.toggle("on", !showAll);
+    allBtn.classList.toggle("on", showAll);
+    listArea.innerHTML = "";
+    const entries = [];
+    days.forEach(day => {
+      day.courses.forEach(c => {
+        if (!showAll && c.color !== ownColor) return;
+        if (!c.rows.some(r => r.time || r.violation)) return;
+        entries.push({ dateStr: day.dateStr, date: day.date || new Date(day.dateStr + "T00:00:00"), color: c.color, name: c.name, rows: c.rows, saved: c.saved });
+      });
+    });
+    entries.sort((a, b) => {
+      if (a.dateStr !== b.dateStr) return a.dateStr < b.dateStr ? 1 : -1;
+      const ca = a.color === ownColor ? 0 : 1;
+      const cb = b.color === ownColor ? 0 : 1;
+      if (ca !== cb) return ca - cb;
+      if (a.color !== b.color) return a.color.localeCompare(b.color, "ja");
+      return courseSortRank(a.name) - courseSortRank(b.name);
+    });
+
+    if (entries.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "過去14日分の記録はありません。";
+      listArea.appendChild(empty);
+      return;
+    }
     const ul = document.createElement("ul");
     ul.className = "history-date-list";
     entries.forEach(entry => {
@@ -639,7 +681,7 @@ async function showHistoryList(){
       li.className = "history-date-item";
       const left = document.createElement("div");
       left.innerHTML =
-        '<div class="history-date-label">' + formatDateJp(entry.date) + '　' + shortCourseName(entry.name) + '</div>' +
+        '<div class="history-date-label">' + formatDateJp(entry.date) + '　' + entry.color + ' ' + shortCourseName(entry.name) + '</div>' +
         '<div class="history-date-sub">' + doneCount + ' / ' + entry.rows.length + ' 件完了' +
         (violationCount ? '　違反' + violationCount + '箇所' : '') + '</div>';
       li.appendChild(left);
@@ -658,8 +700,12 @@ async function showHistoryList(){
       });
       ul.appendChild(li);
     });
-    box.appendChild(ul);
+    listArea.appendChild(ul);
   }
+
+  ownBtn.addEventListener("click", () => { showAll = false; renderList(); });
+  allBtn.addEventListener("click", () => { showAll = true; renderList(); });
+  renderList();
 
   const actions = document.createElement("div");
   actions.className = "modal-actions";
@@ -670,7 +716,6 @@ async function showHistoryList(){
   actions.appendChild(closeBtn);
   box.appendChild(actions);
 }
-
 function showHistoryDetail(entry){
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";

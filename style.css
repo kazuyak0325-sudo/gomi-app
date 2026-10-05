@@ -508,6 +508,18 @@ main {
   white-space: nowrap;
 }
 .history-source-note { font-size: 12px; color: #777; margin: 0 0 10px; }
+.history-scope-toggle { display: flex; gap: 6px; margin: 0 0 10px; }
+.history-scope-toggle button {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-body);
+}
+.history-scope-toggle button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
 .history-badge.saved { background: #e3edfa; color: #1a5fb4; }
 .history-badge.unsaved { background: #fbe4e4; color: #b4341a; }
 .history-detail-list {
