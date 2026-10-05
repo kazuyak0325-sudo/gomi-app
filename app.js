@@ -522,6 +522,18 @@ function toArrayOrEmpty(v){
   return v ? [v] : [];
 }
 
+function shortCourseName(name){
+  const m = String(name).match(/（(.+)）/);
+  return m ? m[1] : String(name);
+}
+
+function courseSortRank(name){
+  const s = shortCourseName(name);
+  if (s.includes("月・木")) return 0;
+  if (s.includes("火・金")) return 1;
+  return s.includes("②") ? 3 : 2;
+}
+
 function localRowsFor(dateStr){
   let recs = {};
   let viols = {};
@@ -541,8 +553,7 @@ function localHistoryDays(){
   return getHistoryDates().map(info => ({
     dateStr: info.dateStr,
     date: info.date,
-    saved: info.saved,
-    rows: localRowsFor(info.dateStr)
+    courses: [{ name: COURSE_NAME, rows: localRowsFor(info.dateStr), saved: info.saved }]
   }));
 }
 
@@ -553,23 +564,25 @@ async function fetchServerHistoryDays(){
   const timeoutId = setTimeout(() => controller.abort(), 6000);
   try {
     const base = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "");
-    const url = base + "/api/history?courseId=" + encodeURIComponent(COURSE_ID) +
-      "&courseName=" + encodeURIComponent(COURSE_NAME);
+    const url = base + "/api/history?courseId=" + encodeURIComponent(COURSE_ID);
     const res = await fetch(url, { signal: controller.signal });
     const data = await res.json();
     if (!res.ok || data.error) return null;
     return toArrayOrEmpty(data.days).map(day => ({
       dateStr: day.date,
       date: new Date(day.date + "T00:00:00"),
-      saved: true,
-      rows: toArrayOrEmpty(day.rows).map(r => ({
-        no: r["番号"],
-        st: r["ST番号"],
-        map: r["地図番号"],
-        target: r["目標物"],
-        time: r["収集時刻"] || "",
-        violation: r["違反ゴミ個数"] || ""
-      }))
+      courses: toArrayOrEmpty(day.courses).map(c => ({
+        name: c.name,
+        saved: true,
+        rows: toArrayOrEmpty(c.rows).map(r => ({
+          no: r["番号"],
+          st: r["ST番号"],
+          map: r["地図番号"],
+          target: r["目標物"],
+          time: r["収集時刻"] || "",
+          violation: r["違反ゴミ個数"] || ""
+        }))
+      })).sort((a, b) => courseSortRank(a.name) - courseSortRank(b.name))
     }));
   } catch (e) {
     return null;
@@ -595,48 +608,53 @@ async function showHistoryList(){
 
   const serverDays = await fetchServerHistoryDays();
   const fromServer = serverDays !== null;
-  const days = (fromServer ? serverDays : localHistoryDays()).filter(d => d.rows.some(r => r.time || r.violation));
+  const days = fromServer ? serverDays : localHistoryDays();
+  const entries = [];
+  days.forEach(day => {
+    day.courses.forEach(c => {
+      if (!c.rows.some(r => r.time || r.violation)) return;
+      entries.push({ dateStr: day.dateStr, date: day.date || new Date(day.dateStr + "T00:00:00"), name: c.name, rows: c.rows, saved: c.saved });
+    });
+  });
   loading.remove();
 
   const note = document.createElement("p");
   note.className = "history-source-note";
   note.textContent = fromServer
-    ? "管理PCに保存された記録を表示しています。"
+    ? "管理PCに保存された記録を、この色の全コースで表示しています。"
     : "管理PCに接続できないため、このタブレット内の記録のみ表示しています。";
   box.appendChild(note);
 
-  if (days.length === 0) {
+  if (entries.length === 0) {
     const empty = document.createElement("p");
     empty.textContent = "過去14日分の記録はありません。";
     box.appendChild(empty);
   } else {
     const ul = document.createElement("ul");
     ul.className = "history-date-list";
-    days.forEach(day => {
-      const doneCount = day.rows.filter(r => r.time).length;
-      const violationCount = day.rows.filter(r => r.violation).length;
+    entries.forEach(entry => {
+      const doneCount = entry.rows.filter(r => r.time).length;
+      const violationCount = entry.rows.filter(r => r.violation).length;
       const li = document.createElement("li");
       li.className = "history-date-item";
       const left = document.createElement("div");
       left.innerHTML =
-        '<div class="history-date-label">' + formatDateJp(day.date || new Date(day.dateStr + "T00:00:00")) + '</div>' +
-        '<div class="history-date-sub">' + doneCount + ' / ' + day.rows.length + ' 件完了' +
+        '<div class="history-date-label">' + formatDateJp(entry.date) + '　' + shortCourseName(entry.name) + '</div>' +
+        '<div class="history-date-sub">' + doneCount + ' / ' + entry.rows.length + ' 件完了' +
         (violationCount ? '　違反' + violationCount + '箇所' : '') + '</div>';
       li.appendChild(left);
+      const badge = document.createElement("span");
       if (fromServer) {
-        const badge = document.createElement("span");
         badge.className = "history-badge saved";
         badge.textContent = "管理PC保存済み";
-        li.appendChild(badge);
       } else {
-        const badge = document.createElement("span");
-        badge.className = "history-badge " + (day.saved ? "saved" : "unsaved");
-        badge.textContent = day.saved ? "送信済み" : "未送信";
-        li.appendChild(badge);
+        badge.className = "history-badge " + (entry.saved ? "saved" : "unsaved");
+        badge.textContent = entry.saved ? "送信済み" : "未送信";
       }
+      li.appendChild(badge);
       li.addEventListener("click", () => {
         overlay.remove();
-        showHistoryDetail(day);
+        showHistoryDetail(entry);
       });
       ul.appendChild(li);
     });
@@ -653,19 +671,18 @@ async function showHistoryList(){
   box.appendChild(actions);
 }
 
-function showHistoryDetail(day){
+function showHistoryDetail(entry){
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
   const box = document.createElement("div");
   box.className = "modal-box history-box";
   const title = document.createElement("p");
-  const d = day.date || new Date(day.dateStr + "T00:00:00");
-  title.textContent = formatDateJp(d) + "の記録";
+  title.textContent = formatDateJp(entry.date) + "　" + shortCourseName(entry.name) + "の記録";
   box.appendChild(title);
 
   const ul = document.createElement("ul");
   ul.className = "history-detail-list";
-  day.rows.forEach(r => {
+  entry.rows.forEach(r => {
     const li = document.createElement("li");
     li.className = "history-row" + (r.violation ? " h-violation" : "");
     li.innerHTML =
