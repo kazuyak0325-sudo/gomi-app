@@ -507,6 +507,7 @@ main {
   border-radius: 10px;
   white-space: nowrap;
 }
+.history-source-note { font-size: 12px; color: #777; margin: 0 0 10px; }
 .history-badge.saved { background: #e3edfa; color: #1a5fb4; }
 .history-badge.unsaved { background: #fbe4e4; color: #b4341a; }
 .history-detail-list {
