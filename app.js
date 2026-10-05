@@ -596,6 +596,31 @@ async function fetchServerHistory(){
     clearTimeout(timeoutId);
   }
 }
+function saveHistoryCache(days){
+  try {
+    localStorage.setItem("gomi_history_cache", JSON.stringify({
+      savedAt: new Date().toISOString(),
+      days: days.map(day => ({
+        dateStr: day.dateStr,
+        courses: day.courses.map(c => ({ color: c.color, name: c.name, rows: c.rows }))
+      }))
+    }));
+  } catch (e) {}
+}
+
+function loadHistoryCache(){
+  try {
+    return JSON.parse(localStorage.getItem("gomi_history_cache") || "null");
+  } catch (e) {
+    return null;
+  }
+}
+
+function formatSavedAt(iso){
+  const d = new Date(iso);
+  return (d.getMonth() + 1) + "/" + d.getDate() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+
 async function showHistoryList(){
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
@@ -612,23 +637,35 @@ async function showHistoryList(){
   document.body.appendChild(overlay);
 
   const fetched = await fetchServerHistory();
-  const fromServer = fetched !== null;
+  const ownColor = colorLabelOfCourse();
   let days;
-  let ownColor;
-  if (fromServer) {
+  let fromServer = false;
+  let noteText;
+  if (fetched !== null) {
     days = fetched.days;
-    ownColor = fetched.ownColor;
+    fromServer = true;
+    saveHistoryCache(fetched.days);
+    noteText = "管理PCに保存された記録を表示しています。";
   } else {
-    days = localHistoryDays();
-    ownColor = colorLabelOfCourse();
+    const cache = loadHistoryCache();
+    if (cache) {
+      days = cache.days.map(day => ({
+        dateStr: day.dateStr,
+        date: new Date(day.dateStr + "T00:00:00"),
+        courses: day.courses.map(c => ({ color: c.color, name: c.name, saved: true, rows: c.rows }))
+      }));
+      fromServer = true;
+      noteText = "管理PCに接続できないため、最後に取得した記録（" + formatSavedAt(cache.savedAt) + "時点）を表示しています。";
+    } else {
+      days = localHistoryDays();
+      noteText = "管理PCに接続できず、取得済みの記録もないため、このタブレット内の記録のみ表示しています。";
+    }
   }
   loading.remove();
 
   const note = document.createElement("p");
   note.className = "history-source-note";
-  note.textContent = fromServer
-    ? "管理PCに保存された記録を表示しています。"
-    : "管理PCに接続できないため、このタブレット内の記録のみ表示しています。";
+  note.textContent = noteText;
   box.appendChild(note);
 
   let showAll = false;
