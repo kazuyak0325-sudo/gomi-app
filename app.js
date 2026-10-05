@@ -956,6 +956,8 @@ function mkStepperBtn(label, onClick){
   return b;
 }
 
+const RED_NO_FROM = { "youpura_kiiro-higashi": 283, "youpura_murasaki-higashi": 223 };
+
 function render(filterText){
   const list = document.getElementById("list");
   list.innerHTML = "";
@@ -996,7 +998,7 @@ function render(filterText){
 
     const rowMain = document.createElement("div");
     rowMain.className = "row-main";
-    const noHighlight = (COURSE_ID === "youpura_kiiro-higashi" && s.no >= 283) ? " no-highlight" : "";
+    const noHighlight = (RED_NO_FROM[COURSE_ID] !== undefined && s.no >= RED_NO_FROM[COURSE_ID]) ? " no-highlight" : "";
     rowMain.innerHTML =
       '<span class="no' + noHighlight + '">' + s.no + '</span>' +
       '<span class="target">' + s.target + '<small>' + s.map + ' / ST' + s.st + '</small></span>' +
