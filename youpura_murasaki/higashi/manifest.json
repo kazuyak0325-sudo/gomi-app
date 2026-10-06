@@ -1,8 +1,8 @@
-﻿{
+{
   "name": "容プラ(紫)コース（東地区） 回収記録",
   "short_name": "容プラ(紫)コース（東地区）",
   "start_url": "./index.html",
-  "scope": "./",
+  "scope": "/gomi-app/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

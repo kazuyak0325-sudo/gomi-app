@@ -1,8 +1,8 @@
-﻿{
+{
   "name": "容プラ(黄)コース（金田地区） 回収記録",
   "short_name": "容プラ(黄)コース（金田地区）",
   "start_url": "./index.html",
-  "scope": "./",
+  "scope": "/gomi-app/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

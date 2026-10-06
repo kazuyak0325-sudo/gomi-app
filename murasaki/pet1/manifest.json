@@ -1,8 +1,8 @@
-﻿{
+{
   "name": "紫コース（ペット・ダンボール①） 回収記録",
   "short_name": "紫コース（ペット・ダンボール①）",
   "start_url": "./index.html",
-  "scope": "./",
+  "scope": "/gomi-app/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
