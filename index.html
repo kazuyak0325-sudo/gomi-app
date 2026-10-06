@@ -7,57 +7,104 @@
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 <meta name="theme-color" content="#333333">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
 <style>
   * { box-sizing: border-box; }
   body {
     margin: 0;
     font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: #f5f5f5;
-    color: #222;
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
+    background: #ffffff;
+    color: #221f28;
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 16px 20px;
   }
   h1 {
-    font-size: 18px;
-    margin: 0 0 6px;
-    text-align: center;
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.25;
+    max-width: 480px;
+    margin: 0 auto 14px;
+    padding-right: 56px;
   }
   .tagline {
-    text-align: center;
-    font-size: 14px;
+    max-width: 480px;
+    margin: 0 auto 16px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #fdecea;
+    text-align: left;
+    font-size: 15px;
     font-weight: 700;
-    color: #c0392b;
-    margin: 0 0 20px;
+    color: #b4341a;
   }
   .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     max-width: 480px;
     margin: 0 auto;
   }
+  /* 左の色帯は、インラインのbackground色を残したまま右側を白で塗りつぶして表現している。
+     管理ツールがこのaタグの文字列を書き換えるため、HTML側の構造は変えないこと。 */
   a.card {
+    position: relative;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    min-height: 60px;
+    padding: 8px 40px 8px 74px;
+    border: 1px solid #e6e2ec;
+    border-radius: 16px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #221f28;
+    font-weight: 700;
+    font-size: 19px;
+    background-image: linear-gradient(#ffffff, #ffffff) !important;
+    background-size: calc(100% - 58px) 100% !important;
+    background-position: right center !important;
+    background-repeat: no-repeat !important;
+  }
+  a.card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 58px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 24px 8px;
-    border-radius: 14px;
-    text-decoration: none;
-    color: #fff;
-    font-weight: 700;
-    font-size: 15px;
-    min-height: 100px;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 900;
   }
+  a.card::after {
+    content: "\203A";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a29cad;
+    font-size: 26px;
+    font-weight: 700;
+  }
+  a.card[href^="murasaki/"]::before { content: "紫"; }
+  a.card[href^="midori/"]::before { content: "緑"; }
+  a.card[href^="kiiro/"]::before { content: "黄"; }
+  a.card[href^="ao/"]::before { content: "青"; }
+  a.card[href^="kuro/"]::before { content: "黒"; }
+  a.card[href^="pink/"]::before { content: "ピ"; }
+  a.card[href^="youpura_murasaki/"]::before, a.card[href^="youpura_kiiro/"]::before { content: "容"; }
+  a.card[href^="kiiro/"] { background-color: #a87808 !important; }
+  a.card[href^="youpura_kiiro/"] { background-color: #8f6a05 !important; }
   a.card.disabled {
     opacity: 0.55;
     pointer-events: none;
   }
   .card small {
+    margin-left: 8px;
     font-weight: 400;
-    font-size: 11px;
-    opacity: 0.85;
+    font-size: 12px;
+    color: #6b6676;
   }
   .footer {
     max-width: 480px;
@@ -280,7 +327,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v2.8";
+const TOP_VERSION = "v2.9";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
