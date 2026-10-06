@@ -1,6 +1,6 @@
 ﻿const CACHE_NAME = "gomi-app-kiiro-kanada-1791185067";
 const CACHE_PREFIX = "gomi-app-kiiro-kanada-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791185067", "../../app.js?v=1791185067"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791254928", "../../app.js?v=1791254928"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

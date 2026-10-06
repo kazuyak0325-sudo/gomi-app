@@ -1,6 +1,6 @@
 ﻿const CACHE_NAME = "gomi-app-ao-pet2-1790222930";
 const CACHE_PREFIX = "gomi-app-ao-pet2-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1790222930", "../../app.js?v=1790222930", "../../pet-icon.png"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791254928", "../../app.js?v=1791254928", "../../pet-icon.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

@@ -569,3 +569,7 @@ main {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* ヘッダーの白い文字に影を付けて、明るい色（黄など）の上でも読みやすくする */
+header { text-shadow: 0 1px 3px rgba(0,0,0,0.45); }
+header .menu-panel, header .past-data-banner, header #filter { text-shadow: none; }
