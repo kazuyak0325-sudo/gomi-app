@@ -1162,11 +1162,17 @@ function getVehicleFor(dateStr){
 
 function refreshDateVersion(){
   const vehicle = getVehicleFor(todayDateStr());
-  document.getElementById("dateVersion").textContent =
-    formatDateJp(new Date()) + (vehicle ? "　車両 " + vehicle : "") + "　" + APP_VERSION;
+  const el = document.getElementById("dateVersion");
+  el.textContent = formatDateJp(new Date()) + "　";
+  const btn = document.createElement("button");
+  btn.className = "vehicle-change-btn";
+  btn.textContent = vehicle ? "車両 " + vehicle : "車両を入力";
+  btn.addEventListener("click", () => showVehicleModal(true));
+  el.appendChild(btn);
+  el.appendChild(document.createTextNode("　" + APP_VERSION));
 }
 
-function showVehicleModal(){
+function showVehicleModal(fromHeader){
   const today = todayDateStr();
   let initial = getVehicleFor(today);
   if (!initial) { try { initial = localStorage.getItem("gomi_last_vehicle") || ""; } catch (e) {} }
@@ -1189,7 +1195,10 @@ function showVehicleModal(){
   const cancelBtn = document.createElement("button");
   cancelBtn.className = "modal-btn-cancel";
   cancelBtn.textContent = "キャンセル";
-  cancelBtn.addEventListener("click", () => { location.href = "../../"; });
+  cancelBtn.addEventListener("click", () => {
+    if (fromHeader) overlay.remove();
+    else location.href = "../../";
+  });
   const okBtn = document.createElement("button");
   okBtn.className = "modal-btn-ok";
   okBtn.textContent = "決定";
