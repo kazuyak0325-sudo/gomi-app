@@ -145,6 +145,54 @@
   }
   .modal-btn-cancel { background: #eee; color: #333; }
   .modal-btn-ok { background: #4b2e83; color: #fff; }
+  .top-history-wrap { text-align: center; margin: 18px 0 4px; }
+  .top-history-btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    background: #4b2e83;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  }
+  .hist-box { max-width: 420px; max-height: 80vh; overflow-y: auto; }
+  .hist-title { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
+  .hist-note { font-size: 12px; color: #777; margin: 0 0 10px; }
+  .hist-list, .hist-detail {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    max-height: 55vh;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 8px;
+  }
+  .hist-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+  }
+  .hist-item:last-child { border-bottom: none; }
+  .hist-item-name { font-weight: 700; font-size: 15px; }
+  .hist-item-sub { font-size: 12px; color: #666; white-space: nowrap; }
+  .hist-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 6px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-row .h-target small { color: #777; font-size: 12px; }
+  .hist-row .h-time { font-weight: 700; }
+  .hist-row.h-violation { background: #fbe4e4; }
+  .hist-row .h-violation-count { color: #b4341a; font-size: 12px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -160,6 +208,9 @@
   <a class="card" style="background:#7c4dbd" href="youpura_murasaki/">容プラ(紫)コース</a>
   <a class="card" style="background:#c99a1e" href="youpura_kiiro/">容プラ(黄)コース</a>
 </div>
+<div class="top-history-wrap">
+  <button id="topHistoryBtn" class="top-history-btn">過去の記録</button>
+</div>
 <div class="footer">
   <div class="admin-addr-box">
     アップロード先
@@ -170,7 +221,7 @@
   <button id="updateBtn">最新版に更新する</button>
 </div>
 <script>
-const TOP_VERSION = "v1.7";
+const TOP_VERSION = "v1.8";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -358,6 +409,252 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
+
+const HIST_CACHE_KEY = "gomi_history_cache";
+
+function histArr(v){ return Array.isArray(v) ? v : (v ? [v] : []); }
+
+function histRow(r){
+  return {
+    no: r["番号"],
+    st: r["ST番号"],
+    map: r["地図番号"],
+    target: r["目標物"],
+    time: r["収集時刻"] || "",
+    violation: r["違反ゴミ個数"] || ""
+  };
+}
+
+function histCourseRank(name){
+  const s = histShortName(name);
+  if (s.includes("月・木")) return 0;
+  if (s.includes("火・金")) return 1;
+  return s.includes("②") ? 3 : 2;
+}
+
+function histShortName(name){
+  const m = String(name).match(/（(.+)）/);
+  return m ? m[1] : String(name);
+}
+
+function histDateLabel(dateStr){
+  const d = new Date(dateStr + "T00:00:00");
+  const w = ["日","月","火","水","木","金","土"];
+  return (d.getMonth() + 1) + "/" + d.getDate() + "（" + w[d.getDay()] + "）";
+}
+
+function formatHistSavedAt(iso){
+  const d = new Date(iso);
+  return (d.getMonth() + 1) + "/" + d.getDate() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+
+function saveHistCache(days){
+  try {
+    localStorage.setItem(HIST_CACHE_KEY, JSON.stringify({
+      savedAt: new Date().toISOString(),
+      days: days.map(d => ({
+        dateStr: d.dateStr,
+        courses: d.courses.map(c => ({ color: c.color, name: c.name, rows: c.rows }))
+      }))
+    }));
+  } catch (e) {}
+}
+
+function loadHistCache(){
+  try { return JSON.parse(localStorage.getItem(HIST_CACHE_KEY) || "null"); } catch (e) { return null; }
+}
+
+async function fetchAllHistory(){
+  const server = getAdminServer();
+  if (server) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    try {
+      const base = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "");
+      const res = await fetch(base + "/api/history", { signal: controller.signal });
+      const data = await res.json();
+      if (res.ok && !data.error) {
+        const days = histArr(data.days).map(day => ({
+          dateStr: day.date,
+          courses: histArr(day.courses).map(c => ({
+            color: c.color,
+            name: c.name,
+            rows: histArr(c.rows).map(histRow)
+          }))
+        }));
+        saveHistCache(days);
+        return { days, fromServer: true, savedAt: null };
+      }
+    } catch (e) {
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+  const cache = loadHistCache();
+  if (cache && cache.days) return { days: cache.days, fromServer: false, savedAt: cache.savedAt };
+  return null;
+}
+
+function buildHistGroups(days){
+  const map = new Map();
+  days.forEach(day => day.courses.forEach(c => {
+    if (!c.rows.some(r => r.time || r.violation)) return;
+    const key = c.color + "|" + c.name;
+    if (!map.has(key)) map.set(key, { color: c.color, name: c.name, days: [] });
+    map.get(key).days.push({ dateStr: day.dateStr, rows: c.rows });
+  }));
+  const groups = [...map.values()];
+  groups.forEach(g => g.days.sort((a, b) => (a.dateStr < b.dateStr ? 1 : -1)));
+  groups.sort((a, b) => {
+    if (a.color !== b.color) return a.color.localeCompare(b.color, "ja");
+    return histCourseRank(a.name) - histCourseRank(b.name);
+  });
+  return groups;
+}
+
+function histTitle(text){
+  const p = document.createElement("p");
+  p.className = "hist-title";
+  p.textContent = text;
+  return p;
+}
+
+function histNote(text){
+  const p = document.createElement("p");
+  p.className = "hist-note";
+  p.textContent = text;
+  return p;
+}
+
+function histActions(overlay, onBack){
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  if (onBack) {
+    const backBtn = document.createElement("button");
+    backBtn.className = "modal-btn-cancel";
+    backBtn.textContent = "戻る";
+    backBtn.addEventListener("click", onBack);
+    actions.appendChild(backBtn);
+  }
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "modal-btn-ok";
+  closeBtn.textContent = "閉じる";
+  closeBtn.addEventListener("click", () => overlay.remove());
+  actions.appendChild(closeBtn);
+  return actions;
+}
+
+function histListItem(nameText, subText, onClick){
+  const li = document.createElement("li");
+  li.className = "hist-item";
+  const name = document.createElement("span");
+  name.className = "hist-item-name";
+  name.textContent = nameText;
+  const sub = document.createElement("span");
+  sub.className = "hist-item-sub";
+  sub.textContent = subText;
+  li.appendChild(name);
+  li.appendChild(sub);
+  li.addEventListener("click", onClick);
+  return li;
+}
+
+function renderHistCourseList(overlay, box, result){
+  box.innerHTML = "";
+  box.appendChild(histTitle("過去の記録（直近14日）"));
+  box.appendChild(histNote(result.fromServer
+    ? "管理PCに保存された全コースの記録です。"
+    : "管理PCに接続できないため、最後に取得した記録（" + formatHistSavedAt(result.savedAt) + "時点）です。"));
+  const groups = buildHistGroups(result.days);
+  if (groups.length === 0) {
+    box.appendChild(histNote("過去14日分の記録はありません。"));
+  } else {
+    const ul = document.createElement("ul");
+    ul.className = "hist-list";
+    groups.forEach(g => {
+      ul.appendChild(histListItem(
+        g.color + "　" + histShortName(g.name),
+        g.days.length + "日分 ›",
+        () => renderHistCourseDays(overlay, box, result, g)
+      ));
+    });
+    box.appendChild(ul);
+  }
+  box.appendChild(histActions(overlay, null));
+}
+
+function renderHistCourseDays(overlay, box, result, group){
+  box.innerHTML = "";
+  box.appendChild(histTitle(group.color + "　" + histShortName(group.name)));
+  box.appendChild(histNote("日付をタップすると、ステーションごとの記録を見られます。"));
+  const ul = document.createElement("ul");
+  ul.className = "hist-list";
+  group.days.forEach(day => {
+    const done = day.rows.filter(r => r.time).length;
+    ul.appendChild(histListItem(
+      histDateLabel(day.dateStr),
+      done + " / " + day.rows.length + " 件完了 ›",
+      () => renderHistDayDetail(overlay, box, result, group, day)
+    ));
+  });
+  box.appendChild(ul);
+  box.appendChild(histActions(overlay, () => renderHistCourseList(overlay, box, result)));
+}
+
+function renderHistDayDetail(overlay, box, result, group, day){
+  box.innerHTML = "";
+  box.appendChild(histTitle(histDateLabel(day.dateStr) + "　" + histShortName(group.name)));
+  const ul = document.createElement("ul");
+  ul.className = "hist-detail";
+  day.rows.forEach(r => {
+    const li = document.createElement("li");
+    li.className = "hist-row" + (r.violation ? " h-violation" : "");
+    const target = document.createElement("span");
+    target.className = "h-target";
+    target.textContent = r.target || "";
+    target.appendChild(document.createElement("br"));
+    const small = document.createElement("small");
+    small.textContent = (r.map || "") + " / ST" + (r.st || "");
+    target.appendChild(small);
+    const time = document.createElement("span");
+    time.className = "h-time";
+    time.textContent = r.time || "--:--";
+    li.appendChild(target);
+    li.appendChild(time);
+    if (r.violation) {
+      const v = document.createElement("span");
+      v.className = "h-violation-count";
+      v.textContent = "違反" + r.violation + "個";
+      li.appendChild(v);
+    }
+    ul.appendChild(li);
+  });
+  box.appendChild(ul);
+  box.appendChild(histActions(overlay, () => renderHistCourseDays(overlay, box, result, group)));
+}
+
+async function openTopHistory(){
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box hist-box";
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  box.appendChild(histNote("読み込み中..."));
+
+  const result = await fetchAllHistory();
+  if (result === null) {
+    box.innerHTML = "";
+    box.appendChild(histTitle("過去の記録"));
+    box.appendChild(histNote("管理PCに接続できず、取得済みの記録もありません。アップロード先を設定して、事務所のWi-Fiでもう一度開いてください。"));
+    box.appendChild(histActions(overlay, null));
+    return;
+  }
+  renderHistCourseList(overlay, box, result);
+}
+
+document.getElementById("topHistoryBtn").addEventListener("click", openTopHistory);
 
 document.getElementById("updateBtn").addEventListener("click", async () => {
   const btn = document.getElementById("updateBtn");
