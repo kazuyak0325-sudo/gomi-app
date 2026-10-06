@@ -198,6 +198,19 @@
     font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   }
   .hist-filter-btn.on { background: #4b2e83; color: #fff; border-color: #4b2e83; }
+  .hist-delete-btn {
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #fbe4e4;
+    color: #b4341a;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  }
+  .modal-btn-danger { background: #b4341a; color: #fff; }
   .hist-box { max-width: 420px; max-height: 80vh; overflow-y: auto; }
   .hist-title { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
   .hist-note { font-size: 12px; color: #777; margin: 0 0 10px; }
@@ -267,7 +280,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v2.7";
+const TOP_VERSION = "v2.8";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -746,7 +759,73 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
   box.appendChild(filterBtn);
   box.appendChild(ul);
   renderRows();
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "hist-delete-btn";
+  deleteBtn.textContent = "この日の記録を削除";
+  deleteBtn.addEventListener("click", () => {
+    confirmHistDelete(() => deleteHistDay(overlay, box, result, group, day));
+  });
+  box.appendChild(deleteBtn);
   box.appendChild(histActions(overlay, onBack));
+}
+
+function confirmHistDelete(onOk){
+  const ov = document.createElement("div");
+  ov.className = "modal-overlay";
+  const bx = document.createElement("div");
+  bx.className = "modal-box";
+  bx.appendChild(histTitle("削除しますか？"));
+  bx.appendChild(histNote("管理PCのこの日の記録を削除します。削除したデータは「削除済み」フォルダに移動するので、必要なら手作業で戻せます。"));
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "キャンセル";
+  cancelBtn.addEventListener("click", () => ov.remove());
+  const okBtn = document.createElement("button");
+  okBtn.className = "modal-btn-danger";
+  okBtn.textContent = "削除する";
+  okBtn.addEventListener("click", () => {
+    ov.remove();
+    onOk();
+  });
+  actions.appendChild(cancelBtn);
+  actions.appendChild(okBtn);
+  bx.appendChild(actions);
+  ov.appendChild(bx);
+  document.body.appendChild(ov);
+}
+
+async function deleteHistDay(overlay, box, result, group, day){
+  const server = getAdminServer();
+  try {
+    if (!server) throw new Error("アップロード先が未設定です。");
+    const base = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "");
+    const res = await fetch(base + "/api/history-delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ colorLabel: group.color, courseName: group.name, date: day.dateStr })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || "削除できませんでした。");
+  } catch (e) {
+    box.appendChild(histNote("削除できませんでした：" + e.message));
+    return;
+  }
+  result.days = result.days
+    .map(d => d.dateStr !== day.dateStr ? d : { ...d, courses: d.courses.filter(c => !(c.color === group.color && c.name === group.name)) })
+    .filter(d => d.courses.length > 0);
+  pruneHistCache(group, day.dateStr);
+  renderHistColorList(overlay, box, result);
+}
+
+function pruneHistCache(group, dateStr){
+  const cache = loadHistCache();
+  if (!cache || !cache.days) return;
+  cache.days = cache.days
+    .map(d => d.dateStr !== dateStr ? d : { ...d, courses: d.courses.filter(c => !(c.color === group.color && c.name === group.name)) })
+    .filter(d => d.courses.length > 0);
+  try { localStorage.setItem(HIST_CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
 }
 function dateKeyOf(d){
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");

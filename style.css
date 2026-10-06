@@ -480,6 +480,7 @@ main {
   color: var(--text);
 }
 .vehicle-input { width: 100%; box-sizing: border-box; padding: 10px; margin: 0 0 14px; font-size: 28px; text-align: center; letter-spacing: 0.3em; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
+.modal-btn-danger { background: #b4341a; color: #fff; }
 .vehicle-change-btn {
   padding: 2px 8px;
   border: 1px dashed currentColor;
