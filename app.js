@@ -22,6 +22,12 @@ function formatDateJp(d){
 }
 document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + "　" + APP_VERSION;
 
+try {
+  const courseNames = JSON.parse(localStorage.getItem("gomi_course_names") || "{}");
+  courseNames[COURSE_ID] = COURSE_NAME;
+  localStorage.setItem("gomi_course_names", JSON.stringify(courseNames));
+} catch (e) {}
+
 (function(){
   const header = document.querySelector("header");
   if (header) {
