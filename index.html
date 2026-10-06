@@ -232,7 +232,9 @@
   }
   .hist-row:last-child { border-bottom: none; }
   .hist-row .h-target small { color: #777; font-size: 12px; }
+  .hist-row .h-time-wrap { display: flex; flex-direction: column; align-items: flex-end; }
   .hist-row .h-time { font-weight: 700; }
+  .hist-row .h-vehicle { font-size: 11px; color: #4b2e83; font-weight: 700; }
   .hist-row.h-violation { background: #fbe4e4; }
   .hist-row .h-violation-count { color: #b4341a; font-size: 12px; font-weight: 700; }
 </style>
@@ -265,7 +267,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v2.4";
+const TOP_VERSION = "v2.5";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -465,8 +467,14 @@ function histRow(r){
     map: r["地図番号"],
     target: r["目標物"],
     time: r["収集時刻"] || "",
-    violation: r["違反ゴミ個数"] || ""
+    violation: r["違反ゴミ個数"] || "",
+    vehicle: r["車両番号"] || ""
   };
+}
+
+function histVehiclesOf(rows){
+  const list = [...new Set(rows.map(r => r.vehicle).filter(v => v))];
+  return list.join("・");
 }
 
 function histCourseRank(name){
@@ -643,7 +651,9 @@ function renderHistColorDays(overlay, box, result, color, groups){
   ul.className = "hist-list";
   dates.forEach(dateStr => {
     const items = byDate.get(dateStr);
-    ul.appendChild(histListItem(histDateLabel(dateStr), items.length + "コース ›", () => {
+    const vehicles = histVehiclesOf(items.flatMap(it => it.day.rows));
+    const sub = (vehicles ? "車両 " + vehicles + "　" : "") + items.length + "コース ›";
+    ul.appendChild(histListItem(histDateLabel(dateStr), sub, () => {
       if (items.length === 1) {
         renderHistDayDetail(overlay, box, result, items[0].group, items[0].day,
           () => renderHistColorDays(overlay, box, result, color, groups));
@@ -663,9 +673,10 @@ function renderHistDateCourses(overlay, box, result, color, groups, dateStr, ite
   ul.className = "hist-list";
   items.forEach(({ group, day }) => {
     const done = day.rows.filter(r => r.time).length;
+    const vehicles = histVehiclesOf(day.rows);
     ul.appendChild(histListItem(
       histShortName(group.name),
-      done + " / " + day.rows.length + " 件完了 ›",
+      (vehicles ? "車両 " + vehicles + "　" : "") + done + " / " + day.rows.length + " 件完了 ›",
       () => renderHistDayDetail(overlay, box, result, group, day,
         () => renderHistDateCourses(overlay, box, result, color, groups, dateStr, items))
     ));
@@ -704,11 +715,20 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
       const small = document.createElement("small");
       small.textContent = (r.map || "") + " / ST" + (r.st || "");
       target.appendChild(small);
+      const timeWrap = document.createElement("span");
+      timeWrap.className = "h-time-wrap";
+      if (r.vehicle) {
+        const veh = document.createElement("span");
+        veh.className = "h-vehicle";
+        veh.textContent = "車両 " + r.vehicle;
+        timeWrap.appendChild(veh);
+      }
       const time = document.createElement("span");
       time.className = "h-time";
       time.textContent = r.time || "--:--";
+      timeWrap.appendChild(time);
       li.appendChild(target);
-      li.appendChild(time);
+      li.appendChild(timeWrap);
       if (r.violation) {
         const v = document.createElement("span");
         v.className = "h-violation-count";
