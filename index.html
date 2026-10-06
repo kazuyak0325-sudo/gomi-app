@@ -177,14 +177,6 @@
     cursor: pointer;
   }
   .hist-item:last-child { border-bottom: none; }
-  .hist-color-head {
-    padding: 8px 12px;
-    background: #f3f0f8;
-    color: #4b2e83;
-    font-size: 13px;
-    font-weight: 700;
-    border-bottom: 1px solid #eee;
-  }
   .hist-item-name { font-weight: 700; font-size: 15px; }
   .hist-item-sub { font-size: 12px; color: #666; white-space: nowrap; }
   .hist-row {
@@ -229,7 +221,7 @@
   <button id="updateBtn">最新版に更新する</button>
 </div>
 <script>
-const TOP_VERSION = "v1.9";
+const TOP_VERSION = "v2.0";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -567,7 +559,7 @@ function histListItem(nameText, subText, onClick){
   return li;
 }
 
-function renderHistCourseList(overlay, box, result){
+function renderHistColorList(overlay, box, result){
   box.innerHTML = "";
   box.appendChild(histTitle("過去の記録（直近14日）"));
   box.appendChild(histNote(result.fromServer
@@ -577,49 +569,70 @@ function renderHistCourseList(overlay, box, result){
   if (groups.length === 0) {
     box.appendChild(histNote("過去14日分の記録はありません。"));
   } else {
+    const byColor = new Map();
+    groups.forEach(g => {
+      if (!byColor.has(g.color)) byColor.set(g.color, []);
+      byColor.get(g.color).push(g);
+    });
     const ul = document.createElement("ul");
     ul.className = "hist-list";
-    let currentColor = null;
-    groups.forEach(g => {
-      if (g.color !== currentColor) {
-        currentColor = g.color;
-        const head = document.createElement("li");
-        head.className = "hist-color-head";
-        head.textContent = g.color;
-        ul.appendChild(head);
-      }
-      ul.appendChild(histListItem(
-        histShortName(g.name),
-        g.days.length + "日分 ›",
-        () => renderHistCourseDays(overlay, box, result, g)
-      ));
+    byColor.forEach((gs, color) => {
+      const dayCount = new Set(gs.flatMap(g => g.days.map(d => d.dateStr))).size;
+      ul.appendChild(histListItem(color, dayCount + "日分 ›", () => renderHistColorDays(overlay, box, result, color, gs)));
     });
     box.appendChild(ul);
   }
   box.appendChild(histActions(overlay, null));
 }
 
-function renderHistCourseDays(overlay, box, result, group){
+function renderHistColorDays(overlay, box, result, color, groups){
   box.innerHTML = "";
-  box.appendChild(histTitle(group.color + "　" + histShortName(group.name)));
-  box.appendChild(histNote("日付をタップすると、ステーションごとの記録を見られます。"));
+  box.appendChild(histTitle(color));
+  box.appendChild(histNote("日付をタップすると、その日の記録を見られます。"));
+  const byDate = new Map();
+  groups.forEach(g => g.days.forEach(day => {
+    if (!byDate.has(day.dateStr)) byDate.set(day.dateStr, []);
+    byDate.get(day.dateStr).push({ group: g, day });
+  }));
+  const dates = [...byDate.keys()].sort((a, b) => (a < b ? 1 : -1));
   const ul = document.createElement("ul");
   ul.className = "hist-list";
-  group.days.forEach(day => {
+  dates.forEach(dateStr => {
+    const items = byDate.get(dateStr);
+    ul.appendChild(histListItem(histDateLabel(dateStr), items.length + "コース ›", () => {
+      if (items.length === 1) {
+        renderHistDayDetail(overlay, box, result, items[0].group, items[0].day,
+          () => renderHistColorDays(overlay, box, result, color, groups));
+      } else {
+        renderHistDateCourses(overlay, box, result, color, groups, dateStr, items);
+      }
+    }));
+  });
+  box.appendChild(ul);
+  box.appendChild(histActions(overlay, () => renderHistColorList(overlay, box, result)));
+}
+
+function renderHistDateCourses(overlay, box, result, color, groups, dateStr, items){
+  box.innerHTML = "";
+  box.appendChild(histTitle(histDateLabel(dateStr) + "　" + color));
+  const ul = document.createElement("ul");
+  ul.className = "hist-list";
+  items.forEach(({ group, day }) => {
     const done = day.rows.filter(r => r.time).length;
     ul.appendChild(histListItem(
-      histDateLabel(day.dateStr),
+      histShortName(group.name),
       done + " / " + day.rows.length + " 件完了 ›",
-      () => renderHistDayDetail(overlay, box, result, group, day)
+      () => renderHistDayDetail(overlay, box, result, group, day,
+        () => renderHistDateCourses(overlay, box, result, color, groups, dateStr, items))
     ));
   });
   box.appendChild(ul);
-  box.appendChild(histActions(overlay, () => renderHistCourseList(overlay, box, result)));
+  box.appendChild(histActions(overlay, () => renderHistColorDays(overlay, box, result, color, groups)));
 }
 
-function renderHistDayDetail(overlay, box, result, group, day){
+function renderHistDayDetail(overlay, box, result, group, day, onBack){
   box.innerHTML = "";
-  box.appendChild(histTitle(histDateLabel(day.dateStr) + "　" + histShortName(group.name)));
+  box.appendChild(histTitle(histDateLabel(day.dateStr) + "　" + group.color + " " + histShortName(group.name)));
   const ul = document.createElement("ul");
   ul.className = "hist-detail";
   day.rows.forEach(r => {
@@ -646,9 +659,8 @@ function renderHistDayDetail(overlay, box, result, group, day){
     ul.appendChild(li);
   });
   box.appendChild(ul);
-  box.appendChild(histActions(overlay, () => renderHistCourseDays(overlay, box, result, group)));
+  box.appendChild(histActions(overlay, onBack));
 }
-
 async function openTopHistory(){
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
@@ -667,7 +679,7 @@ async function openTopHistory(){
     box.appendChild(histActions(overlay, null));
     return;
   }
-  renderHistCourseList(overlay, box, result);
+  renderHistColorList(overlay, box, result);
 }
 
 document.getElementById("topHistoryBtn").addEventListener("click", openTopHistory);
