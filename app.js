@@ -427,30 +427,35 @@ function save(){
   try {
     localStorage.setItem(todayKey(), JSON.stringify(records));
   } catch (e) {}
+  syncStationVehicles();
 }
 
 function saveViolations(){
   try {
     localStorage.setItem(todayViolationKey(), JSON.stringify(violations));
   } catch (e) {}
+  syncStationVehicles();
 }
 
 function saveCardboardViolations(){
   try {
     localStorage.setItem(cardboardViolationKeyFor(todayDateStr()), JSON.stringify(cardboardViolations));
   } catch (e) {}
+  syncStationVehicles();
 }
 
 function saveCardboard(){
   try {
     localStorage.setItem(cardboardKeyFor(todayDateStr()), JSON.stringify(cardboard));
   } catch (e) {}
+  syncStationVehicles();
 }
 
 function saveCardboardTimes(){
   try {
     localStorage.setItem(cardboardTimeKeyFor(todayDateStr()), JSON.stringify(cardboardTimes));
   } catch (e) {}
+  syncStationVehicles();
 }
 
 function toggleCardboard(s){
@@ -958,7 +963,9 @@ function csvField(v){
   return s;
 }
 
-function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj, cardboardViolationsObj, vehicleNo){
+function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj, cardboardViolationsObj, dateStr){
+  const stationVehicles = getStationVehicles(dateStr);
+  const fallbackVehicle = getVehicleFor(dateStr);
   const headers = ["番号", "ST番号", "地図番号", "目標物", "収集時刻", "違反ゴミ個数"];
   if (IS_CARDBOARD_COURSE) headers.push("ダンボールあり", "ダンボール回収時刻", "ダンボール違反ゴミ個数");
   headers.push("車両番号");
@@ -980,14 +987,14 @@ function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj,
       row.push(cv ? String(cv.count) : "");
     }
     const hasRecord = row.slice(4).some(v => v !== "");
-    row.push(hasRecord && vehicleNo ? vehicleNo : "");
+    row.push(hasRecord ? (stationVehicles[s.st] || fallbackVehicle) : "");
     rows.push(row);
   });
   return "﻿" + rows.map(row => row.map(csvField).join(",")).join("\r\n");
 }
 
 function buildCsv(){
-  return buildCsvFor(records, violations, cardboard, cardboardTimes, cardboardViolations, getVehicleFor(todayDateStr()));
+  return buildCsvFor(records, violations, cardboard, cardboardTimes, cardboardViolations, todayDateStr());
 }
 
 function downloadCsvFallback(csv, dateStr, reasonMessage){
@@ -1110,7 +1117,7 @@ function checkUnsentPastData(){
       const cbs = JSON.parse(localStorage.getItem(cardboardKeyFor(dateStr)) || "{}");
       const cbTimes = JSON.parse(localStorage.getItem(cardboardTimeKeyFor(dateStr)) || "{}");
       const cbViols = JSON.parse(localStorage.getItem(cardboardViolationKeyFor(dateStr)) || "{}");
-      await uploadOrDownload(buildCsvFor(recs, viols, cbs, cbTimes, cbViols, getVehicleFor(dateStr)), dateStr);
+      await uploadOrDownload(buildCsvFor(recs, viols, cbs, cbTimes, cbViols, dateStr), dateStr);
     }
     banner.remove();
   });
@@ -1127,6 +1134,26 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+function stationVehicleKey(dateStr){ return "gomi_sveh_" + COURSE_ID + "_" + dateStr; }
+
+function getStationVehicles(dateStr){
+  try { return JSON.parse(localStorage.getItem(stationVehicleKey(dateStr)) || "{}"); } catch (e) { return {}; }
+}
+
+function syncStationVehicles(){
+  const today = todayDateStr();
+  const current = getVehicleFor(today);
+  const map = getStationVehicles(today);
+  let changed = false;
+  stations.forEach(s => {
+    const hasRecord = !!(records[s.st] || violations[s.st] || cardboard[s.st] || cardboardTimes[s.st] || cardboardViolations[s.st]);
+    if (hasRecord && !map[s.st] && current) { map[s.st] = current; changed = true; }
+    if (!hasRecord && map[s.st]) { delete map[s.st]; changed = true; }
+  });
+  if (changed) {
+    try { localStorage.setItem(stationVehicleKey(today), JSON.stringify(map)); } catch (e) {}
+  }
+}
 function vehicleKeyFor(dateStr){ return "gomi_veh_" + COURSE_ID + "_" + dateStr; }
 
 function getVehicleFor(dateStr){
