@@ -177,6 +177,14 @@
     cursor: pointer;
   }
   .hist-item:last-child { border-bottom: none; }
+  .hist-color-head {
+    padding: 8px 12px;
+    background: #f3f0f8;
+    color: #4b2e83;
+    font-size: 13px;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+  }
   .hist-item-name { font-weight: 700; font-size: 15px; }
   .hist-item-sub { font-size: 12px; color: #666; white-space: nowrap; }
   .hist-row {
@@ -221,7 +229,7 @@
   <button id="updateBtn">最新版に更新する</button>
 </div>
 <script>
-const TOP_VERSION = "v1.8";
+const TOP_VERSION = "v1.9";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -571,9 +579,17 @@ function renderHistCourseList(overlay, box, result){
   } else {
     const ul = document.createElement("ul");
     ul.className = "hist-list";
+    let currentColor = null;
     groups.forEach(g => {
+      if (g.color !== currentColor) {
+        currentColor = g.color;
+        const head = document.createElement("li");
+        head.className = "hist-color-head";
+        head.textContent = g.color;
+        ul.appendChild(head);
+      }
       ul.appendChild(histListItem(
-        g.color + "　" + histShortName(g.name),
+        histShortName(g.name),
         g.days.length + "日分 ›",
         () => renderHistCourseDays(overlay, box, result, g)
       ));
