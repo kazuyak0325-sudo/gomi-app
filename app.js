@@ -20,7 +20,7 @@ function formatDateJp(d){
   const days = ["日","月","火","水","木","金","土"];
   return d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日(" + days[d.getDay()] + ")";
 }
-document.getElementById("dateVersion").textContent = formatDateJp(new Date()) + "　" + APP_VERSION;
+refreshDateVersion();
 
 try {
   const courseNames = JSON.parse(localStorage.getItem("gomi_course_names") || "{}");
@@ -958,9 +958,10 @@ function csvField(v){
   return s;
 }
 
-function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj, cardboardViolationsObj){
+function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj, cardboardViolationsObj, vehicleNo){
   const headers = ["番号", "ST番号", "地図番号", "目標物", "収集時刻", "違反ゴミ個数"];
   if (IS_CARDBOARD_COURSE) headers.push("ダンボールあり", "ダンボール回収時刻", "ダンボール違反ゴミ個数");
+  headers.push("車両番号");
   const rows = [headers];
   stations.forEach(s => {
     const v = violationsObj[s.st];
@@ -978,13 +979,15 @@ function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj,
       row.push((cardboardTimesObj && cardboardTimesObj[s.st]) || "");
       row.push(cv ? String(cv.count) : "");
     }
+    const hasRecord = row.slice(4).some(v => v !== "");
+    row.push(hasRecord && vehicleNo ? vehicleNo : "");
     rows.push(row);
   });
   return "﻿" + rows.map(row => row.map(csvField).join(",")).join("\r\n");
 }
 
 function buildCsv(){
-  return buildCsvFor(records, violations, cardboard, cardboardTimes, cardboardViolations);
+  return buildCsvFor(records, violations, cardboard, cardboardTimes, cardboardViolations, getVehicleFor(todayDateStr()));
 }
 
 function downloadCsvFallback(csv, dateStr, reasonMessage){
@@ -1107,7 +1110,7 @@ function checkUnsentPastData(){
       const cbs = JSON.parse(localStorage.getItem(cardboardKeyFor(dateStr)) || "{}");
       const cbTimes = JSON.parse(localStorage.getItem(cardboardTimeKeyFor(dateStr)) || "{}");
       const cbViols = JSON.parse(localStorage.getItem(cardboardViolationKeyFor(dateStr)) || "{}");
-      await uploadOrDownload(buildCsvFor(recs, viols, cbs, cbTimes, cbViols), dateStr);
+      await uploadOrDownload(buildCsvFor(recs, viols, cbs, cbTimes, cbViols, getVehicleFor(dateStr)), dateStr);
     }
     banner.remove();
   });
@@ -1123,3 +1126,69 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 }
+
+function vehicleKeyFor(dateStr){ return "gomi_veh_" + COURSE_ID + "_" + dateStr; }
+
+function getVehicleFor(dateStr){
+  try { return localStorage.getItem(vehicleKeyFor(dateStr)) || ""; } catch (e) { return ""; }
+}
+
+function refreshDateVersion(){
+  const vehicle = getVehicleFor(todayDateStr());
+  document.getElementById("dateVersion").textContent =
+    formatDateJp(new Date()) + (vehicle ? "　車両 " + vehicle : "") + "　" + APP_VERSION;
+}
+
+function showVehicleModal(){
+  const today = todayDateStr();
+  let initial = getVehicleFor(today);
+  if (!initial) { try { initial = localStorage.getItem("gomi_last_vehicle") || ""; } catch (e) {} }
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  const title = document.createElement("p");
+  title.textContent = "車両番号を入力してください（数字4桁まで）";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.inputMode = "numeric";
+  input.pattern = "[0-9]*";
+  input.maxLength = 4;
+  input.value = initial;
+  input.className = "vehicle-input";
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "キャンセル";
+  cancelBtn.addEventListener("click", () => { location.href = "../../"; });
+  const okBtn = document.createElement("button");
+  okBtn.className = "modal-btn-ok";
+  okBtn.textContent = "決定";
+  okBtn.addEventListener("click", () => {
+    const v = input.value.trim();
+    if (!/^\d{1,4}$/.test(v)) {
+      showToast("車両番号は数字1〜4桁で入力してください。");
+      return;
+    }
+    const padded = v.padStart(4, "0");
+    try {
+      localStorage.setItem(vehicleKeyFor(today), padded);
+      localStorage.setItem("gomi_last_vehicle", padded);
+    } catch (e) {}
+    refreshDateVersion();
+    overlay.remove();
+  });
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") okBtn.click(); });
+  actions.appendChild(cancelBtn);
+  actions.appendChild(okBtn);
+  box.appendChild(title);
+  box.appendChild(input);
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  input.focus();
+}
+
+if (stations.length > 0) showVehicleModal();

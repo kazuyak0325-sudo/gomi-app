@@ -479,6 +479,7 @@ main {
   background: var(--border);
   color: var(--text);
 }
+.vehicle-input { width: 100%; box-sizing: border-box; padding: 10px; margin: 0 0 14px; font-size: 28px; text-align: center; letter-spacing: 0.3em; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
 .camera-overlay { padding: 0; background: #000; }
 .camera-box {
   background: #000;
