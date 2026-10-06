@@ -145,17 +145,57 @@
   }
   .modal-btn-cancel { background: #eee; color: #333; }
   .modal-btn-ok { background: #4b2e83; color: #fff; }
-  .top-history-wrap { text-align: center; margin: 18px 0 4px; }
-  .top-history-btn {
-    padding: 12px 28px;
-    border: none;
+  .top-menu-btn {
+    position: fixed;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    right: 12px;
+    width: 42px;
+    height: 42px;
+    border: 1px solid #ccc;
+    border-radius: 9px;
+    background: #fff;
+    font-size: 20px;
+    z-index: 60;
+  }
+  .top-menu-panel {
+    position: fixed;
+    top: calc(62px + env(safe-area-inset-top, 0px));
+    right: 12px;
+    min-width: 170px;
+    background: #fff;
+    border: 1px solid #ddd;
     border-radius: 10px;
-    background: #4b2e83;
-    color: #fff;
+    padding: 6px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    display: none;
+    z-index: 60;
+  }
+  .top-menu-panel.open { display: block; }
+  .top-menu-panel button {
+    display: block;
+    width: 100%;
+    padding: 11px 12px;
+    border: none;
+    border-radius: 7px;
+    background: none;
+    text-align: left;
     font-size: 15px;
     font-weight: 700;
     font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   }
+  .top-menu-panel button:active { background: #f3f0f8; }
+  .hist-filter-btn {
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #f5f5f5;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  }
+  .hist-filter-btn.on { background: #4b2e83; color: #fff; border-color: #4b2e83; }
   .hist-box { max-width: 420px; max-height: 80vh; overflow-y: auto; }
   .hist-title { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
   .hist-note { font-size: 12px; color: #777; margin: 0 0 10px; }
@@ -196,6 +236,10 @@
 </style>
 </head>
 <body>
+<button id="topMenuBtn" class="top-menu-btn" aria-label="メニュー">☰</button>
+<div id="topMenuPanel" class="top-menu-panel">
+  <button id="topHistoryBtn">過去の記録</button>
+</div>
 <h1>コースを選んでください</h1>
 <p class="tagline">今日も一日安全運転・安全作業！</p>
 <div class="grid">
@@ -208,9 +252,6 @@
   <a class="card" style="background:#7c4dbd" href="youpura_murasaki/">容プラ(紫)コース</a>
   <a class="card" style="background:#c99a1e" href="youpura_kiiro/">容プラ(黄)コース</a>
 </div>
-<div class="top-history-wrap">
-  <button id="topHistoryBtn" class="top-history-btn">過去の記録</button>
-</div>
 <div class="footer">
   <div class="admin-addr-box">
     アップロード先
@@ -221,7 +262,7 @@
   <button id="updateBtn">最新版に更新する</button>
 </div>
 <script>
-const TOP_VERSION = "v2.1";
+const TOP_VERSION = "v2.2";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -633,32 +674,55 @@ function renderHistDateCourses(overlay, box, result, color, groups, dateStr, ite
 function renderHistDayDetail(overlay, box, result, group, day, onBack){
   box.innerHTML = "";
   box.appendChild(histTitle(histDateLabel(day.dateStr) + "　" + group.color + " " + histShortName(group.name)));
+  let onlyViolation = false;
+  const filterBtn = document.createElement("button");
+  filterBtn.className = "hist-filter-btn";
   const ul = document.createElement("ul");
   ul.className = "hist-detail";
-  day.rows.forEach(r => {
-    const li = document.createElement("li");
-    li.className = "hist-row" + (r.violation ? " h-violation" : "");
-    const target = document.createElement("span");
-    target.className = "h-target";
-    target.textContent = r.target || "";
-    target.appendChild(document.createElement("br"));
-    const small = document.createElement("small");
-    small.textContent = (r.map || "") + " / ST" + (r.st || "");
-    target.appendChild(small);
-    const time = document.createElement("span");
-    time.className = "h-time";
-    time.textContent = r.time || "--:--";
-    li.appendChild(target);
-    li.appendChild(time);
-    if (r.violation) {
-      const v = document.createElement("span");
-      v.className = "h-violation-count";
-      v.textContent = "違反" + r.violation + "個";
-      li.appendChild(v);
+
+  function renderRows(){
+    filterBtn.textContent = onlyViolation ? "すべて表示に戻す" : "違反ステーションだけ表示";
+    filterBtn.classList.toggle("on", onlyViolation);
+    ul.innerHTML = "";
+    const rows = day.rows.filter(r => !onlyViolation || r.violation);
+    if (rows.length === 0) {
+      const empty = document.createElement("li");
+      empty.className = "hist-row";
+      empty.textContent = "違反ステーションはありません。";
+      ul.appendChild(empty);
     }
-    ul.appendChild(li);
+    rows.forEach(r => {
+      const li = document.createElement("li");
+      li.className = "hist-row" + (r.violation ? " h-violation" : "");
+      const target = document.createElement("span");
+      target.className = "h-target";
+      target.textContent = r.target || "";
+      target.appendChild(document.createElement("br"));
+      const small = document.createElement("small");
+      small.textContent = (r.map || "") + " / ST" + (r.st || "");
+      target.appendChild(small);
+      const time = document.createElement("span");
+      time.className = "h-time";
+      time.textContent = r.time || "--:--";
+      li.appendChild(target);
+      li.appendChild(time);
+      if (r.violation) {
+        const v = document.createElement("span");
+        v.className = "h-violation-count";
+        v.textContent = "違反" + r.violation + "個";
+        li.appendChild(v);
+      }
+      ul.appendChild(li);
+    });
+  }
+
+  filterBtn.addEventListener("click", () => {
+    onlyViolation = !onlyViolation;
+    renderRows();
   });
+  box.appendChild(filterBtn);
   box.appendChild(ul);
+  renderRows();
   box.appendChild(histActions(overlay, onBack));
 }
 async function openTopHistory(){
@@ -682,7 +746,19 @@ async function openTopHistory(){
   renderHistColorList(overlay, box, result);
 }
 
-document.getElementById("topHistoryBtn").addEventListener("click", openTopHistory);
+const topMenuBtn = document.getElementById("topMenuBtn");
+const topMenuPanel = document.getElementById("topMenuPanel");
+topMenuBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  topMenuPanel.classList.toggle("open");
+});
+document.addEventListener("click", (e) => {
+  if (!topMenuPanel.contains(e.target) && e.target !== topMenuBtn) topMenuPanel.classList.remove("open");
+});
+document.getElementById("topHistoryBtn").addEventListener("click", () => {
+  topMenuPanel.classList.remove("open");
+  openTopHistory();
+});
 
 document.getElementById("updateBtn").addEventListener("click", async () => {
   const btn = document.getElementById("updateBtn");
