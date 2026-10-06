@@ -89,9 +89,7 @@
     font-size: 26px;
     font-weight: 700;
   }
-  a.card[href^="kiiro/"] { background-color: #ffc83d !important; }
   a.card .mark { text-shadow: 0 1px 3px rgba(0,0,0,0.45); }
-  a.card[href^="youpura_kiiro/"] { background-color: #8f6a05 !important; }
   a.card.disabled {
     opacity: 0.55;
     pointer-events: none;
@@ -336,18 +334,18 @@
 <div class="grid">
   <a class="card" style="background:#4b2e83" href="murasaki/"><span class="mark">紫</span>コース</a>
   <a class="card" style="background:#2e7d32" href="midori/"><span class="mark">緑</span>コース</a>
-  <a class="card" style="background:#b8860b" href="kiiro/"><span class="mark">黄</span>コース</a>
+  <a class="card" style="background:#ffc83d" href="kiiro/"><span class="mark">黄</span>コース</a>
   <a class="card" style="background:#1565c0" href="ao/"><span class="mark">青</span>コース</a>
   <a class="card" style="background:#2b2b2b" href="kuro/"><span class="mark">黒</span>コース</a>
-  <a class="card" style="background:#d6336c" href="pink/"><span class="mark long">ピンク</span>コース</a>
+  <a class="card" style="background:#d6336c" href="pink/"><span class="mark vert">ピンク</span>コース</a>
   <a class="card" style="background:#7c4dbd" href="youpura_murasaki/"><span class="mark vert">容プラ</span>コース</a>
-  <a class="card" style="background:#c99a1e" href="youpura_kiiro/"><span class="mark vert">容プラ</span>コース</a>
+  <a class="card" style="background:#ffc83d" href="youpura_kiiro/"><span class="mark vert">容プラ</span>コース</a>
 </div>
 <div class="footer">
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v3.1";
+const TOP_VERSION = "v3.2";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
