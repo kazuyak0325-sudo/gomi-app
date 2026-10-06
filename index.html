@@ -63,7 +63,7 @@
     background-position: right center !important;
     background-repeat: no-repeat !important;
   }
-  a.card::before {
+  a.card .mark {
     content: "";
     position: absolute;
     left: 0;
@@ -77,6 +77,8 @@
     font-size: 22px;
     font-weight: 900;
   }
+  a.card .mark.long { font-size: 15px; letter-spacing: -0.02em; }
+  a.card .mark.vert { writing-mode: vertical-rl; text-orientation: upright; font-size: 16px; line-height: 1; }
   a.card::after {
     content: "\203A";
     position: absolute;
@@ -87,14 +89,8 @@
     font-size: 26px;
     font-weight: 700;
   }
-  a.card[href^="murasaki/"]::before { content: "紫"; }
-  a.card[href^="midori/"]::before { content: "緑"; }
-  a.card[href^="kiiro/"]::before { content: "黄"; }
-  a.card[href^="ao/"]::before { content: "青"; }
-  a.card[href^="kuro/"]::before { content: "黒"; }
-  a.card[href^="pink/"]::before { content: "ピ"; }
-  a.card[href^="youpura_murasaki/"]::before, a.card[href^="youpura_kiiro/"]::before { content: "容"; }
-  a.card[href^="kiiro/"] { background-color: #a87808 !important; }
+  a.card[href^="kiiro/"] { background-color: #ffc83d !important; }
+  a.card .mark { text-shadow: 0 1px 3px rgba(0,0,0,0.45); }
   a.card[href^="youpura_kiiro/"] { background-color: #8f6a05 !important; }
   a.card.disabled {
     opacity: 0.55;
@@ -315,7 +311,9 @@
       line-height: 1.3;
       background-size: calc(100% - 66px) 100% !important;
     }
-    a.card::before { width: 66px; font-size: 28px; }
+    a.card .mark { width: 66px; font-size: 28px; }
+    a.card .mark.long { font-size: 17px; }
+    a.card .mark.vert { font-size: 24px; }
     a.card::after { right: 12px; }
     .footer { max-width: 1100px; margin-top: 16px; }
   }
@@ -336,20 +334,20 @@
 <h1>コースを選んでください</h1>
 <p class="tagline">今日も一日安全運転・安全作業！</p>
 <div class="grid">
-  <a class="card" style="background:#4b2e83" href="murasaki/">紫コース</a>
-  <a class="card" style="background:#2e7d32" href="midori/">緑コース</a>
-  <a class="card" style="background:#b8860b" href="kiiro/">黄コース</a>
-  <a class="card" style="background:#1565c0" href="ao/">青コース</a>
-  <a class="card" style="background:#2b2b2b" href="kuro/">黒コース</a>
-  <a class="card" style="background:#d6336c" href="pink/">ピンクコース</a>
-  <a class="card" style="background:#7c4dbd" href="youpura_murasaki/">容プラ(紫)コース</a>
-  <a class="card" style="background:#c99a1e" href="youpura_kiiro/">容プラ(黄)コース</a>
+  <a class="card" style="background:#4b2e83" href="murasaki/"><span class="mark">紫</span>コース</a>
+  <a class="card" style="background:#2e7d32" href="midori/"><span class="mark">緑</span>コース</a>
+  <a class="card" style="background:#b8860b" href="kiiro/"><span class="mark">黄</span>コース</a>
+  <a class="card" style="background:#1565c0" href="ao/"><span class="mark">青</span>コース</a>
+  <a class="card" style="background:#2b2b2b" href="kuro/"><span class="mark">黒</span>コース</a>
+  <a class="card" style="background:#d6336c" href="pink/"><span class="mark long">ピンク</span>コース</a>
+  <a class="card" style="background:#7c4dbd" href="youpura_murasaki/"><span class="mark vert">容プラ</span>コース</a>
+  <a class="card" style="background:#c99a1e" href="youpura_kiiro/"><span class="mark vert">容プラ</span>コース</a>
 </div>
 <div class="footer">
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v3.0";
+const TOP_VERSION = "v3.1";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
