@@ -297,6 +297,28 @@
   .hist-row .h-vehicle { font-size: 11px; color: #4b2e83; font-weight: 700; }
   .hist-row.h-violation { background: #fbe4e4; }
   .hist-row .h-violation-count { color: #b4341a; font-size: 12px; font-weight: 700; }
+  /* 横向き（iPad）：コースを4列×2段のタイルにして、画面の幅を使い切る */
+  @media (orientation: landscape) and (min-width: 700px) {
+    body { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
+    h1 { max-width: 1100px; font-size: 28px; margin-bottom: 10px; }
+    .tagline { max-width: 1100px; margin-bottom: 14px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 1100px;
+    }
+    a.card {
+      min-height: 120px;
+      padding: 10px 34px 10px 82px;
+      font-size: 21px;
+      line-height: 1.3;
+      background-size: calc(100% - 66px) 100% !important;
+    }
+    a.card::before { width: 66px; font-size: 28px; }
+    a.card::after { right: 12px; }
+    .footer { max-width: 1100px; margin-top: 16px; }
+  }
 </style>
 </head>
 <body>
@@ -327,7 +349,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v2.9";
+const TOP_VERSION = "v3.0";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
