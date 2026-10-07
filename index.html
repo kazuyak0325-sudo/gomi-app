@@ -239,12 +239,49 @@
     font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   }
   .hist-filter-btn.on { background: #4b2e83; color: #fff; border-color: #4b2e83; }
+  .hist-delete-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line, #e4e0ec);
+  }
+  .hist-undo-toast {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    max-width: 400px;
+    margin: 0 auto;
+    background: #2a2630;
+    color: #fff;
+    padding: 12px 14px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    z-index: 200;
+  }
+  .hist-undo-toast button {
+    flex: none;
+    background: #fff;
+    color: #2a2630;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: 700;
+    font-size: 13px;
+  }
   .hist-delete-btn {
-    width: 100%;
-    margin: 0 0 10px;
-    padding: 10px;
+    width: auto;
+    margin: 0;
+    padding: 8px 16px;
     border: none;
     border-radius: 8px;
+    font-size: 12px;
     background: #fbe4e4;
     color: #b4341a;
     font-size: 14px;
@@ -345,7 +382,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v3.8";
+const TOP_VERSION = "v3.9";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -828,13 +865,16 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
   box.appendChild(filterBtn);
   box.appendChild(ul);
   renderRows();
+  const deleteWrap = document.createElement("div");
+  deleteWrap.className = "hist-delete-wrap";
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "hist-delete-btn";
   deleteBtn.textContent = "この日の記録を削除";
   deleteBtn.addEventListener("click", () => {
     confirmHistDelete(() => deleteHistDay(overlay, box, result, group, day));
   });
-  box.appendChild(deleteBtn);
+  deleteWrap.appendChild(deleteBtn);
+  box.appendChild(deleteWrap);
   box.appendChild(histActions(overlay, onBack));
 }
 
@@ -865,17 +905,41 @@ function confirmHistDelete(onOk){
   document.body.appendChild(ov);
 }
 
+function showHistToast(message, actionLabel, onAction){
+  const existing = document.getElementById("histUndoToast");
+  if (existing) existing.remove();
+  const toast = document.createElement("div");
+  toast.id = "histUndoToast";
+  toast.className = "hist-undo-toast";
+  const msg = document.createElement("span");
+  msg.textContent = message;
+  toast.appendChild(msg);
+  let timer = setTimeout(() => toast.remove(), 6000);
+  if (actionLabel && onAction) {
+    const btn = document.createElement("button");
+    btn.textContent = actionLabel;
+    btn.addEventListener("click", () => {
+      clearTimeout(timer);
+      toast.remove();
+      onAction();
+    });
+    toast.appendChild(btn);
+  }
+  document.body.appendChild(toast);
+}
+
 async function deleteHistDay(overlay, box, result, group, day){
   const server = getAdminServer();
+  const base = server ? (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "") : "";
+  let data;
   try {
     if (!server) throw new Error("アップロード先が未設定です。");
-    const base = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "");
     const res = await fetch(base + "/api/history-delete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ colorLabel: group.color, courseName: group.name, date: day.dateStr })
     });
-    const data = await res.json();
+    data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || "削除できませんでした。");
   } catch (e) {
     box.appendChild(histNote("削除できませんでした：" + e.message));
@@ -886,6 +950,33 @@ async function deleteHistDay(overlay, box, result, group, day){
     .filter(d => d.courses.length > 0);
   pruneHistCache(group, day.dateStr);
   renderHistColorList(overlay, box, result);
+
+  const label = histDateLabel(day.dateStr) + "　" + group.color + " " + histShortName(group.name) + " を削除しました";
+  if (data.trashPath && data.originalPath) {
+    showHistToast(label, "元に戻す", async () => {
+      try {
+        const r2 = await fetch(base + "/api/history-restore", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ trashPath: data.trashPath, originalPath: data.originalPath })
+        });
+        const d2 = await r2.json();
+        if (!r2.ok || d2.error) throw new Error(d2.error || "元に戻せませんでした。");
+        let dayEntry = result.days.find(d => d.dateStr === day.dateStr);
+        if (!dayEntry) {
+          dayEntry = { dateStr: day.dateStr, date: day.date, courses: [] };
+          result.days.push(dayEntry);
+        }
+        dayEntry.courses.push({ color: group.color, name: group.name, saved: true, rows: day.rows });
+        saveHistCache(result.days);
+        renderHistColorList(overlay, box, result);
+      } catch (e) {
+        showHistToast("元に戻せませんでした：" + e.message, null, null);
+      }
+    });
+  } else {
+    showHistToast(label, null, null);
+  }
 }
 
 function pruneHistCache(group, dateStr){
