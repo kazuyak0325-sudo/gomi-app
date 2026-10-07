@@ -322,12 +322,31 @@
     font-size: 14px;
   }
   .hist-row:last-child { border-bottom: none; }
+  .hist-row .h-info { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .hist-row .h-no { flex: none; min-width: 16px; text-align: right; font-size: 12px; font-weight: 700; color: #999; font-variant-numeric: tabular-nums; }
+  .hist-row .h-target { min-width: 0; }
   .hist-row .h-target small { color: #777; font-size: 12px; }
-  .hist-row .h-time-wrap { display: flex; flex-direction: column; align-items: flex-end; }
+  .hist-row .h-time-wrap { display: flex; flex-direction: column; align-items: flex-end; flex: none; }
   .hist-row .h-time { font-weight: 700; }
+  .hist-detail[data-mode="pet"] .h-time { color: #1565c0; }
+  .hist-detail[data-mode="box"] .h-time { color: #9c6b00; }
   .hist-row .h-vehicle { font-size: 11px; color: #4b2e83; font-weight: 700; }
   .hist-row.h-violation { background: #fbe4e4; }
-  .hist-row .h-violation-count { color: #b4341a; font-size: 12px; font-weight: 700; }
+  .hist-row .h-violation-count { color: #b4341a; font-size: 12px; font-weight: 700; flex: none; }
+  .hist-mode-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
+  .hist-mode-toggle button {
+    flex: 1;
+    padding: 9px 10px;
+    border: 1px solid #e4e0ec;
+    border-radius: 8px;
+    background: #f5f5f5;
+    color: #22202a;
+    font-weight: 700;
+    font-size: 13px;
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  }
+  .hist-mode-toggle button.pet.on { background: #1565c0; border-color: #1565c0; color: #fff; }
+  .hist-mode-toggle button.box.on { background: #c99a1e; border-color: #c99a1e; color: #241b02; }
   /* 横向き（iPad）：コースを4列×2段のタイルにして、画面の幅を使い切る */
   @media (orientation: landscape) and (min-width: 700px) {
     body { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
@@ -382,7 +401,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v3.9";
+const TOP_VERSION = "v4.0";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -583,7 +602,10 @@ function histRow(r){
     target: r["目標物"],
     time: r["収集時刻"] || "",
     violation: r["違反ゴミ個数"] || "",
-    vehicle: r["車両番号"] || ""
+    vehicle: r["車両番号"] || "",
+    hasCardboardCols: Object.prototype.hasOwnProperty.call(r, "ダンボール回収時刻"),
+    cardboardTime: r["ダンボール回収時刻"] || "",
+    cardboardViolation: r["ダンボール違反ゴミ個数"] || ""
   };
 }
 
@@ -807,17 +829,28 @@ function renderHistDateCourses(overlay, box, result, color, groups, dateStr, ite
 function renderHistDayDetail(overlay, box, result, group, day, onBack){
   box.innerHTML = "";
   box.appendChild(histTitle(histDateLabel(day.dateStr) + "　" + group.color + " " + histShortName(group.name)));
+
+  const isCardboard = day.rows.some(r => r.hasCardboardCols);
+  let mode = "pet";
   let onlyViolation = false;
+
+  function recOf(r){
+    return mode === "box"
+      ? { time: r.cardboardTime, violation: r.cardboardViolation }
+      : { time: r.time, violation: r.violation };
+  }
+
   const filterBtn = document.createElement("button");
   filterBtn.className = "hist-filter-btn";
   const ul = document.createElement("ul");
   ul.className = "hist-detail";
 
   function renderRows(){
+    if (isCardboard) ul.dataset.mode = mode;
     filterBtn.textContent = onlyViolation ? "すべて表示に戻す" : "違反ステーションだけ表示";
     filterBtn.classList.toggle("on", onlyViolation);
     ul.innerHTML = "";
-    const rows = day.rows.filter(r => !onlyViolation || r.violation);
+    const rows = day.rows.filter(r => !onlyViolation || recOf(r).violation);
     if (rows.length === 0) {
       const empty = document.createElement("li");
       empty.className = "hist-row";
@@ -825,8 +858,15 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
       ul.appendChild(empty);
     }
     rows.forEach(r => {
+      const rec = recOf(r);
       const li = document.createElement("li");
-      li.className = "hist-row" + (r.violation ? " h-violation" : "");
+      li.className = "hist-row" + (rec.violation ? " h-violation" : "");
+
+      const info = document.createElement("span");
+      info.className = "h-info";
+      const no = document.createElement("span");
+      no.className = "h-no";
+      no.textContent = r.no || "";
       const target = document.createElement("span");
       target.className = "h-target";
       target.textContent = r.target || "";
@@ -834,6 +874,17 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
       const small = document.createElement("small");
       small.textContent = (r.map || "") + " / ST" + (r.st || "");
       target.appendChild(small);
+      info.appendChild(no);
+      info.appendChild(target);
+      li.appendChild(info);
+
+      if (rec.violation) {
+        const v = document.createElement("span");
+        v.className = "h-violation-count";
+        v.textContent = "違反" + rec.violation + "個";
+        li.appendChild(v);
+      }
+
       const timeWrap = document.createElement("span");
       timeWrap.className = "h-time-wrap";
       if (r.vehicle) {
@@ -844,18 +895,38 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
       }
       const time = document.createElement("span");
       time.className = "h-time";
-      time.textContent = r.time || "--:--";
+      time.textContent = rec.time || "なし";
       timeWrap.appendChild(time);
-      li.appendChild(target);
       li.appendChild(timeWrap);
-      if (r.violation) {
-        const v = document.createElement("span");
-        v.className = "h-violation-count";
-        v.textContent = "違反" + r.violation + "個";
-        li.appendChild(v);
-      }
+
       ul.appendChild(li);
     });
+  }
+
+  if (isCardboard) {
+    const modeToggle = document.createElement("div");
+    modeToggle.className = "hist-mode-toggle";
+    const petBtn = document.createElement("button");
+    petBtn.className = "pet on";
+    petBtn.textContent = "ペット";
+    const boxBtn = document.createElement("button");
+    boxBtn.className = "box";
+    boxBtn.textContent = "ダンボール";
+    petBtn.addEventListener("click", () => {
+      mode = "pet";
+      petBtn.classList.add("on");
+      boxBtn.classList.remove("on");
+      renderRows();
+    });
+    boxBtn.addEventListener("click", () => {
+      mode = "box";
+      boxBtn.classList.add("on");
+      petBtn.classList.remove("on");
+      renderRows();
+    });
+    modeToggle.appendChild(petBtn);
+    modeToggle.appendChild(boxBtn);
+    box.appendChild(modeToggle);
   }
 
   filterBtn.addEventListener("click", () => {
