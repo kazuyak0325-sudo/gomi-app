@@ -133,11 +133,6 @@ header h1 {
   font-size: 20px;
   font-weight: 700;
 }
-header .sub {
-  margin: 0 0 4px;
-  font-size: 13px;
-  opacity: 0.85;
-}
 header .meta {
   margin: 0 0 10px;
   font-size: 13px;
@@ -145,6 +140,28 @@ header .meta {
   font-variant-numeric: tabular-nums;
   opacity: 0.85;
 }
+.hdr-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.hdr-top .back-link { margin: 0; opacity: 1; font-weight: 700; font-size: 14px; }
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+.hdr-right .menu-toggle { position: static; }
+.hdr-right .vehicle-change-btn { margin: 0; font-size: 13px; color: var(--accent-contrast); }
+.hdr-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 8px;
+  margin-bottom: 8px;
+}
+.hdr-status #progress { margin: 0; min-width: 0; font-size: 14px; }
+.hdr-status .meta { flex: none; }
+.hdr-status .meta { margin: 0; font-size: 12px; }
 #progress {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

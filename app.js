@@ -20,8 +20,6 @@ function formatDateJp(d){
   const days = ["日","月","火","水","木","金","土"];
   return d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日(" + days[d.getDay()] + ")";
 }
-refreshDateVersion();
-
 try {
   const courseNames = JSON.parse(localStorage.getItem("gomi_course_names") || "{}");
   courseNames[COURSE_ID] = COURSE_NAME;
@@ -30,35 +28,43 @@ try {
 
 (function(){
   const header = document.querySelector("header");
-  if (header) {
-    const backLink = document.createElement("a");
-    backLink.href = "../";
-    backLink.className = "back-link";
-    backLink.textContent = "← コース選択に戻る";
-    header.insertBefore(backLink, header.firstChild);
-
-    const topLink = document.createElement("a");
-    topLink.href = "../../";
-    topLink.className = "back-link";
-    topLink.style.marginLeft = "10px";
-    topLink.textContent = "トップ画面に戻る";
-    header.insertBefore(topLink, backLink.nextSibling);
-  }
-})();
-
-(function(){
-  const header = document.querySelector("header");
   const actions1 = document.querySelector(".actions:not(.actions-2)");
   const actions2 = document.querySelector(".actions-2");
   if (!header || !actions1 || !actions2) return;
 
+  const topRow = document.createElement("div");
+  topRow.className = "hdr-top";
+  topRow.id = "hdrTop";
+  const backLink = document.createElement("a");
+  backLink.href = "../";
+  backLink.className = "back-link";
+  backLink.textContent = "← 戻る";
+  const topRight = document.createElement("div");
+  topRight.className = "hdr-right";
   const menuToggle = document.createElement("button");
   menuToggle.className = "menu-toggle";
   menuToggle.setAttribute("aria-label", "メニュー");
   menuToggle.textContent = "☰";
+  topRight.appendChild(menuToggle);
+  topRow.appendChild(backLink);
+  topRow.appendChild(topRight);
+  header.insertBefore(topRow, header.firstChild);
+
+  const statusRow = document.createElement("div");
+  statusRow.className = "hdr-status";
+  const progress = document.getElementById("progress");
+  const dateVersion = document.getElementById("dateVersion");
+  header.insertBefore(statusRow, progress);
+  statusRow.appendChild(progress);
+  statusRow.appendChild(dateVersion);
 
   const menuPanel = document.createElement("div");
   menuPanel.className = "menu-panel";
+  const topBtn = document.createElement("button");
+  topBtn.className = "violation-filter-btn";
+  topBtn.textContent = "トップ画面に戻る";
+  topBtn.addEventListener("click", () => { location.href = "../../"; });
+  menuPanel.appendChild(topBtn);
   menuPanel.appendChild(actions1);
   menuPanel.appendChild(actions2);
 
@@ -74,7 +80,6 @@ try {
   });
   menuPanel.appendChild(violationFilterBtn);
 
-  header.appendChild(menuToggle);
   header.appendChild(menuPanel);
 
   menuToggle.addEventListener("click", (e) => {
@@ -1162,14 +1167,19 @@ function getVehicleFor(dateStr){
 
 function refreshDateVersion(){
   const vehicle = getVehicleFor(todayDateStr());
-  const el = document.getElementById("dateVersion");
-  el.textContent = formatDateJp(new Date()) + "　";
-  const btn = document.createElement("button");
-  btn.className = "vehicle-change-btn";
+  const now = new Date();
+  const w = ["日","月","火","水","木","金","土"][now.getDay()];
+  document.getElementById("dateVersion").textContent =
+    (now.getMonth() + 1) + "/" + now.getDate() + "(" + w + ")　" + APP_VERSION;
+  let btn = document.getElementById("vehicleBtn");
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.id = "vehicleBtn";
+    btn.className = "vehicle-change-btn";
+    btn.addEventListener("click", () => showVehicleModal(true));
+    document.querySelector("#hdrTop .hdr-right").prepend(btn);
+  }
   btn.textContent = vehicle ? "車両 " + vehicle : "車両を入力";
-  btn.addEventListener("click", () => showVehicleModal(true));
-  el.appendChild(btn);
-  el.appendChild(document.createTextNode("　" + APP_VERSION));
 }
 
 function showVehicleModal(fromHeader){
@@ -1227,4 +1237,5 @@ function showVehicleModal(fromHeader){
   input.focus();
 }
 
+refreshDateVersion();
 if (stations.length > 0) showVehicleModal();
