@@ -65,10 +65,10 @@ try {
   const violationFilterBtn = document.createElement("button");
   violationFilterBtn.id = "violationFilterBtn";
   violationFilterBtn.className = "violation-filter-btn";
-  violationFilterBtn.textContent = "違反ステーションを表示する";
+  violationFilterBtn.textContent = "違反ステーションの表示";
   violationFilterBtn.addEventListener("click", () => {
     violationFilterOn = !violationFilterOn;
-    violationFilterBtn.textContent = violationFilterOn ? "すべて表示に戻す" : "違反ステーションを表示する";
+    violationFilterBtn.textContent = violationFilterOn ? "すべて表示に戻す" : "違反ステーションの表示";
     violationFilterBtn.classList.toggle("on", violationFilterOn);
     render(document.getElementById("filter").value);
   });
@@ -1067,7 +1067,7 @@ async function uploadOrDownload(csv, dateStr, onDone){
   }
 }
 
-document.getElementById("saveBtn").textContent = "本日の収集データをアップロード";
+document.getElementById("saveBtn").textContent = "本日の収集データを送信";
 
 document.getElementById("saveBtn").addEventListener("click", async () => {
   if (stations.length === 0) {
@@ -1079,7 +1079,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
   btn.textContent = "アップロード中...";
   await uploadOrDownload(buildCsv(), todayDateStr());
   btn.disabled = false;
-  btn.textContent = "本日の収集データをアップロード";
+  btn.textContent = "本日の収集データを送信";
 });
 
 function findUnsentPastDates(){

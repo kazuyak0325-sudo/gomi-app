@@ -345,7 +345,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v3.6";
+const TOP_VERSION = "v3.7";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -625,6 +625,8 @@ async function fetchAllHistory(){
   return null;
 }
 
+const HIST_COLOR_ORDER = ["紫", "緑", "黄", "青", "黒", "ピンク", "容プラ(紫)", "容プラ(黄)"];
+
 function buildHistGroups(days){
   const map = new Map();
   days.forEach(day => day.courses.forEach(c => {
@@ -636,6 +638,8 @@ function buildHistGroups(days){
   const groups = [...map.values()];
   groups.forEach(g => g.days.sort((a, b) => (a.dateStr < b.dateStr ? 1 : -1)));
   groups.sort((a, b) => {
+    const ra = HIST_COLOR_ORDER.indexOf(a.color), rb = HIST_COLOR_ORDER.indexOf(b.color);
+    if (ra !== rb) return (ra < 0 ? 99 : ra) - (rb < 0 ? 99 : rb);
     if (a.color !== b.color) return a.color.localeCompare(b.color, "ja");
     return histCourseRank(a.name) - histCourseRank(b.name);
   });

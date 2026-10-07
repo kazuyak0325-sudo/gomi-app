@@ -71,9 +71,9 @@ header {
   font-weight: 700;
 }
 .menu-panel .actions button:active { background: #e5e1ec; }
-.menu-panel #resetBtn { background: #fbe4e4; }
+.menu-panel #resetBtn { background: #f0a8a8; }
 .menu-panel #resetBtn:active { background: #f5d0d0; }
-.menu-panel #saveBtn { background: #e3edfa; }
+.menu-panel #saveBtn { background: #7fb0e6; }
 .menu-panel #saveBtn:active { background: #d0e0f5; }
 .menu-panel .violation-filter-btn {
   display: block;
