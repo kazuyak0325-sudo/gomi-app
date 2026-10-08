@@ -185,7 +185,7 @@
     font-weight: 700;
   }
   .modal-btn-cancel { background: #eee; color: #333; }
-  .modal-btn-ok { background: #4b2e83; color: #fff; }
+  .modal-btn-ok { background: var(--hist-course, #4b2e83); color: #fff; }
   .top-menu-btn {
     position: fixed;
     top: calc(12px + env(safe-area-inset-top, 0px));
@@ -238,7 +238,7 @@
     font-weight: 700;
     font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   }
-  .hist-filter-btn.on { background: #4b2e83; color: #fff; border-color: #4b2e83; }
+  .hist-filter-btn.on { background: var(--hist-course, #4b2e83); color: #fff; border-color: var(--hist-course, #4b2e83); }
   .hist-title-row {
     display: flex;
     align-items: flex-start;
@@ -246,6 +246,21 @@
     gap: 10px;
   }
   .hist-title-row .hist-title-in-row { flex: 1; min-width: 0; }
+  .hist-title-stack { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .hist-course-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 3px 10px 3px 8px;
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--hist-course, #4b2e83) 15%, white);
+    color: var(--hist-course, #4b2e83);
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .hist-course-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--hist-course, #4b2e83); flex: none; }
+  .hist-title-stack .hist-title-in-row { margin: 0; }
   .hist-trash-btn {
     flex: none;
     width: 36px;
@@ -326,10 +341,8 @@
   .hist-row .h-target { min-width: 0; }
   .hist-row .h-target small { color: #777; font-size: 12px; }
   .hist-row .h-time-wrap { display: flex; flex-direction: column; align-items: flex-end; flex: none; }
-  .hist-row .h-time { font-weight: 700; }
-  .hist-detail[data-mode="pet"] .h-time { color: #1565c0; }
-  .hist-detail[data-mode="box"] .h-time { color: #9c6b00; }
-  .hist-row .h-vehicle { font-size: 11px; color: #4b2e83; font-weight: 700; }
+  .hist-row .h-time { font-weight: 700; color: #000; }
+  .hist-row .h-vehicle { font-size: 11px; color: #000; font-weight: 700; }
   .hist-row.h-violation { background: #fbe4e4; }
   .hist-row .h-violation-count {
     color: #b4341a;
@@ -353,8 +366,7 @@
     font-size: 13px;
     font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   }
-  .hist-mode-toggle button.pet.on { background: #1565c0; border-color: #1565c0; color: #fff; }
-  .hist-mode-toggle button.box.on { background: #c99a1e; border-color: #c99a1e; color: #241b02; }
+  .hist-mode-toggle button.on { background: var(--hist-course, #4b2e83); border-color: var(--hist-course, #4b2e83); color: #fff; }
   /* 横向き（iPad）：コースを4列×2段のタイルにして、画面の幅を使い切る */
   @media (orientation: landscape) and (min-width: 700px) {
     body { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
@@ -409,7 +421,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v4.6";
+const TOP_VERSION = "v4.7";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -693,6 +705,16 @@ async function fetchAllHistory(){
 }
 
 const HIST_COLOR_ORDER = ["紫", "緑", "黄", "青", "黒", "ピンク", "容プラ(紫)", "容プラ(黄)"];
+const HIST_COLOR_HEX = {
+  "紫": "#4b2e83",
+  "緑": "#2e7d32",
+  "黄": "#ffc83d",
+  "青": "#1565c0",
+  "黒": "#2b2b2b",
+  "ピンク": "#d6336c",
+  "容プラ(紫)": "#7c4dbd",
+  "容プラ(黄)": "#f2a900"
+};
 
 function buildHistGroups(days){
   const map = new Map();
@@ -762,6 +784,8 @@ function histListItem(nameText, subText, onClick){
 
 function renderHistColorList(overlay, box, result){
   box.innerHTML = "";
+  box.style.borderTop = "";
+  box.style.removeProperty("--hist-course");
   box.appendChild(histTitle("過去の記録（直近14日）"));
   box.appendChild(histNote(result.fromServer
     ? "管理PCに保存された全コースの記録です。"
@@ -788,6 +812,8 @@ function renderHistColorList(overlay, box, result){
 
 function renderHistColorDays(overlay, box, result, color, groups, topLevel){
   box.innerHTML = "";
+  box.style.borderTop = "";
+  box.style.removeProperty("--hist-course");
   box.appendChild(histTitle(color));
   box.appendChild(histNote("日付をタップすると、その日の記録を見られます。"));
   const byDate = new Map();
@@ -817,6 +843,8 @@ function renderHistColorDays(overlay, box, result, color, groups, topLevel){
 
 function renderHistDateCourses(overlay, box, result, color, groups, dateStr, items, topLevel){
   box.innerHTML = "";
+  box.style.borderTop = "";
+  box.style.removeProperty("--hist-course");
   box.appendChild(histTitle(histDateLabel(dateStr) + "　" + color));
   const ul = document.createElement("ul");
   ul.className = "hist-list";
@@ -836,10 +864,21 @@ function renderHistDateCourses(overlay, box, result, color, groups, dateStr, ite
 
 function renderHistDayDetail(overlay, box, result, group, day, onBack){
   box.innerHTML = "";
+  const courseHex = HIST_COLOR_HEX[group.color] || "#4b2e83";
+  box.style.setProperty("--hist-course", courseHex);
+  box.style.borderTop = "4px solid " + courseHex;
+
   const titleRow = document.createElement("div");
   titleRow.className = "hist-title-row";
-  const titleEl = histTitle(histDateLabel(day.dateStr) + "　" + group.color + " " + histShortName(group.name));
+  const titleStack = document.createElement("div");
+  titleStack.className = "hist-title-stack";
+  const chip = document.createElement("span");
+  chip.className = "hist-course-chip";
+  chip.innerHTML = '<span class="dot"></span>' + group.color + "　" + histShortName(group.name);
+  const titleEl = histTitle(histDateLabel(day.dateStr) + "の記録");
   titleEl.classList.add("hist-title-in-row");
+  titleStack.appendChild(chip);
+  titleStack.appendChild(titleEl);
   const trashBtn = document.createElement("button");
   trashBtn.className = "hist-trash-btn";
   trashBtn.setAttribute("aria-label", "この日の記録を削除");
@@ -847,7 +886,7 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
   trashBtn.addEventListener("click", () => {
     confirmHistDelete(() => deleteHistDay(overlay, box, result, group, day));
   });
-  titleRow.appendChild(titleEl);
+  titleRow.appendChild(titleStack);
   titleRow.appendChild(trashBtn);
   box.appendChild(titleRow);
 
