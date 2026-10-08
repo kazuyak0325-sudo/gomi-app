@@ -239,12 +239,24 @@
     font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   }
   .hist-filter-btn.on { background: #4b2e83; color: #fff; border-color: #4b2e83; }
-  .hist-delete-wrap {
+  .hist-title-row {
     display: flex;
-    justify-content: center;
-    margin-top: 18px;
-    padding-top: 14px;
-    border-top: 1px dashed var(--line, #e4e0ec);
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .hist-title-row .hist-title-in-row { flex: 1; min-width: 0; }
+  .hist-trash-btn {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: 1px solid #e4e0ec;
+    background: #fbe4e4;
+    color: #b4341a;
+    font-size: 16px;
+    display: grid;
+    place-items: center;
   }
   .hist-undo-toast {
     position: fixed;
@@ -274,19 +286,6 @@
     padding: 8px 12px;
     font-weight: 700;
     font-size: 13px;
-  }
-  .hist-delete-btn {
-    width: auto;
-    margin: 0;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 12px;
-    background: #fbe4e4;
-    color: #b4341a;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   }
   .modal-btn-danger { background: #b4341a; color: #fff; }
   .hist-box { max-width: 420px; max-height: 80vh; overflow-y: auto; }
@@ -410,7 +409,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v4.1";
+const TOP_VERSION = "v4.2";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -837,7 +836,20 @@ function renderHistDateCourses(overlay, box, result, color, groups, dateStr, ite
 
 function renderHistDayDetail(overlay, box, result, group, day, onBack){
   box.innerHTML = "";
-  box.appendChild(histTitle(histDateLabel(day.dateStr) + "　" + group.color + " " + histShortName(group.name)));
+  const titleRow = document.createElement("div");
+  titleRow.className = "hist-title-row";
+  const titleEl = histTitle(histDateLabel(day.dateStr) + "　" + group.color + " " + histShortName(group.name));
+  titleEl.classList.add("hist-title-in-row");
+  const trashBtn = document.createElement("button");
+  trashBtn.className = "hist-trash-btn";
+  trashBtn.setAttribute("aria-label", "この日の記録を削除");
+  trashBtn.textContent = "🗑";
+  trashBtn.addEventListener("click", () => {
+    confirmHistDelete(() => deleteHistDay(overlay, box, result, group, day));
+  });
+  titleRow.appendChild(titleEl);
+  titleRow.appendChild(trashBtn);
+  box.appendChild(titleRow);
 
   const isCardboard = day.rows.some(r => r.hasCardboardCols);
   let mode = "pet";
@@ -943,16 +955,6 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
   box.appendChild(filterBtn);
   box.appendChild(ul);
   renderRows();
-  const deleteWrap = document.createElement("div");
-  deleteWrap.className = "hist-delete-wrap";
-  const deleteBtn = document.createElement("button");
-  deleteBtn.className = "hist-delete-btn";
-  deleteBtn.textContent = "この日の記録を削除";
-  deleteBtn.addEventListener("click", () => {
-    confirmHistDelete(() => deleteHistDay(overlay, box, result, group, day));
-  });
-  deleteWrap.appendChild(deleteBtn);
-  box.appendChild(deleteWrap);
   box.appendChild(histActions(overlay, onBack));
 }
 
