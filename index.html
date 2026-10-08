@@ -409,7 +409,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v4.4";
+const TOP_VERSION = "v4.5";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -786,7 +786,7 @@ function renderHistColorList(overlay, box, result){
   box.appendChild(histActions(overlay, null));
 }
 
-function renderHistColorDays(overlay, box, result, color, groups){
+function renderHistColorDays(overlay, box, result, color, groups, topLevel){
   box.innerHTML = "";
   box.appendChild(histTitle(color));
   box.appendChild(histNote("日付をタップすると、その日の記録を見られます。"));
@@ -805,17 +805,17 @@ function renderHistColorDays(overlay, box, result, color, groups){
     ul.appendChild(histListItem(histDateLabel(dateStr), sub, () => {
       if (items.length === 1) {
         renderHistDayDetail(overlay, box, result, items[0].group, items[0].day,
-          () => renderHistColorDays(overlay, box, result, color, groups));
+          () => renderHistColorDays(overlay, box, result, color, groups, topLevel));
       } else {
-        renderHistDateCourses(overlay, box, result, color, groups, dateStr, items);
+        renderHistDateCourses(overlay, box, result, color, groups, dateStr, items, topLevel);
       }
     }));
   });
   box.appendChild(ul);
-  box.appendChild(histActions(overlay, () => renderHistColorList(overlay, box, result)));
+  box.appendChild(histActions(overlay, topLevel ? null : (() => renderHistColorList(overlay, box, result))));
 }
 
-function renderHistDateCourses(overlay, box, result, color, groups, dateStr, items){
+function renderHistDateCourses(overlay, box, result, color, groups, dateStr, items, topLevel){
   box.innerHTML = "";
   box.appendChild(histTitle(histDateLabel(dateStr) + "　" + color));
   const ul = document.createElement("ul");
@@ -827,11 +827,11 @@ function renderHistDateCourses(overlay, box, result, color, groups, dateStr, ite
       histShortName(group.name),
       (vehicles ? "車両 " + vehicles + "　" : "") + done + " / " + day.rows.length + " 件完了 ›",
       () => renderHistDayDetail(overlay, box, result, group, day,
-        () => renderHistDateCourses(overlay, box, result, color, groups, dateStr, items))
+        () => renderHistDateCourses(overlay, box, result, color, groups, dateStr, items, topLevel))
     ));
   });
   box.appendChild(ul);
-  box.appendChild(histActions(overlay, () => renderHistColorDays(overlay, box, result, color, groups)));
+  box.appendChild(histActions(overlay, () => renderHistColorDays(overlay, box, result, color, groups, topLevel)));
 }
 
 function renderHistDayDetail(overlay, box, result, group, day, onBack){
@@ -1152,7 +1152,7 @@ async function openTopHistory(preselectColor){
   if (preselectColor) {
     const gs = buildHistGroups(result.days).filter(g => g.color === preselectColor);
     if (gs.length > 0) {
-      renderHistColorDays(overlay, box, result, preselectColor, gs);
+      renderHistColorDays(overlay, box, result, preselectColor, gs, true);
       return;
     }
   }
