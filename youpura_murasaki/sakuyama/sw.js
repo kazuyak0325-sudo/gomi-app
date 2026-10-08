@@ -1,6 +1,7 @@
-﻿const CACHE_NAME = "gomi-app-youpura_murasaki-sakuyama-1790550709";
+const CACHE_NAME = "gomi-app-youpura_murasaki-sakuyama-1790550709";
 const CACHE_PREFIX = "gomi-app-youpura_murasaki-sakuyama-";
 const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791254928", "../../app.js?v=1791254928"];
+const NETWORK_TIMEOUT_MS = 3000;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -19,26 +20,45 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+async function fallbackResponse(request){
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  if (request.mode === "navigate") {
+    const shell = await caches.match(new URL("./", self.registration.scope).href);
+    if (shell) return shell;
+  }
+  return new Response(
+    "オフラインです。このページを一度オンラインで開いてから、もう一度お試しください。",
+    { status: 504, statusText: "Offline", headers: { "Content-Type": "text/plain; charset=utf-8" } }
+  );
+}
+
+function networkFirstWithTimeout(request){
+  return new Promise((resolve) => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      fallbackResponse(request).then(resolve);
+    }, NETWORK_TIMEOUT_MS);
+
+    fetch(request, { cache: "no-store" }).then((response) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+      resolve(response);
+    }).catch(() => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fallbackResponse(request).then(resolve);
+    });
+  });
+}
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  event.respondWith(
-    fetch(event.request, { cache: "no-store" })
-      .then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
-        return response;
-      })
-      .catch(async () => {
-        const cached = await caches.match(event.request);
-        if (cached) return cached;
-        if (event.request.mode === "navigate") {
-          const shell = await caches.match(new URL("./", self.registration.scope).href);
-          if (shell) return shell;
-        }
-        return new Response(
-          "オフラインです。このページを一度オンラインで開いてから、もう一度お試しください。",
-          { status: 504, statusText: "Offline", headers: { "Content-Type": "text/plain; charset=utf-8" } }
-        );
-      })
-  );
+  event.respondWith(networkFirstWithTimeout(event.request));
 });

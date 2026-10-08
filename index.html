@@ -423,7 +423,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v4.9";
+const TOP_VERSION = "v5.0";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -581,15 +581,23 @@ try {
   }
 } catch (e) {}
 
-const ALL_COLORS = ["murasaki", "midori", "kiiro", "ao", "kuro", "pink"];
-const ALL_SCHEDULES = ["getsumoku", "kakin", "pet1", "pet2"];
+const COURSE_SCHEDULES = {
+  murasaki: ["getsumoku", "kakin", "pet1", "pet2"],
+  midori: ["getsumoku", "kakin", "pet1", "pet2"],
+  kiiro: ["getsumoku", "kakin", "kanada", "pet1", "pet2"],
+  ao: ["getsumoku", "kakin", "pet1", "pet2"],
+  kuro: ["getsumoku", "kakin", "pet1", "pet2"],
+  pink: ["getsumoku", "kakin", "pet1", "pet2"],
+  youpura_murasaki: ["kanada", "sakuyama", "nishi", "higashi"],
+  youpura_kiiro: ["kanada", "sakuyama", "nishi", "higashi"]
+};
 
 async function precacheAllCourses(){
   if (!navigator.onLine || !("serviceWorker" in navigator)) return;
   const jobs = [];
-  ALL_COLORS.forEach((color) => {
+  Object.keys(COURSE_SCHEDULES).forEach((color) => {
     jobs.push(navigator.serviceWorker.register(color + "/sw.js", { scope: color + "/" }).catch(() => {}));
-    ALL_SCHEDULES.forEach((schedule) => {
+    COURSE_SCHEDULES[color].forEach((schedule) => {
       jobs.push(
         navigator.serviceWorker
           .register(color + "/" + schedule + "/sw.js", { scope: color + "/" + schedule + "/" })
