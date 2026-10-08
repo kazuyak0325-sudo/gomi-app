@@ -332,7 +332,16 @@
   .hist-detail[data-mode="box"] .h-time { color: #9c6b00; }
   .hist-row .h-vehicle { font-size: 11px; color: #4b2e83; font-weight: 700; }
   .hist-row.h-violation { background: #fbe4e4; }
-  .hist-row .h-violation-count { color: #b4341a; font-size: 12px; font-weight: 700; flex: none; }
+  .hist-row .h-violation-count {
+    color: #b4341a;
+    font-size: 12px;
+    font-weight: 700;
+    flex: none;
+    min-width: 62px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .hist-row .h-violation-count.is-empty { visibility: hidden; }
   .hist-mode-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
   .hist-mode-toggle button {
     flex: 1;
@@ -401,7 +410,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v4.0";
+const TOP_VERSION = "v4.1";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -878,12 +887,10 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
       info.appendChild(target);
       li.appendChild(info);
 
-      if (rec.violation) {
-        const v = document.createElement("span");
-        v.className = "h-violation-count";
-        v.textContent = "違反" + rec.violation + "個";
-        li.appendChild(v);
-      }
+      const v = document.createElement("span");
+      v.className = "h-violation-count" + (rec.violation ? "" : " is-empty");
+      v.textContent = rec.violation ? ("違反" + rec.violation + "個") : "違反なし";
+      li.appendChild(v);
 
       const timeWrap = document.createElement("span");
       timeWrap.className = "h-time-wrap";
