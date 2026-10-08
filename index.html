@@ -409,7 +409,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v4.3";
+const TOP_VERSION = "v4.4";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -1131,7 +1131,7 @@ function openUnsentList(){
   box.appendChild(histActions(overlay, null));
 }
 
-async function openTopHistory(){
+async function openTopHistory(preselectColor){
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
   const box = document.createElement("div");
@@ -1149,6 +1149,13 @@ async function openTopHistory(){
     box.appendChild(histActions(overlay, null));
     return;
   }
+  if (preselectColor) {
+    const gs = buildHistGroups(result.days).filter(g => g.color === preselectColor);
+    if (gs.length > 0) {
+      renderHistColorDays(overlay, box, result, preselectColor, gs);
+      return;
+    }
+  }
   renderHistColorList(overlay, box, result);
 }
 
@@ -1165,6 +1172,11 @@ document.getElementById("topHistoryBtn").addEventListener("click", () => {
   topMenuPanel.classList.remove("open");
   openTopHistory();
 });
+
+(function(){
+  const historyColor = new URLSearchParams(location.search).get("historyColor");
+  if (historyColor) openTopHistory(historyColor);
+})();
 document.getElementById("unsentBtn").addEventListener("click", () => {
   topMenuPanel.classList.remove("open");
   openUnsentList();

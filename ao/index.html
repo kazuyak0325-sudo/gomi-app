@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -60,7 +60,21 @@
     font-size: 11px;
     opacity: 0.85;
   }
-</style>
+
+  .hist-link {
+    display: block;
+    margin: 14px auto 0;
+    max-width: 480px;
+    text-align: center;
+    padding: 12px;
+    border: 1px dashed #1565c0;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1565c0;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+  }</style>
 </head>
 <body>
 <a class="back" href="../">← コース選択に戻る</a>
@@ -71,6 +85,7 @@
   <a class="card" style="background:#1565c0" href="pet1/">ペット・ダンボール①</a>
   <a class="card" style="background:#1565c0" href="pet2/">ペット・ダンボール②</a>
 </div>
+<a class="hist-link" href="../?historyColor=%E9%9D%92">過去の記録を見る</a>
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {

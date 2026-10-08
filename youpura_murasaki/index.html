@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -60,7 +60,21 @@
     font-size: 11px;
     opacity: 0.85;
   }
-</style>
+
+  .hist-link {
+    display: block;
+    margin: 14px auto 0;
+    max-width: 480px;
+    text-align: center;
+    padding: 12px;
+    border: 1px dashed #7c4dbd;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #7c4dbd;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+  }</style>
 </head>
 <body>
 <a class="back" href="../">← コース選択に戻る</a>
@@ -71,6 +85,7 @@
   <a class="card" style="background:#7c4dbd" href="nishi/">西地区</a>
   <a class="card" style="background:#7c4dbd" href="higashi/">東地区</a>
 </div>
+<a class="hist-link" href="../?historyColor=%E5%AE%B9%E3%83%97%E3%83%A9(%E7%B4%AB)">過去の記録を見る</a>
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
