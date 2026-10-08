@@ -261,6 +261,8 @@
   }
   .hist-course-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--hist-course, #4b2e83); flex: none; }
   .hist-title-stack .hist-title-in-row { margin: 0; }
+  .hist-title-line { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .hist-violation-total { font-size: 12px; font-weight: 700; color: #b4341a; }
   .hist-trash-btn {
     flex: none;
     width: 36px;
@@ -336,7 +338,7 @@
     font-size: 14px;
   }
   .hist-row:last-child { border-bottom: none; }
-  .hist-row .h-info { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .hist-row .h-info { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
   .hist-row .h-no { flex: none; min-width: 16px; text-align: right; font-size: 12px; font-weight: 700; color: #999; font-variant-numeric: tabular-nums; }
   .hist-row .h-target { min-width: 0; }
   .hist-row .h-target small { color: #777; font-size: 12px; }
@@ -421,7 +423,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v4.7";
+const TOP_VERSION = "v4.8";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 const ADMIN_PRESETS = [
@@ -875,10 +877,16 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
   const chip = document.createElement("span");
   chip.className = "hist-course-chip";
   chip.innerHTML = '<span class="dot"></span>' + group.color + "　" + histShortName(group.name);
+  const titleLine = document.createElement("div");
+  titleLine.className = "hist-title-line";
   const titleEl = histTitle(histDateLabel(day.dateStr) + "の記録");
   titleEl.classList.add("hist-title-in-row");
+  const violationTotalEl = document.createElement("span");
+  violationTotalEl.className = "hist-violation-total";
+  titleLine.appendChild(titleEl);
+  titleLine.appendChild(violationTotalEl);
   titleStack.appendChild(chip);
-  titleStack.appendChild(titleEl);
+  titleStack.appendChild(titleLine);
   const trashBtn = document.createElement("button");
   trashBtn.className = "hist-trash-btn";
   trashBtn.setAttribute("aria-label", "この日の記録を削除");
@@ -909,6 +917,8 @@ function renderHistDayDetail(overlay, box, result, group, day, onBack){
     if (isCardboard) ul.dataset.mode = mode;
     filterBtn.textContent = onlyViolation ? "すべて表示に戻す" : "違反ステーションだけ表示";
     filterBtn.classList.toggle("on", onlyViolation);
+    const total = day.rows.reduce((sum, r) => sum + (parseInt(recOf(r).violation, 10) || 0), 0);
+    violationTotalEl.textContent = total > 0 ? ("違反 計" + total + "個") : "";
     ul.innerHTML = "";
     const rows = day.rows.filter(r => !onlyViolation || recOf(r).violation);
     if (rows.length === 0) {
