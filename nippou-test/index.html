@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>収集日報（テスト）</title>
+<style>
+  :root {
+    --accent: #0d9488;
+    --accent-dark: #0f766e;
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --border: #e4e7ec;
+    --text: #1c2128;
+    --text-muted: #6b7280;
+    --ok: #2c8c3f;
+    --danger: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 60px;
+  }
+  header {
+    background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+    color: #fff;
+    padding: 14px 18px;
+  }
+  header h1 { margin: 0; font-size: 19px; }
+  header p { margin: 4px 0 0; font-size: 12px; opacity: 0.85; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .card h2 { margin: 0 0 10px; font-size: 15px; color: var(--accent-dark); }
+  label { display: block; font-size: 13px; color: var(--text-muted); margin: 10px 0 4px; }
+  select, input[type=text], input[type=number], input[type=date] {
+    width: 100%;
+    padding: 10px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .row5 label { text-align: center; margin: 0 0 4px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .auto-field {
+    background: #f1f5f4;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .auto-field strong { color: var(--text); }
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .btn-primary:active { background: var(--accent-dark); }
+  .status-msg { margin-top: 10px; font-size: 14px; text-align: center; }
+  .status-msg.ok { color: var(--ok); }
+  .status-msg.err { color: var(--danger); }
+  details.server-setting { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+  details.server-setting input { margin-top: 6px; }
+  .test-badge {
+    display: inline-block;
+    background: #fff3cd;
+    color: #8a6d1f;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 6px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>収集日報の入力<span class="test-badge">テスト機能</span></h1>
+  <p>市への報告書用データを入力して送信します（既存のタップ記録アプリとは別ページです）</p>
+</header>
+<main>
+  <div class="card">
+    <h2>日付・コース</h2>
+    <div class="row2">
+      <div>
+        <label>日付</label>
+        <input type="date" id="dateInput">
+      </div>
+      <div>
+        <label>コース</label>
+        <select id="courseSelect"></select>
+      </div>
+    </div>
+
+    <label>車両NO・収集時間（自動で入力されます）</label>
+    <div class="auto-field" id="autoField">コースを選ぶと自動で表示されます</div>
+  </div>
+
+  <div class="card">
+    <h2>搭乗者</h2>
+    <div class="row2">
+      <div>
+        <label>運転手</label>
+        <select id="driverSelect"></select>
+      </div>
+      <div>
+        <label>助手</label>
+        <select id="helperSelect"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>可燃収集量（kg）</h2>
+    <div class="row5">
+      <div><label>1回目</label><input type="number" inputmode="decimal" id="b1"></div>
+      <div><label>2回目</label><input type="number" inputmode="decimal" id="b2"></div>
+      <div><label>3回目</label><input type="number" inputmode="decimal" id="b3"></div>
+      <div><label>4回目</label><input type="number" inputmode="decimal" id="b4"></div>
+      <div><label>5回目</label><input type="number" inputmode="decimal" id="b5"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>資源ごみ収集量（kg）</h2>
+    <div class="row3">
+      <div><label>ペットボトル</label><input type="number" inputmode="decimal" id="petBottle"></div>
+      <div><label>ダンボール</label><input type="number" inputmode="decimal" id="cardboardKg"></div>
+      <div><label>容プラ</label><input type="number" inputmode="decimal" id="youpura"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>収集地区・走行距離</h2>
+    <label>収集地区</label>
+    <input type="text" id="district" placeholder="例：新富　城山">
+    <div class="row2">
+      <div><label>走行距離 開始（km）</label><input type="number" inputmode="decimal" id="odoStart"></div>
+      <div><label>走行距離 終了（km）</label><input type="number" inputmode="decimal" id="odoEnd"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <button class="btn-primary" id="submitBtn">この内容を送信する</button>
+    <div class="status-msg" id="statusMsg"></div>
+    <details class="server-setting">
+      <summary>送信先設定</summary>
+      <input type="text" id="serverAddrInput" placeholder="例：https://192.168.11.34:8788">
+    </details>
+  </div>
+</main>
+
+<script>
+const COURSES = [
+  { id: "murasaki-getsumoku", name: "紫コース（月・木）", color: "紫" },
+  { id: "murasaki-kakin", name: "紫コース（火・金）", color: "紫" },
+  { id: "murasaki-pet1", name: "紫コース（ペット・ダンボール①）", color: "紫" },
+  { id: "murasaki-pet2", name: "紫コース（ペット・ダンボール②）", color: "紫" },
+  { id: "midori-getsumoku", name: "緑コース（月・木）", color: "緑" },
+  { id: "midori-kakin", name: "緑コース（火・金）", color: "緑" },
+  { id: "midori-pet1", name: "緑コース（ペット・ダンボール①）", color: "緑" },
+  { id: "midori-pet2", name: "緑コース（ペット・ダンボール②）", color: "緑" },
+  { id: "kiiro-getsumoku", name: "黄コース（月・木）", color: "黄" },
+  { id: "kiiro-kakin", name: "黄コース（火・金）", color: "黄" },
+  { id: "kiiro-kanada", name: "黄コース（金田地区）", color: "黄" },
+  { id: "kiiro-pet1", name: "黄コース（ペット・ダンボール①）", color: "黄" },
+  { id: "kiiro-pet2", name: "黄コース（ペット・ダンボール②）", color: "黄" },
+  { id: "ao-getsumoku", name: "青コース（月・木）", color: "青" },
+  { id: "ao-kakin", name: "青コース（火・金）", color: "青" },
+  { id: "ao-pet1", name: "青コース（ペット・ダンボール①）", color: "青" },
+  { id: "ao-pet2", name: "青コース（ペット・ダンボール②）", color: "青" },
+  { id: "kuro-getsumoku", name: "黒コース（月・木）", color: "黒" },
+  { id: "kuro-kakin", name: "黒コース（火・金）", color: "黒" },
+  { id: "kuro-pet1", name: "黒コース（ペット・ダンボール①）", color: "黒" },
+  { id: "kuro-pet2", name: "黒コース（ペット・ダンボール②）", color: "黒" },
+  { id: "pink-getsumoku", name: "ピンクコース（月・木）", color: "ピンク" },
+  { id: "pink-kakin", name: "ピンクコース（火・金）", color: "ピンク" },
+  { id: "pink-pet1", name: "ピンクコース（ペット・ダンボール①）", color: "ピンク" },
+  { id: "pink-pet2", name: "ピンクコース（ペット・ダンボール②）", color: "ピンク" },
+  { id: "youpura_murasaki-kanada", name: "容プラ(紫)コース（金田地区）", color: "容プラ(紫)" },
+  { id: "youpura_murasaki-sakuyama", name: "容プラ(紫)コース（佐久山・親園・野崎）", color: "容プラ(紫)" },
+  { id: "youpura_murasaki-nishi", name: "容プラ(紫)コース（西地区）", color: "容プラ(紫)" },
+  { id: "youpura_murasaki-higashi", name: "容プラ(紫)コース（東地区）", color: "容プラ(紫)" },
+  { id: "youpura_kiiro-kanada", name: "容プラ(黄)コース（金田地区）", color: "容プラ(黄)" },
+  { id: "youpura_kiiro-sakuyama", name: "容プラ(黄)コース（佐久山・親園・野崎）", color: "容プラ(黄)" },
+  { id: "youpura_kiiro-nishi", name: "容プラ(黄)コース（西地区）", color: "容プラ(黄)" },
+  { id: "youpura_kiiro-higashi", name: "容プラ(黄)コース（東地区）", color: "容プラ(黄)" }
+];
+
+const STAFF_NAMES = [
+  "坪井 利幸", "渡辺 晋也", "佐々木 晃", "磯 浩之", "君島 義美", "伊藤 隆",
+  "金川 貴広", "相馬 有紀", "大森 司", "室井 正", "渡邉 浩克", "小森 公乃",
+  "小山田 雅紀", "大野 知昭", "君島 敬一", "大宮 泰彦"
+];
+
+function pad2(n){ return String(n).padStart(2, "0"); }
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+}
+
+function buildCourseSelect(){
+  const sel = document.getElementById("courseSelect");
+  const groups = {};
+  COURSES.forEach(c => {
+    if (!groups[c.color]) groups[c.color] = [];
+    groups[c.color].push(c);
+  });
+  Object.keys(groups).forEach(color => {
+    const og = document.createElement("optgroup");
+    og.label = color;
+    groups[color].forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = c.name;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+}
+
+function buildStaffSelects(){
+  [document.getElementById("driverSelect"), document.getElementById("helperSelect")].forEach(sel => {
+    const blank = document.createElement("option");
+    blank.value = "";
+    blank.textContent = "（選択してください）";
+    sel.appendChild(blank);
+    STAFF_NAMES.forEach(name => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function findCourse(id){
+  return COURSES.find(c => c.id === id);
+}
+
+function updateAutoField(){
+  const courseId = document.getElementById("courseSelect").value;
+  const date = document.getElementById("dateInput").value;
+  const box = document.getElementById("autoField");
+  if (!courseId || !date) { box.textContent = "コースと日付を選んでください"; return; }
+
+  let vehicle = "";
+  let timeStart = "";
+  let timeEnd = "";
+  try {
+    vehicle = localStorage.getItem("gomi_veh_" + courseId + "_" + date) || "";
+  } catch (e) {}
+  try {
+    const records = JSON.parse(localStorage.getItem("gomi_" + courseId + "_" + date) || "{}");
+    const times = Object.values(records).filter(v => typeof v === "string" && /^\d{1,2}:\d{2}$/.test(v));
+    if (times.length > 0) {
+      times.sort();
+      timeStart = times[0];
+      timeEnd = times[times.length - 1];
+    }
+  } catch (e) {}
+
+  window.__nippouAuto = { vehicle: vehicle, timeStart: timeStart, timeEnd: timeEnd };
+
+  if (!vehicle && !timeStart) {
+    box.innerHTML = "この端末にこのコース・日付の収集記録が見つかりませんでした。車両NO・収集時間は未記入のまま送信されます。";
+  } else {
+    box.innerHTML = "車両NO：<strong>" + (vehicle || "ー") + "</strong>　収集時間：<strong>" +
+      (timeStart || "ー") + " 〜 " + (timeEnd || "ー") + "</strong>";
+  }
+}
+
+function getAdminServer(){
+  try { return localStorage.getItem("gomi_admin_server") || ""; } catch (e) { return ""; }
+}
+function setAdminServer(v){
+  try { localStorage.setItem("gomi_admin_server", v); } catch (e) {}
+}
+
+function initServerField(){
+  const input = document.getElementById("serverAddrInput");
+  input.value = getAdminServer();
+  input.addEventListener("change", () => setAdminServer(input.value.trim()));
+}
+
+async function submitReport(){
+  const statusMsg = document.getElementById("statusMsg");
+  const courseId = document.getElementById("courseSelect").value;
+  const course = findCourse(courseId);
+  const date = document.getElementById("dateInput").value;
+  const server = getAdminServer();
+
+  if (!course || !date) {
+    statusMsg.className = "status-msg err";
+    statusMsg.textContent = "コースと日付を確認してください。";
+    return;
+  }
+  if (!server) {
+    statusMsg.className = "status-msg err";
+    statusMsg.textContent = "送信先設定（事務所PCのアドレス）を入力してください。";
+    return;
+  }
+
+  const burnable = [
+    document.getElementById("b1").value,
+    document.getElementById("b2").value,
+    document.getElementById("b3").value,
+    document.getElementById("b4").value,
+    document.getElementById("b5").value
+  ];
+  const count = burnable.filter(v => v !== "" && v !== null).length;
+  const auto = window.__nippouAuto || {};
+
+  const payload = {
+    date: date,
+    courseId: course.id,
+    courseName: course.name,
+    color: course.color,
+    vehicleNo: auto.vehicle || "",
+    driver: document.getElementById("driverSelect").value,
+    helper: document.getElementById("helperSelect").value,
+    burnable: burnable,
+    petBottle: document.getElementById("petBottle").value,
+    cardboardKg: document.getElementById("cardboardKg").value,
+    youpura: document.getElementById("youpura").value,
+    district: document.getElementById("district").value,
+    odoStart: document.getElementById("odoStart").value,
+    odoEnd: document.getElementById("odoEnd").value,
+    timeStart: auto.timeStart || "",
+    timeEnd: auto.timeEnd || "",
+    count: count
+  };
+
+  statusMsg.className = "status-msg";
+  statusMsg.textContent = "送信中...";
+  try {
+    const res = await fetch(server.replace(/\/$/, "") + "/api/nippou-submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.ok) {
+      statusMsg.className = "status-msg ok";
+      statusMsg.textContent = "送信しました！";
+    } else {
+      statusMsg.className = "status-msg err";
+      statusMsg.textContent = "送信に失敗しました：" + (data.error || "不明なエラー");
+    }
+  } catch (e) {
+    statusMsg.className = "status-msg err";
+    statusMsg.textContent = "事務所PCに接続できませんでした。送信先設定とWi-Fi接続を確認してください。";
+  }
+}
+
+buildCourseSelect();
+buildStaffSelects();
+initServerField();
+document.getElementById("dateInput").value = todayStr();
+document.getElementById("courseSelect").addEventListener("change", updateAutoField);
+document.getElementById("dateInput").addEventListener("change", updateAutoField);
+document.getElementById("submitBtn").addEventListener("click", submitReport);
+updateAutoField();
+</script>
+</body>
+</html>
