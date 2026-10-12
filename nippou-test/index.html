@@ -105,8 +105,11 @@
     <label>収集地区</label>
     <input type="text" id="district" placeholder="例：新富　城山">
 
-    <label>車両NO・収集時間（自動で入力されます）</label>
-    <div class="auto-field" id="autoField">コースを選ぶと自動で表示されます</div>
+    <label>車両NO（自動で入ります。違う場合は書き換えてください）</label>
+    <input type="text" inputmode="numeric" id="vehicleInput" placeholder="例：0317">
+
+    <label>収集時間（自動で入力されます）</label>
+    <div class="auto-field" id="autoField">コースが指定されていません</div>
   </div>
 
   <div class="card">
@@ -231,6 +234,7 @@ function findCourse(id){
 
 function updateAutoField(){
   const box = document.getElementById("autoField");
+  const vehicleInput = document.getElementById("vehicleInput");
   if (!CURRENT_COURSE) { box.textContent = "コースが指定されていないため、自動入力できません。"; return; }
   const courseId = CURRENT_COURSE.id;
   const date = CURRENT_DATE;
@@ -251,13 +255,14 @@ function updateAutoField(){
     }
   } catch (e) {}
 
-  window.__nippouAuto = { vehicle: vehicle, timeStart: timeStart, timeEnd: timeEnd };
+  if (vehicle && !vehicleInput.value) { vehicleInput.value = vehicle; }
 
-  if (!vehicle && !timeStart) {
-    box.innerHTML = "この端末にこのコース・日付の収集記録が見つかりませんでした。車両NO・収集時間は未記入のまま送信されます。";
+  window.__nippouAuto = { timeStart: timeStart, timeEnd: timeEnd };
+
+  if (!timeStart) {
+    box.textContent = "この端末にこのコース・日付の収集記録が見つかりませんでした。収集時間は未記入のまま送信されます。";
   } else {
-    box.innerHTML = "車両NO：<strong>" + (vehicle || "ー") + "</strong>　収集時間：<strong>" +
-      (timeStart || "ー") + " 〜 " + (timeEnd || "ー") + "</strong>";
+    box.innerHTML = "<strong>" + timeStart + " 〜 " + timeEnd + "</strong>";
   }
 }
 
@@ -278,11 +283,17 @@ async function submitReport(){
   const statusMsg = document.getElementById("statusMsg");
   const course = CURRENT_COURSE;
   const date = CURRENT_DATE;
+  const vehicleNo = document.getElementById("vehicleInput").value.trim();
   const server = getAdminServer();
 
   if (!course || !date) {
     statusMsg.className = "status-msg err";
     statusMsg.textContent = "コースが指定されていません。各コース画面の☰メニューから開いてください。";
+    return;
+  }
+  if (!vehicleNo) {
+    statusMsg.className = "status-msg err";
+    statusMsg.textContent = "車両NOを入力してください。";
     return;
   }
   if (!server) {
@@ -306,7 +317,7 @@ async function submitReport(){
     courseId: course.id,
     courseName: course.name,
     color: course.color,
-    vehicleNo: auto.vehicle || "",
+    vehicleNo: vehicleNo,
     driver: document.getElementById("driverSelect").value,
     helper: document.getElementById("helperSelect").value,
     burnable: burnable,
