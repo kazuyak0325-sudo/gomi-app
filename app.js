@@ -80,6 +80,14 @@ try {
   });
   menuPanel.appendChild(violationFilterBtn);
 
+  const nippouBtn = document.createElement("button");
+  nippouBtn.className = "violation-filter-btn";
+  nippouBtn.textContent = "収集日報を入力（テスト）";
+  nippouBtn.addEventListener("click", () => {
+    location.href = "../../nippou-test/?course=" + encodeURIComponent(COURSE_ID);
+  });
+  menuPanel.appendChild(nippouBtn);
+
   header.appendChild(menuPanel);
 
   menuToggle.addEventListener("click", (e) => {

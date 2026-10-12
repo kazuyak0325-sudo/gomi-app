@@ -376,6 +376,12 @@ buildCourseSelect();
 buildStaffSelects();
 initServerField();
 document.getElementById("dateInput").value = todayStr();
+
+const presetCourseId = new URLSearchParams(location.search).get("course");
+if (presetCourseId && findCourse(presetCourseId)) {
+  document.getElementById("courseSelect").value = presetCourseId;
+}
+
 document.getElementById("courseSelect").addEventListener("change", updateAutoField);
 document.getElementById("dateInput").addEventListener("change", updateAutoField);
 document.getElementById("submitBtn").addEventListener("click", submitReport);

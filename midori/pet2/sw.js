@@ -1,6 +1,6 @@
 const CACHE_NAME = "gomi-app-midori-pet2-1790747192";
 const CACHE_PREFIX = "gomi-app-midori-pet2-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791254928", "../../app.js?v=1791254928", "../../pet-icon.png"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791813047", "../../app.js?v=1791813047", "../../pet-icon.png"];
 const NETWORK_TIMEOUT_MS = 3000;
 
 self.addEventListener("install", (event) => {
