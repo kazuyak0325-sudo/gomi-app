@@ -63,6 +63,10 @@
   .row5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
   .row5 label { text-align: center; margin: 0 0 4px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  input[type=time].auto-field {
+    width: 100%;
+    color: var(--text);
+  }
   .auto-field {
     background: #f1f5f4;
     border: 1px dashed var(--border);
@@ -86,6 +90,17 @@
   }
   .btn-primary:active { background: var(--accent-dark); }
   .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+  .link-btn {
+    display: block;
+    background: none;
+    border: none;
+    color: var(--accent-dark);
+    font-size: 13px;
+    text-decoration: underline;
+    padding: 6px 0 2px;
+    cursor: pointer;
+    text-align: left;
+  }
   .status-msg { margin-top: 10px; font-size: 14px; text-align: center; }
   .status-msg.ok { color: var(--ok); }
   .status-msg.err { color: var(--danger); }
@@ -117,6 +132,12 @@
     <label>車両NO（自動で入ります。違う場合は書き換えてください）</label>
     <input type="text" inputmode="numeric" id="vehicleInput" placeholder="例：0317">
 
+    <button type="button" class="link-btn" id="toggleVehicle2Btn">＋ 車両故障などで途中から別の車両に交代した場合はこちら</button>
+    <div id="vehicle2Wrap" style="display:none;">
+      <label>交代後の車両NO</label>
+      <input type="text" inputmode="numeric" id="vehicle2Input" placeholder="例：0450">
+    </div>
+
     <label>収集地区</label>
     <input type="text" id="district" placeholder="例：新富　城山">
 
@@ -128,7 +149,7 @@
       </div>
       <div>
         <label>帰社時間（終了）</label>
-        <input type="time" id="timeEndInput">
+        <input type="time" id="timeEndInput" class="auto-field">
       </div>
     </div>
   </div>
@@ -285,6 +306,7 @@ async function submitReport(){
   const course = CURRENT_COURSE;
   const date = CURRENT_DATE;
   const vehicleNo = document.getElementById("vehicleInput").value.trim();
+  const vehicleNo2 = document.getElementById("vehicle2Input").value.trim();
   const server = getAdminServer();
 
   if (!vehicleNo) {
@@ -313,6 +335,7 @@ async function submitReport(){
     courseName: course ? course.name : "",
     color: course ? course.color : "",
     vehicleNo: vehicleNo,
+    vehicleNo2: vehicleNo2,
     driver: document.getElementById("driverSelect").value,
     helper: document.getElementById("helperSelect").value,
     burnable: burnable,
@@ -360,6 +383,16 @@ let CURRENT_COURSE = presetCourseId ? findCourse(presetCourseId) : null;
 const dateField = document.getElementById("dateField");
 const weekday = WEEKDAYS[new Date(CURRENT_DATE + "T00:00:00").getDay()];
 dateField.innerHTML = "<strong>" + CURRENT_DATE.replace(/-/g, "/") + "（" + weekday + "）</strong>";
+
+document.getElementById("toggleVehicle2Btn").addEventListener("click", () => {
+  const wrap = document.getElementById("vehicle2Wrap");
+  const btn = document.getElementById("toggleVehicle2Btn");
+  const showing = wrap.style.display !== "none";
+  wrap.style.display = showing ? "none" : "block";
+  btn.textContent = showing
+    ? "＋ 車両故障などで途中から別の車両に交代した場合はこちら"
+    : "－ 交代車両の入力を閉じる";
+});
 
 document.getElementById("submitBtn").addEventListener("click", submitReport);
 updateAutoField();
