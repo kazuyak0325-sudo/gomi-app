@@ -114,11 +114,6 @@
     <h2>車両NO・収集地区</h2>
     <div class="auto-field" id="dateField">読み込み中...</div>
 
-    <div id="courseSelectWrap" style="display:none;">
-      <label>コース（車両NO自動入力の参考にします）</label>
-      <select id="courseSelect"></select>
-    </div>
-
     <label>車両NO（自動で入ります。違う場合は書き換えてください）</label>
     <input type="text" inputmode="numeric" id="vehicleInput" placeholder="例：0317">
 
@@ -239,30 +234,6 @@ function todayStr(){
   return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
 }
 
-function buildCourseSelect(){
-  const sel = document.getElementById("courseSelect");
-  const groups = {};
-  COURSES.forEach(c => {
-    if (!groups[c.color]) groups[c.color] = [];
-    groups[c.color].push(c);
-  });
-  const blank = document.createElement("option");
-  blank.value = "";
-  blank.textContent = "（選択してください）";
-  sel.appendChild(blank);
-  Object.keys(groups).forEach(color => {
-    const og = document.createElement("optgroup");
-    og.label = color;
-    groups[color].forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.id;
-      opt.textContent = c.name;
-      og.appendChild(opt);
-    });
-    sel.appendChild(og);
-  });
-}
-
 function buildStaffSelects(){
   [document.getElementById("driverSelect"), document.getElementById("helperSelect")].forEach(sel => {
     const blank = document.createElement("option");
@@ -316,11 +287,6 @@ async function submitReport(){
   const vehicleNo = document.getElementById("vehicleInput").value.trim();
   const server = getAdminServer();
 
-  if (!course || !date) {
-    statusMsg.className = "status-msg err";
-    statusMsg.textContent = "コースを選択してください。";
-    return;
-  }
   if (!vehicleNo) {
     statusMsg.className = "status-msg err";
     statusMsg.textContent = "車両NOを入力してください。";
@@ -343,9 +309,9 @@ async function submitReport(){
 
   const payload = {
     date: date,
-    courseId: course.id,
-    courseName: course.name,
-    color: course.color,
+    courseId: course ? course.id : "",
+    courseName: course ? course.name : "",
+    color: course ? course.color : "",
     vehicleNo: vehicleNo,
     driver: document.getElementById("driverSelect").value,
     helper: document.getElementById("helperSelect").value,
@@ -383,7 +349,6 @@ async function submitReport(){
   }
 }
 
-buildCourseSelect();
 buildStaffSelects();
 initServerField();
 
@@ -395,14 +360,6 @@ let CURRENT_COURSE = presetCourseId ? findCourse(presetCourseId) : null;
 const dateField = document.getElementById("dateField");
 const weekday = WEEKDAYS[new Date(CURRENT_DATE + "T00:00:00").getDay()];
 dateField.innerHTML = "<strong>" + CURRENT_DATE.replace(/-/g, "/") + "（" + weekday + "）</strong>";
-
-if (!CURRENT_COURSE) {
-  document.getElementById("courseSelectWrap").style.display = "block";
-}
-document.getElementById("courseSelect").addEventListener("change", (e) => {
-  CURRENT_COURSE = findCourse(e.target.value) || null;
-  updateAutoField();
-});
 
 document.getElementById("submitBtn").addEventListener("click", submitReport);
 updateAutoField();
