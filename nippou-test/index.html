@@ -75,6 +75,7 @@
     margin-top: 6px;
   }
   .btn-primary:active { background: var(--accent-dark); }
+  .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
   .status-msg { margin-top: 10px; font-size: 14px; text-align: center; }
   .status-msg.ok { color: var(--ok); }
   .status-msg.err { color: var(--danger); }
@@ -99,17 +100,10 @@
 </header>
 <main>
   <div class="card">
-    <h2>日付・コース</h2>
-    <div class="row2">
-      <div>
-        <label>日付</label>
-        <input type="date" id="dateInput">
-      </div>
-      <div>
-        <label>コース</label>
-        <select id="courseSelect"></select>
-      </div>
-    </div>
+    <h2>収集地区</h2>
+    <div class="auto-field" id="courseInfoField">読み込み中...</div>
+    <label>収集地区</label>
+    <input type="text" id="district" placeholder="例：新富　城山">
 
     <label>車両NO・収集時間（自動で入力されます）</label>
     <div class="auto-field" id="autoField">コースを選ぶと自動で表示されます</div>
@@ -150,9 +144,7 @@
   </div>
 
   <div class="card">
-    <h2>収集地区・走行距離</h2>
-    <label>収集地区</label>
-    <input type="text" id="district" placeholder="例：新富　城山">
+    <h2>走行距離</h2>
     <div class="row2">
       <div><label>走行距離 開始（km）</label><input type="number" inputmode="decimal" id="odoStart"></div>
       <div><label>走行距離 終了（km）</label><input type="number" inputmode="decimal" id="odoEnd"></div>
@@ -218,26 +210,6 @@ function todayStr(){
   return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
 }
 
-function buildCourseSelect(){
-  const sel = document.getElementById("courseSelect");
-  const groups = {};
-  COURSES.forEach(c => {
-    if (!groups[c.color]) groups[c.color] = [];
-    groups[c.color].push(c);
-  });
-  Object.keys(groups).forEach(color => {
-    const og = document.createElement("optgroup");
-    og.label = color;
-    groups[color].forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.id;
-      opt.textContent = c.name;
-      og.appendChild(opt);
-    });
-    sel.appendChild(og);
-  });
-}
-
 function buildStaffSelects(){
   [document.getElementById("driverSelect"), document.getElementById("helperSelect")].forEach(sel => {
     const blank = document.createElement("option");
@@ -258,10 +230,10 @@ function findCourse(id){
 }
 
 function updateAutoField(){
-  const courseId = document.getElementById("courseSelect").value;
-  const date = document.getElementById("dateInput").value;
   const box = document.getElementById("autoField");
-  if (!courseId || !date) { box.textContent = "コースと日付を選んでください"; return; }
+  if (!CURRENT_COURSE) { box.textContent = "コースが指定されていないため、自動入力できません。"; return; }
+  const courseId = CURRENT_COURSE.id;
+  const date = CURRENT_DATE;
 
   let vehicle = "";
   let timeStart = "";
@@ -304,14 +276,13 @@ function initServerField(){
 
 async function submitReport(){
   const statusMsg = document.getElementById("statusMsg");
-  const courseId = document.getElementById("courseSelect").value;
-  const course = findCourse(courseId);
-  const date = document.getElementById("dateInput").value;
+  const course = CURRENT_COURSE;
+  const date = CURRENT_DATE;
   const server = getAdminServer();
 
   if (!course || !date) {
     statusMsg.className = "status-msg err";
-    statusMsg.textContent = "コースと日付を確認してください。";
+    statusMsg.textContent = "コースが指定されていません。各コース画面の☰メニューから開いてください。";
     return;
   }
   if (!server) {
@@ -372,18 +343,21 @@ async function submitReport(){
   }
 }
 
-buildCourseSelect();
 buildStaffSelects();
 initServerField();
-document.getElementById("dateInput").value = todayStr();
 
+const CURRENT_DATE = todayStr();
 const presetCourseId = new URLSearchParams(location.search).get("course");
-if (presetCourseId && findCourse(presetCourseId)) {
-  document.getElementById("courseSelect").value = presetCourseId;
+const CURRENT_COURSE = presetCourseId ? findCourse(presetCourseId) : null;
+
+const courseInfoField = document.getElementById("courseInfoField");
+if (CURRENT_COURSE) {
+  courseInfoField.innerHTML = "<strong>" + CURRENT_COURSE.name + "</strong>　" + CURRENT_DATE.replace(/-/g, "/");
+} else {
+  courseInfoField.textContent = "コースが指定されていません。各コース画面の☰メニューから「収集日報を入力（テスト）」を開いてください。";
+  document.getElementById("submitBtn").disabled = true;
 }
 
-document.getElementById("courseSelect").addEventListener("change", updateAutoField);
-document.getElementById("dateInput").addEventListener("change", updateAutoField);
 document.getElementById("submitBtn").addEventListener("click", submitReport);
 updateAutoField();
 </script>
