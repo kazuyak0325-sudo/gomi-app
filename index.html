@@ -399,6 +399,7 @@
 <button id="topMenuBtn" class="top-menu-btn" aria-label="メニュー">☰</button>
 <div id="topMenuPanel" class="top-menu-panel">
   <button id="topHistoryBtn">過去の記録</button>
+  <button id="nippouTopBtn">収集日報を入力（テスト）</button>
   <button id="unsentBtn">未送信データの確認</button>
   <div class="admin-addr-box">
     アップロード先
@@ -1228,6 +1229,10 @@ document.addEventListener("click", (e) => {
 document.getElementById("topHistoryBtn").addEventListener("click", () => {
   topMenuPanel.classList.remove("open");
   openTopHistory();
+});
+document.getElementById("nippouTopBtn").addEventListener("click", () => {
+  topMenuPanel.classList.remove("open");
+  location.href = "nippou-test/";
 });
 
 (function(){
