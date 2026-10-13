@@ -473,6 +473,14 @@ function saveCardboardTimes(){
 
 function toggleCardboard(s){
   if (cardboard[s.st]) {
+    if (IS_CARDBOARD_COURSE && cardboardFilterOn) {
+      showConfirm('「' + s.target + '」の「ダンボールあり」を解除します。絞り込み表示から消えますが、よろしいですか？', () => {
+        delete cardboard[s.st];
+        saveCardboard();
+        render(document.getElementById("filter").value);
+      });
+      return;
+    }
     delete cardboard[s.st];
   } else {
     cardboard[s.st] = true;

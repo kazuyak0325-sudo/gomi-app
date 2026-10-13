@@ -1,6 +1,6 @@
 const CACHE_NAME = "gomi-app-kuro-pet1-1790223151";
 const CACHE_PREFIX = "gomi-app-kuro-pet1-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791813047", "../../app.js?v=1791813047", "../../pet-icon.png"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791966156", "../../app.js?v=1791966156", "../../pet-icon.png"];
 const NETWORK_TIMEOUT_MS = 3000;
 
 self.addEventListener("install", (event) => {
