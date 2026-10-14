@@ -71,15 +71,17 @@
     font-size: 14px;
     color: var(--text-muted);
   }
-  input[type=time].auto-field {
+  .time-wrap { padding: 0; }
+  .time-wrap input[type=time] {
+    display: block;
     width: 100%;
-    color: var(--text);
-    background: #f1f5f4;
-    border: 1px dashed var(--border);
-    border-radius: 8px;
+    box-sizing: border-box;
     padding: 10px;
     font-size: 14px;
-    box-sizing: border-box;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    outline: none;
   }
   .auto-field strong { color: var(--text); }
   .btn-primary {
@@ -151,7 +153,9 @@
     <div class="auto-field">8:30（固定）</div>
 
     <label>帰社時間 終了</label>
-    <input type="time" id="timeEndInput" class="auto-field">
+    <div class="auto-field time-wrap">
+      <input type="time" id="timeEndInput">
+    </div>
   </div>
 
   <div class="card">
