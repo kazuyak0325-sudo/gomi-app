@@ -671,9 +671,12 @@ function restoreDraft(){
 function openDestinationPicker(onChoose){
   const current = getAdminServer();
   const matchedPreset = ADMIN_PRESETS.find(p => p.url === current);
-  const options = ADMIN_PRESETS.slice();
+  const options = ADMIN_PRESETS.map(p => ({ label: p.label, value: p.url }));
   if (current && !matchedPreset) {
-    options.push({ label: "設定済みのアドレス（" + current + "）", url: current });
+    options.push({ label: "設定済みのアドレス（" + current + "）", value: current });
+  }
+  if (ADMIN_PRESETS.length > 1) {
+    options.push({ label: "両方（" + ADMIN_PRESETS.map(p => p.label).join("・") + "）", value: ADMIN_PRESETS.map(p => p.url) });
   }
 
   const overlay = document.createElement("div");
@@ -707,7 +710,7 @@ function openDestinationPicker(onChoose){
     btn.textContent = opt.label + "に送信";
     btn.addEventListener("click", () => {
       overlay.remove();
-      onChoose(opt.url);
+      onChoose(opt.value);
     });
     wrap.appendChild(btn);
   });
@@ -768,25 +771,38 @@ async function submitReport(server){
 
   statusMsg.className = "status-msg";
   statusMsg.textContent = "送信中...";
-  try {
-    const res = await fetch(server.replace(/\/$/, "") + "/api/nippou-submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (data.ok) {
-      statusMsg.className = "status-msg ok";
-      statusMsg.textContent = "送信しました！";
-      clearDraft();
-    } else {
-      statusMsg.className = "status-msg err";
-      statusMsg.textContent = "送信に失敗しました：" + (data.error || "不明なエラー");
+  const serverList = (Array.isArray(server) ? server : [server]).filter(Boolean);
+  const results = [];
+  for (const s of serverList) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const res = await fetch(s.replace(/\/$/, "") + "/api/nippou-submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      const data = await res.json();
+      results.push(!!data.ok);
+    } catch (e) {
+      results.push(false);
     }
-  } catch (e) {
-    statusMsg.className = "status-msg err";
-    statusMsg.textContent = "事務所PCに接続できませんでした。送信先設定とWi-Fi接続を確認してください。";
   }
+  const successCount = results.filter(Boolean).length;
+  if (successCount === 0) {
+    statusMsg.className = "status-msg err";
+    statusMsg.textContent = "送信に失敗しました。事務所PCに接続できませんでした。";
+    return;
+  }
+  statusMsg.className = "status-msg ok";
+  if (successCount === serverList.length) {
+    statusMsg.textContent = "送信しました！";
+  } else {
+    statusMsg.textContent = "送信しました（" + (serverList.length - successCount) + "台には接続できませんでした）";
+  }
+  clearDraft();
 }
 
 buildStaffSelects();
@@ -828,8 +844,10 @@ document.getElementById("submitBtn").addEventListener("click", () => {
     return;
   }
   openDestinationPicker((url) => {
-    setAdminServer(url);
-    initServerField();
+    if (!Array.isArray(url)) {
+      setAdminServer(url);
+      initServerField();
+    }
     submitReport(url);
   });
 });

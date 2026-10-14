@@ -1,6 +1,6 @@
 const CACHE_NAME = "gomi-app-pink-getsumoku-1789966274";
 const CACHE_PREFIX = "gomi-app-pink-getsumoku-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791996441", "../../app.js?v=1791996441"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1791997199", "../../app.js?v=1791997199"];
 const NETWORK_TIMEOUT_MS = 3000;
 
 self.addEventListener("install", (event) => {

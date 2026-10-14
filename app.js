@@ -548,9 +548,12 @@ const ADMIN_PRESETS = [
 function openDestinationPicker(onChoose){
   const current = getAdminServer();
   const matchedPreset = ADMIN_PRESETS.find(p => p.url === current);
-  const options = ADMIN_PRESETS.slice();
+  const options = ADMIN_PRESETS.map(p => ({ label: p.label, value: p.url }));
   if (current && !matchedPreset) {
-    options.push({ label: "設定済みのアドレス（" + current + "）", url: current });
+    options.push({ label: "設定済みのアドレス（" + current + "）", value: current });
+  }
+  if (ADMIN_PRESETS.length > 1) {
+    options.push({ label: "両方（" + ADMIN_PRESETS.map(p => p.label).join("・") + "）", value: ADMIN_PRESETS.map(p => p.url) });
   }
 
   const overlay = document.createElement("div");
@@ -566,7 +569,7 @@ function openDestinationPicker(onChoose){
     btn.textContent = opt.label + "に送信";
     btn.addEventListener("click", () => {
       overlay.remove();
-      onChoose(opt.url);
+      onChoose(opt.value);
     });
     box.appendChild(btn);
   });
@@ -1095,12 +1098,7 @@ async function uploadPhotosForDate(dateStr, server){
   }
 }
 
-async function uploadOrDownload(csv, dateStr, server, onDone){
-  if (!server) {
-    downloadCsvFallback(csv, dateStr, "送信先が未設定のため、ファイルをダウンロードしました。");
-    if (onDone) onDone(false);
-    return;
-  }
+async function tryUploadToServer(csv, dateStr, server){
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
@@ -1121,14 +1119,37 @@ async function uploadOrDownload(csv, dateStr, server, onDone){
     if (!res.ok || data.error) {
       throw new Error(data.error || "アップロードに失敗しました。");
     }
-    markSavedForDate(dateStr);
-    showToast(dateStr + "分を事務所PCにアップロードしました！");
     await uploadPhotosForDate(dateStr, server);
-    if (onDone) onDone(true);
+    return true;
   } catch (e) {
+    return false;
+  }
+}
+
+async function uploadOrDownload(csv, dateStr, servers, onDone){
+  const serverList = (Array.isArray(servers) ? servers : [servers]).filter(Boolean);
+  if (serverList.length === 0) {
+    downloadCsvFallback(csv, dateStr, "送信先が未設定のため、ファイルをダウンロードしました。");
+    if (onDone) onDone(false);
+    return;
+  }
+  const results = [];
+  for (const server of serverList) {
+    results.push(await tryUploadToServer(csv, dateStr, server));
+  }
+  const successCount = results.filter(Boolean).length;
+  if (successCount === 0) {
     downloadCsvFallback(csv, dateStr, "事務所PCに繋がらなかったため、ファイルをダウンロードしました。");
     if (onDone) onDone(false);
+    return;
   }
+  markSavedForDate(dateStr);
+  if (successCount === serverList.length) {
+    showToast(dateStr + "分を事務所PC" + (serverList.length > 1 ? "（" + serverList.length + "台）" : "") + "にアップロードしました！");
+  } else {
+    showToast(dateStr + "分を送信しました（" + (serverList.length - successCount) + "台には接続できませんでした）");
+  }
+  if (onDone) onDone(true);
 }
 
 document.getElementById("saveBtn").textContent = "本日の収集データを送信";
