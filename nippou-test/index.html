@@ -63,10 +63,6 @@
   .row5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
   .row5 label { text-align: center; margin: 0 0 4px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  input[type=time].auto-field {
-    width: 100%;
-    color: var(--text);
-  }
   .auto-field {
     background: #f1f5f4;
     border: 1px dashed var(--border);
@@ -74,6 +70,18 @@
     padding: 10px;
     font-size: 14px;
     color: var(--text-muted);
+  }
+  input[type=time].auto-field {
+    width: 100%;
+    color: var(--text);
+    background: #f1f5f4;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    -webkit-appearance: textfield;
+    box-sizing: border-box;
   }
   .auto-field strong { color: var(--text); }
   .btn-primary {
