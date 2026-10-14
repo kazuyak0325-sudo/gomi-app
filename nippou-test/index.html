@@ -207,7 +207,7 @@
   .status-msg.ok { color: var(--ok); }
   .status-msg.err { color: var(--danger); }
   details.server-setting { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
-  details.server-setting input { margin-top: 6px; }
+  details.server-setting select, details.server-setting input { margin-top: 6px; }
   .test-badge {
     display: inline-block;
     background: #fff3cd;
@@ -297,6 +297,7 @@
     <div class="status-msg" id="statusMsg"></div>
     <details class="server-setting">
       <summary>送信先設定</summary>
+      <select id="serverPresetSelect"></select>
       <input type="text" id="serverAddrInput" placeholder="例：https://192.168.11.34:8788">
     </details>
   </div>
@@ -593,19 +594,136 @@ function setAdminServer(v){
   try { localStorage.setItem("gomi_admin_server", v); } catch (e) {}
 }
 
+const ADMIN_PRESETS = [
+  { label: "常務のPC", url: "https://192.168.11.34:8788" },
+  { label: "みんなのPC", url: "https://192.168.11.16:8788" }
+];
+
 function initServerField(){
   const input = document.getElementById("serverAddrInput");
-  input.value = getAdminServer();
+  const select = document.getElementById("serverPresetSelect");
+  select.innerHTML = "";
+  ADMIN_PRESETS.forEach(preset => {
+    const opt = document.createElement("option");
+    opt.value = preset.url;
+    opt.textContent = preset.label;
+    select.appendChild(opt);
+  });
+  const otherOpt = document.createElement("option");
+  otherOpt.value = "__other__";
+  otherOpt.textContent = "その他（手入力）";
+  select.appendChild(otherOpt);
+
+  const current = getAdminServer();
+  const matched = ADMIN_PRESETS.find(p => p.url === current);
+  if (matched) {
+    select.value = matched.url;
+    input.style.display = "none";
+    input.value = current;
+  } else {
+    select.value = "__other__";
+    input.style.display = "block";
+    input.value = current;
+  }
+
+  select.addEventListener("change", () => {
+    if (select.value === "__other__") {
+      input.style.display = "block";
+      input.focus();
+    } else {
+      input.style.display = "none";
+      input.value = select.value;
+      setAdminServer(select.value);
+    }
+  });
   input.addEventListener("change", () => setAdminServer(input.value.trim()));
 }
 
-async function submitReport(){
+function draftKey(){
+  const courseId = CURRENT_COURSE ? CURRENT_COURSE.id : "none";
+  return "gomi_nippou_draft_" + courseId + "_" + CURRENT_DATE;
+}
+const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "youpura", "odoStart", "odoEnd"];
+function saveDraft(){
+  const data = {};
+  DRAFT_FIELD_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
+  try { localStorage.setItem(draftKey(), JSON.stringify(data)); } catch (e) {}
+}
+function clearDraft(){
+  try { localStorage.removeItem(draftKey()); } catch (e) {}
+}
+function restoreDraft(){
+  let data = null;
+  try {
+    const raw = localStorage.getItem(draftKey());
+    if (raw) data = JSON.parse(raw);
+  } catch (e) {}
+  if (!data) return;
+  DRAFT_FIELD_IDS.forEach(id => {
+    if (data[id]) document.getElementById(id).value = data[id];
+  });
+  if (data.vehicle2Input) {
+    document.getElementById("vehicle2Wrap").style.display = "block";
+    document.getElementById("toggleVehicle2Btn").textContent = "－ 交代車両の入力を閉じる";
+  }
+}
+
+function openDestinationPicker(onChoose){
+  const current = getAdminServer();
+  const matchedPreset = ADMIN_PRESETS.find(p => p.url === current);
+  const options = ADMIN_PRESETS.slice();
+  if (current && !matchedPreset) {
+    options.push({ label: "設定済みのアドレス（" + current + "）", url: current });
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "staff-modal-overlay open";
+  const box = document.createElement("div");
+  box.className = "staff-modal-box";
+  box.style.maxWidth = "320px";
+
+  const header = document.createElement("div");
+  header.className = "staff-modal-header";
+  const h3 = document.createElement("h3");
+  h3.textContent = "送信先を選んでください";
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "staff-modal-close";
+  closeBtn.textContent = "×";
+  closeBtn.addEventListener("click", () => overlay.remove());
+  header.appendChild(h3);
+  header.appendChild(closeBtn);
+  box.appendChild(header);
+
+  const wrap = document.createElement("div");
+  wrap.style.display = "flex";
+  wrap.style.flexDirection = "column";
+  wrap.style.gap = "8px";
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn-primary";
+    btn.style.marginTop = "0";
+    btn.textContent = opt.label + "に送信";
+    btn.addEventListener("click", () => {
+      overlay.remove();
+      onChoose(opt.url);
+    });
+    wrap.appendChild(btn);
+  });
+  box.appendChild(wrap);
+
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+async function submitReport(server){
   const statusMsg = document.getElementById("statusMsg");
   const course = CURRENT_COURSE;
   const date = CURRENT_DATE;
   const vehicleNo = document.getElementById("vehicleInput").value.trim();
   const vehicleNo2 = document.getElementById("vehicle2Input").value.trim();
-  const server = getAdminServer();
 
   if (!vehicleNo) {
     statusMsg.className = "status-msg err";
@@ -660,6 +778,7 @@ async function submitReport(){
     if (data.ok) {
       statusMsg.className = "status-msg ok";
       statusMsg.textContent = "送信しました！";
+      clearDraft();
     } else {
       statusMsg.className = "status-msg err";
       statusMsg.textContent = "送信に失敗しました：" + (data.error || "不明なエラー");
@@ -700,8 +819,24 @@ document.getElementById("toggleVehicle2Btn").addEventListener("click", () => {
     : "－ 交代車両の入力を閉じる";
 });
 
-document.getElementById("submitBtn").addEventListener("click", submitReport);
+document.getElementById("submitBtn").addEventListener("click", () => {
+  const vehicleNo = document.getElementById("vehicleInput").value.trim();
+  const statusMsg = document.getElementById("statusMsg");
+  if (!vehicleNo) {
+    statusMsg.className = "status-msg err";
+    statusMsg.textContent = "車両NOを入力してください。";
+    return;
+  }
+  openDestinationPicker((url) => {
+    setAdminServer(url);
+    initServerField();
+    submitReport(url);
+  });
+});
 updateAutoField();
+restoreDraft();
+document.querySelector("main").addEventListener("input", saveDraft);
+document.querySelector("main").addEventListener("change", saveDraft);
 </script>
 </body>
 </html>
