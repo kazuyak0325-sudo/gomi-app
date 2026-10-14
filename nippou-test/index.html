@@ -91,12 +91,10 @@
     background: #f1f5f4;
     border: 1px solid var(--border);
     border-radius: 8px;
-    min-width: 48px;
+    width: 36px;
     height: 32px;
-    padding: 0 10px;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1;
-    white-space: nowrap;
     color: var(--text-muted);
     cursor: pointer;
   }
@@ -257,7 +255,7 @@
   <div class="card">
     <div class="card-head">
       <h2>搭乗者</h2>
-      <button type="button" class="staff-menu-btn" id="staffMenuBtn">・・・</button>
+      <button type="button" class="staff-menu-btn" id="staffMenuBtn" aria-label="搭乗者リストを編集">☰</button>
     </div>
     <label>運転手</label>
     <select id="driverSelect"></select>
