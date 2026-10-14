@@ -772,8 +772,7 @@ async function submitReport(server){
   statusMsg.className = "status-msg";
   statusMsg.textContent = "送信中...";
   const serverList = (Array.isArray(server) ? server : [server]).filter(Boolean);
-  const results = [];
-  for (const s of serverList) {
+  const results = await Promise.all(serverList.map(async (s) => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000);
@@ -785,11 +784,11 @@ async function submitReport(server){
       });
       clearTimeout(timeoutId);
       const data = await res.json();
-      results.push(!!data.ok);
+      return !!data.ok;
     } catch (e) {
-      results.push(false);
+      return false;
     }
-  }
+  }));
   const successCount = results.filter(Boolean).length;
   if (successCount === 0) {
     statusMsg.className = "status-msg err";

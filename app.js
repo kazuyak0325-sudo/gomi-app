@@ -1133,10 +1133,7 @@ async function uploadOrDownload(csv, dateStr, servers, onDone){
     if (onDone) onDone(false);
     return;
   }
-  const results = [];
-  for (const server of serverList) {
-    results.push(await tryUploadToServer(csv, dateStr, server));
-  }
+  const results = await Promise.all(serverList.map(server => tryUploadToServer(csv, dateStr, server)));
   const successCount = results.filter(Boolean).length;
   if (successCount === 0) {
     downloadCsvFallback(csv, dateStr, "事務所PCに繋がらなかったため、ファイルをダウンロードしました。");
