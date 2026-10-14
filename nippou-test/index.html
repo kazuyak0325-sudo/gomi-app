@@ -78,10 +78,106 @@
     box-sizing: border-box;
     padding: 10px;
     font-size: 14px;
+    font-family: inherit;
+    text-align: left;
     color: var(--text);
     background: transparent;
     border: none;
     outline: none;
+  }
+  .card-head { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; }
+  .card-head h2 { margin: 0; }
+  .staff-menu-btn {
+    background: #f1f5f4;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-width: 48px;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 16px;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .staff-menu-btn:active { background: #e4e7ec; }
+  .staff-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+  }
+  .staff-modal-overlay.open { display: flex; }
+  .staff-modal-box {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .staff-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .staff-modal-header h3 { margin: 0; font-size: 16px; color: var(--accent-dark); }
+  .staff-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .staff-list-area {
+    overflow-y: auto;
+    flex: 1;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+    min-height: 80px;
+  }
+  .staff-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 2px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+  }
+  .staff-row:last-child { border-bottom: none; }
+  .staff-row-name { flex: 1; }
+  .staff-row button, .staff-add-area .btn-primary {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #f7f7f7;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .staff-row .staff-del-btn { color: var(--danger); border-color: #e8c7c1; }
+  .staff-edit-row { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .staff-edit-row input {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .staff-add-area label { margin: 6px 0 4px; }
+  .staff-add-area input { margin-bottom: 4px; }
+  .staff-add-area .btn-primary {
+    width: 100%;
+    font-size: 14px;
+    padding: 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    margin-top: 4px;
   }
   .auto-field strong { color: var(--text); }
   .btn-primary {
@@ -159,7 +255,10 @@
   </div>
 
   <div class="card">
-    <h2>搭乗者</h2>
+    <div class="card-head">
+      <h2>搭乗者</h2>
+      <button type="button" class="staff-menu-btn" id="staffMenuBtn">・・・</button>
+    </div>
     <label>運転手</label>
     <select id="driverSelect"></select>
 
@@ -204,6 +303,24 @@
     </details>
   </div>
 </main>
+
+<div class="staff-modal-overlay" id="staffModalOverlay">
+  <div class="staff-modal-box">
+    <div class="staff-modal-header">
+      <h3>搭乗者リストの編集</h3>
+      <button type="button" class="staff-modal-close" id="staffModalCloseBtn">×</button>
+    </div>
+    <div class="staff-list-area" id="staffListArea">読み込み中...</div>
+    <div class="staff-add-area">
+      <label>新しく追加する氏名（姓 名）</label>
+      <input type="text" id="newStaffName" placeholder="例：山田 太郎">
+      <label>ふりがな（ひらがな、並び順に使います）</label>
+      <input type="text" id="newStaffReading" placeholder="例：やまだたろう">
+      <button type="button" class="btn-primary" id="addStaffBtn">追加する</button>
+      <div class="status-msg" id="staffModalMsg"></div>
+    </div>
+  </div>
+</div>
 
 <script>
 const COURSES = [
@@ -266,19 +383,191 @@ function todayStr(){
   return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
 }
 
+let STAFF_LIST = STAFF_NAMES.map(name => ({ name, reading: "" }));
+
 function buildStaffSelects(){
   [document.getElementById("driverSelect"), document.getElementById("helperSelect")].forEach(sel => {
+    const prevValue = sel.value;
+    sel.innerHTML = "";
     const blank = document.createElement("option");
     blank.value = "";
     blank.textContent = "（選択してください）";
     sel.appendChild(blank);
-    STAFF_NAMES.forEach(name => {
+    STAFF_LIST.forEach(person => {
       const opt = document.createElement("option");
-      opt.value = name;
-      opt.textContent = name;
+      opt.value = person.name;
+      opt.textContent = person.name;
       sel.appendChild(opt);
     });
+    if (STAFF_LIST.some(p => p.name === prevValue)) sel.value = prevValue;
   });
+}
+
+async function fetchStaffList(){
+  const server = getAdminServer();
+  if (!server) return null;
+  try {
+    const res = await fetch(server.replace(/\/$/, "") + "/api/staff-list", { cache: "no-store" });
+    const data = await res.json();
+    if (data.ok && Array.isArray(data.staff)) return data.staff;
+  } catch (e) {}
+  return null;
+}
+
+async function refreshStaffList(){
+  const list = await fetchStaffList();
+  if (list) {
+    STAFF_LIST = list;
+    buildStaffSelects();
+  }
+}
+
+async function callStaffApi(path, body){
+  const server = getAdminServer();
+  const msg = document.getElementById("staffModalMsg");
+  if (!server) {
+    msg.className = "status-msg err";
+    msg.textContent = "送信先設定（事務所PCのアドレス）を先に設定してください。";
+    return null;
+  }
+  try {
+    const res = await fetch(server.replace(/\/$/, "") + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.error) {
+      msg.className = "status-msg err";
+      msg.textContent = data.error;
+      return null;
+    }
+    return data;
+  } catch (e) {
+    msg.className = "status-msg err";
+    msg.textContent = "事務所PCに接続できませんでした。送信先設定とWi-Fi接続を確認してください。";
+    return null;
+  }
+}
+
+function renderStaffModalList(){
+  const area = document.getElementById("staffListArea");
+  area.innerHTML = "";
+  if (STAFF_LIST.length === 0) {
+    area.textContent = "登録されている搭乗者がいません。";
+    return;
+  }
+  STAFF_LIST.forEach(person => {
+    const row = document.createElement("div");
+    row.className = "staff-row";
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "staff-row-name";
+    nameSpan.textContent = person.name;
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.textContent = "編集";
+    editBtn.addEventListener("click", () => startEditStaffRow(row, person));
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "staff-del-btn";
+    delBtn.textContent = "削除";
+    delBtn.addEventListener("click", () => deleteStaffMember(person));
+    row.appendChild(nameSpan);
+    row.appendChild(editBtn);
+    row.appendChild(delBtn);
+    area.appendChild(row);
+  });
+}
+
+function startEditStaffRow(row, person){
+  row.innerHTML = "";
+  const editWrap = document.createElement("div");
+  editWrap.className = "staff-edit-row";
+  const nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.value = person.name;
+  const readingInput = document.createElement("input");
+  readingInput.type = "text";
+  readingInput.value = person.reading || "";
+  readingInput.placeholder = "ふりがな（ひらがな）";
+  editWrap.appendChild(nameInput);
+  editWrap.appendChild(readingInput);
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.textContent = "保存";
+  saveBtn.addEventListener("click", () => saveStaffEdit(person.name, nameInput.value.trim(), readingInput.value.trim()));
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
+  cancelBtn.textContent = "取消";
+  cancelBtn.addEventListener("click", renderStaffModalList);
+
+  row.appendChild(editWrap);
+  row.appendChild(saveBtn);
+  row.appendChild(cancelBtn);
+}
+
+async function saveStaffEdit(oldName, newName, newReading){
+  const msg = document.getElementById("staffModalMsg");
+  if (!newName || !newReading) {
+    msg.className = "status-msg err";
+    msg.textContent = "氏名とふりがなを入力してください。";
+    return;
+  }
+  const data = await callStaffApi("/api/staff-edit", { oldName, newName, newReading });
+  if (data) {
+    STAFF_LIST = data.staff;
+    msg.className = "status-msg ok";
+    msg.textContent = "更新しました。";
+    renderStaffModalList();
+    buildStaffSelects();
+  }
+}
+
+async function deleteStaffMember(person){
+  if (!confirm(person.name + " を削除しますか？")) return;
+  const data = await callStaffApi("/api/staff-delete", { name: person.name });
+  if (data) {
+    STAFF_LIST = data.staff;
+    document.getElementById("staffModalMsg").className = "status-msg ok";
+    document.getElementById("staffModalMsg").textContent = "削除しました。";
+    renderStaffModalList();
+    buildStaffSelects();
+  }
+}
+
+async function addStaffMember(){
+  const nameInput = document.getElementById("newStaffName");
+  const readingInput = document.getElementById("newStaffReading");
+  const name = nameInput.value.trim();
+  const reading = readingInput.value.trim();
+  const msg = document.getElementById("staffModalMsg");
+  if (!name || !reading) {
+    msg.className = "status-msg err";
+    msg.textContent = "氏名とふりがなを入力してください。";
+    return;
+  }
+  const data = await callStaffApi("/api/staff-add", { name, reading });
+  if (data) {
+    STAFF_LIST = data.staff;
+    nameInput.value = "";
+    readingInput.value = "";
+    msg.className = "status-msg ok";
+    msg.textContent = "追加しました。";
+    renderStaffModalList();
+    buildStaffSelects();
+  }
+}
+
+function openStaffModal(){
+  document.getElementById("staffModalMsg").className = "status-msg";
+  document.getElementById("staffModalMsg").textContent = "";
+  renderStaffModalList();
+  document.getElementById("staffModalOverlay").classList.add("open");
+}
+function closeStaffModal(){
+  document.getElementById("staffModalOverlay").classList.remove("open");
 }
 
 function findCourse(id){
@@ -385,6 +674,14 @@ async function submitReport(){
 
 buildStaffSelects();
 initServerField();
+refreshStaffList();
+
+document.getElementById("staffMenuBtn").addEventListener("click", openStaffModal);
+document.getElementById("staffModalCloseBtn").addEventListener("click", closeStaffModal);
+document.getElementById("staffModalOverlay").addEventListener("click", (e) => {
+  if (e.target.id === "staffModalOverlay") closeStaffModal();
+});
+document.getElementById("addStaffBtn").addEventListener("click", addStaffMember);
 
 const CURRENT_DATE = todayStr();
 const WEEKDAYS = ["日","月","火","水","木","金","土"];
