@@ -540,6 +540,50 @@ function setAdminServer(v){
   } catch (e) {}
 }
 
+const ADMIN_PRESETS = [
+  { label: "常務のPC", url: "https://192.168.11.34:8788" },
+  { label: "みんなのPC", url: "https://192.168.11.16:8788" }
+];
+
+function openDestinationPicker(onChoose){
+  const current = getAdminServer();
+  const matchedPreset = ADMIN_PRESETS.find(p => p.url === current);
+  const options = ADMIN_PRESETS.slice();
+  if (current && !matchedPreset) {
+    options.push({ label: "設定済みのアドレス（" + current + "）", url: current });
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  const p = document.createElement("p");
+  p.textContent = "送信先を選んでください";
+  box.appendChild(p);
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "dest-picker-btn";
+    btn.textContent = opt.label + "に送信";
+    btn.addEventListener("click", () => {
+      overlay.remove();
+      onChoose(opt.url);
+    });
+    box.appendChild(btn);
+  });
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  actions.style.marginTop = "10px";
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "キャンセル";
+  cancelBtn.addEventListener("click", () => overlay.remove());
+  actions.appendChild(cancelBtn);
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
 function showToast(message){
   const t = document.createElement("div");
   t.className = "toast";
@@ -1051,8 +1095,7 @@ async function uploadPhotosForDate(dateStr, server){
   }
 }
 
-async function uploadOrDownload(csv, dateStr, onDone){
-  const server = getAdminServer();
+async function uploadOrDownload(csv, dateStr, server, onDone){
   if (!server) {
     downloadCsvFallback(csv, dateStr, "送信先が未設定のため、ファイルをダウンロードしました。");
     if (onDone) onDone(false);
@@ -1090,17 +1133,19 @@ async function uploadOrDownload(csv, dateStr, onDone){
 
 document.getElementById("saveBtn").textContent = "本日の収集データを送信";
 
-document.getElementById("saveBtn").addEventListener("click", async () => {
+document.getElementById("saveBtn").addEventListener("click", () => {
   if (stations.length === 0) {
     showToast("このコースはまだ準備中です。");
     return;
   }
-  const btn = document.getElementById("saveBtn");
-  btn.disabled = true;
-  btn.textContent = "アップロード中...";
-  await uploadOrDownload(buildCsv(), todayDateStr());
-  btn.disabled = false;
-  btn.textContent = "本日の収集データを送信";
+  openDestinationPicker(async (server) => {
+    const btn = document.getElementById("saveBtn");
+    btn.disabled = true;
+    btn.textContent = "アップロード中...";
+    await uploadOrDownload(buildCsv(), todayDateStr(), server);
+    btn.disabled = false;
+    btn.textContent = "本日の収集データを送信";
+  });
 });
 
 function findUnsentPastDates(){
@@ -1129,18 +1174,20 @@ function checkUnsentPastData(){
   const btn = document.createElement("button");
   btn.className = "past-data-btn";
   btn.textContent = "送信する";
-  btn.addEventListener("click", async () => {
-    btn.disabled = true;
-    btn.textContent = "送信中...";
-    for (const dateStr of dates) {
-      const recs = JSON.parse(localStorage.getItem(keyFor(dateStr)) || "{}");
-      const viols = JSON.parse(localStorage.getItem(violationKeyFor(dateStr)) || "{}");
-      const cbs = JSON.parse(localStorage.getItem(cardboardKeyFor(dateStr)) || "{}");
-      const cbTimes = JSON.parse(localStorage.getItem(cardboardTimeKeyFor(dateStr)) || "{}");
-      const cbViols = JSON.parse(localStorage.getItem(cardboardViolationKeyFor(dateStr)) || "{}");
-      await uploadOrDownload(buildCsvFor(recs, viols, cbs, cbTimes, cbViols, dateStr), dateStr);
-    }
-    banner.remove();
+  btn.addEventListener("click", () => {
+    openDestinationPicker(async (server) => {
+      btn.disabled = true;
+      btn.textContent = "送信中...";
+      for (const dateStr of dates) {
+        const recs = JSON.parse(localStorage.getItem(keyFor(dateStr)) || "{}");
+        const viols = JSON.parse(localStorage.getItem(violationKeyFor(dateStr)) || "{}");
+        const cbs = JSON.parse(localStorage.getItem(cardboardKeyFor(dateStr)) || "{}");
+        const cbTimes = JSON.parse(localStorage.getItem(cardboardTimeKeyFor(dateStr)) || "{}");
+        const cbViols = JSON.parse(localStorage.getItem(cardboardViolationKeyFor(dateStr)) || "{}");
+        await uploadOrDownload(buildCsvFor(recs, viols, cbs, cbTimes, cbViols, dateStr), dateStr, server);
+      }
+      banner.remove();
+    });
   });
   banner.appendChild(btn);
   header.insertBefore(banner, header.firstChild);

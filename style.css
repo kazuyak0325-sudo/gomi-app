@@ -496,6 +496,21 @@ main {
   background: var(--border);
   color: var(--text);
 }
+.dest-picker-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+.dest-picker-btn:active { opacity: 0.85; }
 .vehicle-input { width: 100%; box-sizing: border-box; padding: 10px; margin: 0 0 14px; font-size: 28px; text-align: center; letter-spacing: 0.3em; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
 .modal-btn-danger { background: #b4341a; color: #fff; }
 .vehicle-change-btn {
