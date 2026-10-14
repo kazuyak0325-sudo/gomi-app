@@ -287,9 +287,11 @@
   <div class="card">
     <h2>走行距離</h2>
     <div class="row2">
-      <div><label>走行距離 開始（km）</label><input type="number" inputmode="decimal" id="odoStart"></div>
-      <div><label>走行距離 終了（km）</label><input type="number" inputmode="decimal" id="odoEnd"></div>
+      <div><label>走行距離 開始（km）</label><input type="text" inputmode="decimal" id="odoStart" placeholder="例：1000"></div>
+      <div><label>走行距離 終了（km）</label><input type="text" inputmode="decimal" id="odoEnd" placeholder="例：1100"></div>
     </div>
+    <label>走行距離（自動計算）</label>
+    <div class="auto-field" id="odoDistanceField">-</div>
   </div>
 
   <div class="card">
@@ -325,29 +327,29 @@
 const COURSES = [
   { id: "murasaki-getsumoku", name: "紫コース（月・木）", color: "紫" },
   { id: "murasaki-kakin", name: "紫コース（火・金）", color: "紫" },
-  { id: "murasaki-pet1", name: "紫コース（ペット・ダンボール①）", color: "紫" },
-  { id: "murasaki-pet2", name: "紫コース（ペット・ダンボール②）", color: "紫" },
+  { id: "murasaki-pet1", name: "紫コース（ペット・ダンボール第1/第3）", color: "紫" },
+  { id: "murasaki-pet2", name: "紫コース（ペット・ダンボール第2/第4）", color: "紫" },
   { id: "midori-getsumoku", name: "緑コース（月・木）", color: "緑" },
   { id: "midori-kakin", name: "緑コース（火・金）", color: "緑" },
-  { id: "midori-pet1", name: "緑コース（ペット・ダンボール①）", color: "緑" },
-  { id: "midori-pet2", name: "緑コース（ペット・ダンボール②）", color: "緑" },
+  { id: "midori-pet1", name: "緑コース（ペット・ダンボール第1/第3）", color: "緑" },
+  { id: "midori-pet2", name: "緑コース（ペット・ダンボール第2/第4）", color: "緑" },
   { id: "kiiro-getsumoku", name: "黄コース（月・木）", color: "黄" },
   { id: "kiiro-kakin", name: "黄コース（火・金）", color: "黄" },
   { id: "kiiro-kanada", name: "黄コース（金田地区）", color: "黄" },
-  { id: "kiiro-pet1", name: "黄コース（ペット・ダンボール①）", color: "黄" },
-  { id: "kiiro-pet2", name: "黄コース（ペット・ダンボール②）", color: "黄" },
+  { id: "kiiro-pet1", name: "黄コース（ペット・ダンボール第1/第3）", color: "黄" },
+  { id: "kiiro-pet2", name: "黄コース（ペット・ダンボール第2/第4）", color: "黄" },
   { id: "ao-getsumoku", name: "青コース（月・木）", color: "青" },
   { id: "ao-kakin", name: "青コース（火・金）", color: "青" },
-  { id: "ao-pet1", name: "青コース（ペット・ダンボール①）", color: "青" },
-  { id: "ao-pet2", name: "青コース（ペット・ダンボール②）", color: "青" },
+  { id: "ao-pet1", name: "青コース（ペット・ダンボール第1/第3）", color: "青" },
+  { id: "ao-pet2", name: "青コース（ペット・ダンボール第2/第4）", color: "青" },
   { id: "kuro-getsumoku", name: "黒コース（月・木）", color: "黒" },
   { id: "kuro-kakin", name: "黒コース（火・金）", color: "黒" },
-  { id: "kuro-pet1", name: "黒コース（ペット・ダンボール①）", color: "黒" },
-  { id: "kuro-pet2", name: "黒コース（ペット・ダンボール②）", color: "黒" },
+  { id: "kuro-pet1", name: "黒コース（ペット・ダンボール第1/第3）", color: "黒" },
+  { id: "kuro-pet2", name: "黒コース（ペット・ダンボール第2/第4）", color: "黒" },
   { id: "pink-getsumoku", name: "ピンクコース（月・木）", color: "ピンク" },
   { id: "pink-kakin", name: "ピンクコース（火・金）", color: "ピンク" },
-  { id: "pink-pet1", name: "ピンクコース（ペット・ダンボール①）", color: "ピンク" },
-  { id: "pink-pet2", name: "ピンクコース（ペット・ダンボール②）", color: "ピンク" },
+  { id: "pink-pet1", name: "ピンクコース（ペット・ダンボール第1/第3）", color: "ピンク" },
+  { id: "pink-pet2", name: "ピンクコース（ペット・ダンボール第2/第4）", color: "ピンク" },
   { id: "youpura_murasaki-kanada", name: "容プラ(紫)コース（金田地区）", color: "容プラ(紫)" },
   { id: "youpura_murasaki-sakuyama", name: "容プラ(紫)コース（佐久山・親園・野崎）", color: "容プラ(紫)" },
   { id: "youpura_murasaki-nishi", name: "容プラ(紫)コース（西地区）", color: "容プラ(紫)" },
@@ -380,6 +382,36 @@ function pad2(n){ return String(n).padStart(2, "0"); }
 function todayStr(){
   const d = new Date();
   return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+}
+
+function stripCommas(s){
+  return (s || "").replace(/,/g, "");
+}
+function formatWithCommas(numStr){
+  if (!numStr) return "";
+  const parts = String(numStr).split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+function updateOdoDistance(){
+  const field = document.getElementById("odoDistanceField");
+  const start = parseFloat(stripCommas(document.getElementById("odoStart").value));
+  const end = parseFloat(stripCommas(document.getElementById("odoEnd").value));
+  if (!isNaN(start) && !isNaN(end) && end >= start) {
+    field.textContent = formatWithCommas(String(Math.round((end - start) * 1000) / 1000)) + " km";
+  } else {
+    field.textContent = "-";
+  }
+}
+function handleOdoInput(e){
+  const input = e.target;
+  const cursorFromEnd = input.value.length - input.selectionStart;
+  const raw = stripCommas(input.value).replace(/[^\d.]/g, "");
+  const formatted = formatWithCommas(raw);
+  input.value = formatted;
+  const newPos = Math.max(0, formatted.length - cursorFromEnd);
+  input.setSelectionRange(newPos, newPos);
+  updateOdoDistance();
 }
 
 let STAFF_LIST = STAFF_NAMES.map(name => ({ name, reading: "" }));
@@ -762,8 +794,8 @@ async function submitReport(server){
     cardboardKg: document.getElementById("cardboardKg").value,
     youpura: document.getElementById("youpura").value,
     district: document.getElementById("district").value,
-    odoStart: document.getElementById("odoStart").value,
-    odoEnd: document.getElementById("odoEnd").value,
+    odoStart: stripCommas(document.getElementById("odoStart").value),
+    odoEnd: stripCommas(document.getElementById("odoEnd").value),
     timeStart: "8:30",
     timeEnd: document.getElementById("timeEndInput").value,
     count: count
@@ -852,6 +884,9 @@ document.getElementById("submitBtn").addEventListener("click", () => {
 });
 updateAutoField();
 restoreDraft();
+updateOdoDistance();
+document.getElementById("odoStart").addEventListener("input", handleOdoInput);
+document.getElementById("odoEnd").addEventListener("input", handleOdoInput);
 document.querySelector("main").addEventListener("input", saveDraft);
 document.querySelector("main").addEventListener("change", saveDraft);
 </script>

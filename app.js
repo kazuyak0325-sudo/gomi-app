@@ -60,13 +60,15 @@ try {
 
   const menuPanel = document.createElement("div");
   menuPanel.className = "menu-panel";
+
   const topBtn = document.createElement("button");
   topBtn.className = "violation-filter-btn";
   topBtn.textContent = "トップ画面に戻る";
   topBtn.addEventListener("click", () => { location.href = "../../"; });
   menuPanel.appendChild(topBtn);
-  menuPanel.appendChild(actions1);
-  menuPanel.appendChild(actions2);
+
+  const editBtn = document.getElementById("editBtn");
+  if (editBtn) { editBtn.className = "violation-filter-btn"; menuPanel.appendChild(editBtn); }
 
   const violationFilterBtn = document.createElement("button");
   violationFilterBtn.id = "violationFilterBtn";
@@ -80,7 +82,11 @@ try {
   });
   menuPanel.appendChild(violationFilterBtn);
 
+  const saveBtn = document.getElementById("saveBtn");
+  if (saveBtn) { saveBtn.className = "violation-filter-btn"; menuPanel.appendChild(saveBtn); }
+
   const nippouBtn = document.createElement("button");
+  nippouBtn.id = "nippouBtn";
   nippouBtn.className = "violation-filter-btn";
   nippouBtn.textContent = "収集日報を入力（テスト）";
   nippouBtn.addEventListener("click", () => {
@@ -88,6 +94,11 @@ try {
   });
   menuPanel.appendChild(nippouBtn);
 
+  const resetBtn = document.getElementById("resetBtn");
+  if (resetBtn) { resetBtn.className = "violation-filter-btn"; menuPanel.appendChild(resetBtn); }
+
+  actions1.remove();
+  actions2.remove();
   header.appendChild(menuPanel);
 
   menuToggle.addEventListener("click", (e) => {

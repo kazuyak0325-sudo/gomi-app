@@ -1,6 +1,6 @@
 {
-  "name": "ピンクコース（ペット・ダンボール①） 回収記録",
-  "short_name": "ピンクコース（ペット・ダンボール①）",
+  "name": "ピンクコース（ペット・ダンボール第1/第3） 回収記録",
+  "short_name": "ピンクコース（ペット・ダンボール第1/第3）",
   "start_url": "./index.html",
   "scope": "/gomi-app/",
   "display": "standalone",

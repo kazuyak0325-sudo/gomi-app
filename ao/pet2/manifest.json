@@ -1,6 +1,6 @@
 {
-  "name": "青コース（ペット・ダンボール②） 回収記録",
-  "short_name": "青コース（ペット・ダンボール②）",
+  "name": "青コース（ペット・ダンボール第2/第4） 回収記録",
+  "short_name": "青コース（ペット・ダンボール第2/第4）",
   "start_url": "./index.html",
   "scope": "/gomi-app/",
   "display": "standalone",

@@ -75,6 +75,8 @@ header {
 .menu-panel #resetBtn:active { background: #f5d0d0; }
 .menu-panel #saveBtn { background: #7fb0e6; }
 .menu-panel #saveBtn:active { background: #d0e0f5; }
+.menu-panel #nippouBtn { background: #8fd9b4; }
+.menu-panel #nippouBtn:active { background: #d0f0de; }
 .menu-panel .violation-filter-btn {
   display: block;
   width: 100%;
