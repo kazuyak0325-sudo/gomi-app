@@ -241,7 +241,8 @@
     </div>
 
     <label>収集地区</label>
-    <input type="text" id="district" placeholder="例：新富　城山">
+    <input type="text" id="district" list="districtList" placeholder="例：新富　城山" autocomplete="off">
+    <datalist id="districtList"></datalist>
 
     <label>収集時間 開始</label>
     <div class="auto-field">8:30（固定）</div>
@@ -360,6 +361,12 @@ const COURSES = [
   { id: "youpura_kiiro-higashi", name: "容プラ(黄)コース（東地区）", color: "容プラ(黄)" }
 ];
 
+const DISTRICTS = [
+  "新富　城山", "中央　山の手　城山", "城山　元町　若草", "金田北　紫塚", "小滝　乙連沢　羽田", "金丸　奥沢", "金丸　奥沢　倉骨",
+  "加治屋　浅香　親園", "平沢　佐久山　親園", "末広　浅香", "本町　中央　末広", "加治屋　美原", "薄葉　野崎　石上", "宇田川　親園",
+  "金田北地区", "金田南地区", "大田原西地区", "大田原東地区", "親園・野崎・佐久山地区"
+];
+
 const STAFF_NAMES = [
   "生澤 政雄", "磯 浩之", "伊藤 隆",
   "大島 政夫", "大野 知昭", "大宮 泰彦", "大森 憲司", "大森 司", "大森 弘", "小野 孝二", "小山田 雅紀",
@@ -431,6 +438,16 @@ function buildStaffSelects(){
       sel.appendChild(opt);
     });
     if (STAFF_LIST.some(p => p.name === prevValue)) sel.value = prevValue;
+  });
+}
+
+function buildDistrictList(){
+  const list = document.getElementById("districtList");
+  list.innerHTML = "";
+  DISTRICTS.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    list.appendChild(opt);
   });
 }
 
@@ -837,6 +854,7 @@ async function submitReport(server){
 }
 
 buildStaffSelects();
+buildDistrictList();
 initServerField();
 refreshStaffList();
 
