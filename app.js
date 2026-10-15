@@ -1225,6 +1225,26 @@ checkUnsentPastData();
 
 render("");
 
+// Handoff from the nippou report page: it already sent itself and picked a
+// destination, so this just reuses that same destination for the
+// collection data instead of asking again.
+(function(){
+  const params = new URLSearchParams(location.search);
+  if (params.get("autosend") !== "1") return;
+  let servers = null;
+  try {
+    const raw = sessionStorage.getItem("gomi_autosend_servers");
+    if (raw) servers = JSON.parse(raw);
+  } catch (e) {}
+  try { sessionStorage.removeItem("gomi_autosend_servers"); } catch (e) {}
+  try { history.replaceState(null, "", location.pathname); } catch (e) {}
+  if (!servers || stations.length === 0) return;
+  showToast("収集日報に続けて、収集データも送信しています...");
+  uploadOrDownload(buildCsv(), todayDateStr(), servers, (ok) => {
+    if (ok) showToast("収集データも送信しました！");
+  });
+})();
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch(() => {});

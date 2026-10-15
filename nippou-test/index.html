@@ -851,6 +851,23 @@ async function submitReport(server){
     statusMsg.textContent = "送信しました（" + (serverList.length - successCount) + "台には接続できませんでした）";
   }
   clearDraft();
+
+  if (course) {
+    const path = courseUrlPath(course.id);
+    if (path) {
+      try { sessionStorage.setItem("gomi_autosend_servers", JSON.stringify(serverList)); } catch (e) {}
+      statusMsg.textContent += "　このコースの収集データも続けて送信します…";
+      setTimeout(() => { location.href = path + "?autosend=1"; }, 900);
+    }
+  }
+}
+
+function courseUrlPath(courseId){
+  const idx = courseId.indexOf("-");
+  if (idx === -1) return null;
+  const colorPart = courseId.substring(0, idx);
+  const subPart = courseId.substring(idx + 1);
+  return "../" + colorPart + "/" + subPart + "/";
 }
 
 buildStaffSelects();
