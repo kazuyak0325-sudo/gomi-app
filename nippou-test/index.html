@@ -884,8 +884,17 @@ document.getElementById("addStaffBtn").addEventListener("click", addStaffMember)
 
 const CURRENT_DATE = todayStr();
 const WEEKDAYS = ["日","月","火","水","木","金","土"];
+const LAST_COURSE_KEY = "gomi_last_nippou_course";
 const presetCourseId = new URLSearchParams(location.search).get("course");
 let CURRENT_COURSE = presetCourseId ? findCourse(presetCourseId) : null;
+if (CURRENT_COURSE) {
+  try { localStorage.setItem(LAST_COURSE_KEY, CURRENT_COURSE.id); } catch (e) {}
+} else {
+  try {
+    const lastCourseId = localStorage.getItem(LAST_COURSE_KEY);
+    if (lastCourseId) CURRENT_COURSE = findCourse(lastCourseId);
+  } catch (e) {}
+}
 
 const dateField = document.getElementById("dateField");
 const weekday = WEEKDAYS[new Date(CURRENT_DATE + "T00:00:00").getDay()];
