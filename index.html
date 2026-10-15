@@ -217,16 +217,19 @@
   .top-menu-panel button {
     display: block;
     width: 100%;
+    margin-top: 8px;
     padding: 11px 12px;
     border: none;
-    border-radius: 7px;
-    background: none;
-    text-align: left;
+    border-radius: 8px;
+    background: #f2f0f5;
+    text-align: center;
     font-size: 15px;
     font-weight: 700;
     font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   }
-  .top-menu-panel button:active { background: #f3f0f8; }
+  .top-menu-panel button:active { background: #e5e1ec; }
+  .top-menu-panel #nippouTopBtn { background: #8fd9b4; }
+  .top-menu-panel #nippouTopBtn:active { background: #d0f0de; }
   .hist-filter-btn {
     width: 100%;
     margin: 0 0 10px;
@@ -399,8 +402,8 @@
 <button id="topMenuBtn" class="top-menu-btn" aria-label="メニュー">☰</button>
 <div id="topMenuPanel" class="top-menu-panel">
   <button id="topHistoryBtn">過去の記録</button>
-  <button id="nippouTopBtn">収集日報を入力（テスト）</button>
   <button id="unsentBtn">未送信データの確認</button>
+  <button id="nippouTopBtn">収集日報を入力（テスト）</button>
   <div class="admin-addr-box">
     アップロード先
     <code id="adminAddrText">未設定</code>
