@@ -67,9 +67,6 @@ try {
   topBtn.addEventListener("click", () => { location.href = "../../"; });
   menuPanel.appendChild(topBtn);
 
-  const editBtn = document.getElementById("editBtn");
-  if (editBtn) { editBtn.className = "violation-filter-btn"; menuPanel.appendChild(editBtn); }
-
   const violationFilterBtn = document.createElement("button");
   violationFilterBtn.id = "violationFilterBtn";
   violationFilterBtn.className = "violation-filter-btn";
@@ -82,27 +79,6 @@ try {
   });
   menuPanel.appendChild(violationFilterBtn);
 
-  // Rarely needed now that the nippou report page sends this
-  // automatically, so it's tucked behind its own toggle instead of
-  // sitting in the main menu list.
-  const saveBtn = document.getElementById("saveBtn");
-  if (saveBtn) {
-    saveBtn.className = "violation-filter-btn";
-    const moreToggle = document.createElement("button");
-    moreToggle.className = "violation-filter-btn menu-more-toggle";
-    moreToggle.textContent = "▶ その他の操作";
-    const moreSection = document.createElement("div");
-    moreSection.className = "menu-more-section";
-    moreSection.appendChild(saveBtn);
-    moreToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const showing = moreSection.classList.toggle("open");
-      moreToggle.textContent = showing ? "▼ その他の操作" : "▶ その他の操作";
-    });
-    menuPanel.appendChild(moreToggle);
-    menuPanel.appendChild(moreSection);
-  }
-
   const nippouBtn = document.createElement("button");
   nippouBtn.id = "nippouBtn";
   nippouBtn.className = "violation-filter-btn";
@@ -114,6 +90,29 @@ try {
 
   const resetBtn = document.getElementById("resetBtn");
   if (resetBtn) { resetBtn.className = "violation-filter-btn"; menuPanel.appendChild(resetBtn); }
+
+  // ステーション編集・収集データ送信 are rarely needed day-to-day now that
+  // the nippou report page sends the collection data automatically, so
+  // they're tucked behind their own toggle at the bottom of the menu
+  // instead of sitting in the main list.
+  const editBtn = document.getElementById("editBtn");
+  const saveBtn = document.getElementById("saveBtn");
+  if (editBtn || saveBtn) {
+    const moreToggle = document.createElement("button");
+    moreToggle.className = "violation-filter-btn menu-more-toggle";
+    moreToggle.textContent = "▶ その他の操作";
+    const moreSection = document.createElement("div");
+    moreSection.className = "menu-more-section";
+    if (editBtn) { editBtn.className = "violation-filter-btn"; moreSection.appendChild(editBtn); }
+    if (saveBtn) { saveBtn.className = "violation-filter-btn"; moreSection.appendChild(saveBtn); }
+    moreToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const showing = moreSection.classList.toggle("open");
+      moreToggle.textContent = showing ? "▼ その他の操作" : "▶ その他の操作";
+    });
+    menuPanel.appendChild(moreToggle);
+    menuPanel.appendChild(moreSection);
+  }
 
   actions1.remove();
   actions2.remove();
