@@ -82,8 +82,26 @@ try {
   });
   menuPanel.appendChild(violationFilterBtn);
 
+  // Rarely needed now that the nippou report page sends this
+  // automatically, so it's tucked behind its own toggle instead of
+  // sitting in the main menu list.
   const saveBtn = document.getElementById("saveBtn");
-  if (saveBtn) { saveBtn.className = "violation-filter-btn"; menuPanel.appendChild(saveBtn); }
+  if (saveBtn) {
+    saveBtn.className = "violation-filter-btn";
+    const moreToggle = document.createElement("button");
+    moreToggle.className = "violation-filter-btn menu-more-toggle";
+    moreToggle.textContent = "▶ その他の操作";
+    const moreSection = document.createElement("div");
+    moreSection.className = "menu-more-section";
+    moreSection.appendChild(saveBtn);
+    moreToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const showing = moreSection.classList.toggle("open");
+      moreToggle.textContent = showing ? "▼ その他の操作" : "▶ その他の操作";
+    });
+    menuPanel.appendChild(moreToggle);
+    menuPanel.appendChild(moreSection);
+  }
 
   const nippouBtn = document.createElement("button");
   nippouBtn.id = "nippouBtn";
@@ -1241,7 +1259,10 @@ render("");
   if (!servers || stations.length === 0) return;
   showToast("収集日報に続けて、収集データも送信しています...");
   uploadOrDownload(buildCsv(), todayDateStr(), servers, (ok) => {
-    if (ok) showToast("収集データも送信しました！");
+    if (ok) {
+      showToast("収集データも送信しました！トップ画面に戻ります...");
+      setTimeout(() => { location.href = "../../"; }, 1500);
+    }
   });
 })();
 

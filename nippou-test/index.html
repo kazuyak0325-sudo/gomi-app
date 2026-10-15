@@ -206,6 +206,7 @@
   .status-msg { margin-top: 10px; font-size: 14px; text-align: center; }
   .status-msg.ok { color: var(--ok); }
   .status-msg.err { color: var(--danger); }
+  .field-error { border-color: var(--danger) !important; border-width: 2px !important; }
   details.server-setting { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
   details.server-setting select, details.server-setting input { margin-top: 6px; }
   .test-badge {
@@ -296,7 +297,7 @@
   </div>
 
   <div class="card">
-    <button class="btn-primary" id="submitBtn">この内容を送信する</button>
+    <button class="btn-primary" id="submitBtn">本日の業務内容を送信</button>
     <div class="status-msg" id="statusMsg"></div>
     <details class="server-setting">
       <summary>送信先設定</summary>
@@ -910,12 +911,39 @@ document.getElementById("toggleVehicle2Btn").addEventListener("click", () => {
     : "－ 交代車両の入力を閉じる";
 });
 
+const REQUIRED_FIELD_IDS = ["vehicleInput", "driverSelect", "helperSelect", "district", "timeEndInput", "odoStart", "odoEnd"];
+const WEIGHT_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "youpura"];
+
+function clearFieldErrors(){
+  REQUIRED_FIELD_IDS.concat(WEIGHT_FIELD_IDS).forEach(id => {
+    document.getElementById(id).classList.remove("field-error");
+  });
+}
+
+function validateNippouForm(){
+  const invalidIds = [];
+  REQUIRED_FIELD_IDS.forEach(id => {
+    if (!document.getElementById(id).value.trim()) invalidIds.push(id);
+  });
+  const hasWeight = WEIGHT_FIELD_IDS.some(id => document.getElementById(id).value.trim() !== "");
+  if (!hasWeight) invalidIds.push(...WEIGHT_FIELD_IDS);
+  return invalidIds;
+}
+
+REQUIRED_FIELD_IDS.concat(WEIGHT_FIELD_IDS).forEach(id => {
+  document.getElementById(id).addEventListener("input", (e) => e.target.classList.remove("field-error"));
+  document.getElementById(id).addEventListener("change", (e) => e.target.classList.remove("field-error"));
+});
+
 document.getElementById("submitBtn").addEventListener("click", () => {
-  const vehicleNo = document.getElementById("vehicleInput").value.trim();
   const statusMsg = document.getElementById("statusMsg");
-  if (!vehicleNo) {
+  clearFieldErrors();
+  const invalidIds = validateNippouForm();
+  if (invalidIds.length > 0) {
+    invalidIds.forEach(id => document.getElementById(id).classList.add("field-error"));
     statusMsg.className = "status-msg err";
-    statusMsg.textContent = "車両NOを入力してください。";
+    statusMsg.textContent = "赤枠の項目を入力してください。";
+    document.getElementById(invalidIds[0]).scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
   openDestinationPicker((url) => {
