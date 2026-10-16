@@ -446,12 +446,13 @@
   <a class="card" style="background:#d6336c" href="pink/"><span class="mark vert">ピンク</span>コース</a>
   <a class="card" style="background:#7c4dbd" href="youpura_murasaki/"><span class="mark vert">容プラ</span>コース</a>
   <a class="card" style="background:#f2a900" href="youpura_kiiro/"><span class="mark vert">容プラ</span>コース</a>
+  <a class="card" style="background:#2196f3" href="youpura_ao/"><span class="mark vert">容プラ</span>コース</a>
 </div>
 <div class="footer">
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v6.0";
+const TOP_VERSION = "v6.1";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 (function(){
@@ -626,7 +627,8 @@ const COURSE_SCHEDULES = {
   kuro: ["getsumoku", "kakin", "pet1", "pet2"],
   pink: ["getsumoku", "kakin", "pet1", "pet2"],
   youpura_murasaki: ["kanada", "sakuyama", "nishi", "higashi"],
-  youpura_kiiro: ["kanada", "sakuyama", "nishi", "higashi"]
+  youpura_kiiro: ["kanada", "sakuyama", "nishi", "higashi"],
+  youpura_ao: ["nishi"]
 };
 
 async function precacheAllCourses(){
@@ -751,7 +753,7 @@ async function fetchAllHistory(){
   return null;
 }
 
-const HIST_COLOR_ORDER = ["紫", "緑", "黄", "青", "黒", "ピンク", "容プラ(紫)", "容プラ(黄)"];
+const HIST_COLOR_ORDER = ["紫", "緑", "黄", "青", "黒", "ピンク", "容プラ(紫)", "容プラ(黄)", "容プラ(青)"];
 const HIST_COLOR_HEX = {
   "紫": "#4b2e83",
   "緑": "#2e7d32",
@@ -760,7 +762,8 @@ const HIST_COLOR_HEX = {
   "黒": "#2b2b2b",
   "ピンク": "#d6336c",
   "容プラ(紫)": "#7c4dbd",
-  "容プラ(黄)": "#f2a900"
+  "容プラ(黄)": "#f2a900",
+  "容プラ(青)": "#2196f3"
 };
 
 function buildHistGroups(days){
