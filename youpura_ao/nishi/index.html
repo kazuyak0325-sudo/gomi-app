@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="容プラ(青)コース（西地区）">
 <meta name="theme-color" content="#2196f3">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792066080">
+<link rel="stylesheet" href="../../style.css?v=1792117992">
 <style>
   :root { --accent: #2196f3; --accent-contrast: #ffffff; --surface-done: #e3f2fd; --done-text: #1565c0; }
 </style>
@@ -20,6 +20,7 @@
 <body>
 <header>
   <h1>容プラ(青)コース（西地区）</h1>
+  <p class="sub">回収したステーションをタップして時刻を記録</p>
   <p class="meta" id="dateVersion"></p>
   <div id="progress">0 / 0 完了</div>
   <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
@@ -28,7 +29,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -38,10 +39,116 @@
 <script>
 const COURSE_ID = "youpura_ao-nishi";
 const COURSE_NAME = "容プラ(青)コース（西地区）";
-const APP_VERSION = "v6.0";
+const APP_VERSION = "v6.1";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"231",map:"46-C-4",target:"ｶﾞｰﾃﾞﾝｸﾚｽﾄ2"},
+  {no:2,st:"235",map:"46-C-4",target:"職業訓練ｾﾝﾀｰ"},
+  {no:3,st:"234",map:"46-C-4",target:"ｸﾞﾗﾝﾄﾞﾘｳﾞｨｰﾙ21"},
+  {no:4,st:"232",map:"46-D-4",target:"ｶﾞｰﾃﾞﾝｸﾚｽﾄ"},
+  {no:5,st:"228",map:"46-D-4",target:"体育館"},
+  {no:6,st:"229",map:"46-C-3",target:"ｶｻ・ｽﾍﾟﾘｵﾙ"},
+  {no:7,st:"221",map:"46-D-2",target:"市役所"},
+  {no:8,st:"223",map:"46-C-2",target:"市役所　出口歩道"},
+  {no:9,st:"222",map:"46-C-1",target:"市役所向いｴｽﾃｰﾄ"},
+  {no:10,st:"224",map:"46-C-2",target:"ﾉｱ　M 歩道左"},
+  {no:11,st:"225",map:"46-B-2",target:"新　市役所"},
+  {no:12,st:"230",map:"46-A-4",target:"鹿島前　歩道"},
+  {no:13,st:"236",map:"46-A-5",target:"鹿島分譲地入り口"},
+  {no:14,st:"233",map:"46-A-5",target:"鹿島　分譲地おく"},
+  {no:15,st:"215",map:"45-I-4",target:"先　分譲地　塀"},
+  {no:16,st:"212",map:"45-I-3",target:"先　分譲地電柱"},
+  {no:17,st:"1618",map:"45-I-3",target:"本町１丁目 新規"},
+  {no:18,st:"214",map:"45-I-4",target:"深川西公民館"},
+  {no:19,st:"1590",map:"45-G-4",target:"道路脇（ｶﾙﾑ）"},
+  {no:20,st:"213",map:"45-H-4",target:"先　ｶﾞｽﾀﾝｸ横"},
+  {no:21,st:"211",map:"45-H-3",target:"先おく"},
+  {no:22,st:"1520",map:"45-Ｇ-4",target:"新　分譲地"},
+  {no:23,st:"216",map:"45-F-3",target:"長光動物病院"},
+  {no:24,st:"210",map:"45-H-2",target:"ﾚｵﾊﾟﾚｽ"},
+  {no:25,st:"209",map:"45-I-2",target:"生涯学習ｾﾝﾀｰ"},
+  {no:26,st:"169",map:"41-A-5",target:"美容室　前"},
+  {no:27,st:"153",map:"40-I-4",target:"海老の大丸ｾﾌﾞﾝ裏"},
+  {no:28,st:"154",map:"40-G-5",target:"福田AP　牛角右折"},
+  {no:29,st:"155",map:"40-F-5",target:"ﾎﾞﾝﾇｳﾞｨﾗｰｼﾞｭ"},
+  {no:30,st:"141",map:"40-E-5",target:"松本石屋　T字路"},
+  {no:31,st:"207",map:"45-E-2",target:"ｺｰﾎﾟ平山　2"},
+  {no:32,st:"206",map:"45-E-1",target:"ｺｰﾎﾟ平山　1"},
+  {no:33,st:"140",map:"40-E-5",target:"松本石屋　前"},
+  {no:34,st:"138",map:"40-D-4",target:"高山ｸﾘﾆｯｸ前交差点角"},
+  {no:35,st:"142",map:"40-E-3",target:"猪瀬ﾋﾞﾙ"},
+  {no:36,st:"131",map:"40-A-1",target:"栃木液化ｶﾞｽ"},
+  {no:37,st:"127",map:"39-J-1",target:"齋藤ﾊﾞﾙｺﾆｰ小屋"},
+  {no:38,st:"128",map:"39-J-1",target:"本町　第2公園"},
+  {no:39,st:"132",map:"40-A-2",target:"本町分譲地Y字路"},
+  {no:40,st:"133",map:"40-A-2",target:"本町分譲地T字路"},
+  {no:41,st:"136",map:"40-A-3",target:"本町分譲地鉄のｶｺﾞ"},
+  {no:42,st:"129",map:"39-J-3",target:"本町　分譲地"},
+  {no:43,st:"135",map:"40-B-3",target:"ﾊｰﾓﾆｰﾌｧｲﾝｽﾞ"},
+  {no:44,st:"134",map:"40-B-3",target:"本町民家前ﾌﾞﾛｯｸ台"},
+  {no:45,st:"1539",map:"40-C-4",target:"分譲地"},
+  {no:46,st:"137",map:"40-A-4",target:"公園第2分譲地"},
+  {no:47,st:"1598",map:"40-B-5",target:"分譲地　新設"},
+  {no:48,st:"1505",map:"40-B-5",target:"ｸﾗﾝｸ"},
+  {no:49,st:"139",map:"40-C-5",target:"街の保険屋さん"},
+  {no:50,st:"198",map:"45-B-1",target:"ﾊｰﾓﾆｰﾎｰﾙ"},
+  {no:51,st:"200",map:"45-B-2",target:"ﾊｰﾓﾆｰﾎｰﾙ　前AP"},
+  {no:52,st:"199",map:"45-A-2",target:"メゾンダルモニ"},
+  {no:53,st:"201",map:"45-C-2",target:"ｸﾞﾙｰﾌﾟﾎｰﾑ　223"},
+  {no:54,st:"208",map:"45-F-2",target:"ｱﾑｰﾙﾚｼﾞｽﾀﾝｽ"},
+  {no:55,st:"202",map:"45-D-3",target:"ﾍﾞﾙｼｬﾄﾚ本町"},
+  {no:56,st:"204",map:"45-C-4",target:"労基署東分譲地手前"},
+  {no:57,st:"205",map:"45-C-5",target:"ひばり公園"},
+  {no:58,st:"1417",map:"55-D-1",target:"伸好舎　分譲地"},
+  {no:59,st:"396",map:"55-E-2",target:"ｲﾀﾘｱ料理店　裏"},
+  {no:60,st:"1577",map:"55-E-1",target:"新設　分譲地"},
+  {no:61,st:"203",map:"45-E-3",target:"ｼﾞｮｲﾌﾙ鈴木"},
+  {no:62,st:"1558",map:"45-H-5",target:"新設"},
+  {no:63,st:"1418",map:"55-I-1",target:"ﾊﾋﾟｰﾅ"},
+  {no:64,st:"1483",map:"55-I-1",target:"ﾊﾋﾟｰﾅ向かい分譲地"},
+  {no:65,st:"427",map:"56-A-2",target:"末広第2公園前"},
+  {no:66,st:"423",map:"56-A-1",target:"国際ﾋﾞｭｰﾃｨ"},
+  {no:67,st:"428",map:"56-B-1",target:"ﾗｶｰｻ"},
+  {no:68,st:"424",map:"56-D-1",target:"宮澤乳業1"},
+  {no:69,st:"425",map:"56-D-1",target:"宮澤乳業2"},
+  {no:70,st:"426",map:"56-D-1",target:"宮澤乳業3"},
+  {no:71,st:"431",map:"56-C-1",target:"民家ﾌｪﾝｽ"},
+  {no:72,st:"429",map:"56-C-1",target:"Y字路　民家"},
+  {no:73,st:"432",map:"56-A-2",target:"ﾗｶｰｻAP前"},
+  {no:74,st:"1597",map:"56-A-2",target:"新ｱﾊﾟｰﾄ"},
+  {no:75,st:"412",map:"55-J-2",target:"ﾊﾟｰﾙ手前左折　公園"},
+  {no:76,st:"413",map:"55-I-2",target:"分譲地"},
+  {no:77,st:"408",map:"55-F-1",target:"礒接骨院　前　P"},
+  {no:78,st:"409",map:"55-G-2",target:"礒接骨院横"},
+  {no:79,st:"410",map:"55-G-3",target:"礒接骨院奥公園前"},
+  {no:80,st:"411",map:"55-F-3",target:"ｶｰﾑ末広"},
+  {no:81,st:"397",map:"55-E-2",target:"めぐりや"},
+  {no:82,st:"415",map:"55-G-4",target:"DI　ﾀｳﾝ末広"},
+  {no:83,st:"421",map:"55-F-4",target:"ｻﾝｺｰﾄ美原"},
+  {no:84,st:"422",map:"55-F-4",target:"いちはしP"},
+  {no:85,st:"1530",map:"55-E-5",target:"ﾀﾞｲｿｰ前　ﾌｫﾝﾃｰﾇ"},
+  {no:86,st:"399",map:"55-E-4",target:"ﾀﾞｲｿｰ前　住宅"},
+  {no:87,st:"414",map:"55-F-4",target:"ﾀｲﾔ邪魔ﾄﾞﾐｰﾙ榮"},
+  {no:88,st:"398",map:"55-D-3",target:"奥PﾊﾞｯｸST"},
+  {no:89,st:"400",map:"55-C-2",target:"ﾒｿﾞﾝ　ﾔﾏﾓﾄ"},
+  {no:90,st:"403",map:"55-C-4",target:"ｲﾝﾀｰﾅｼｮﾅﾙ"},
+  {no:91,st:"1636",map:"55-B-2",target:"新設ST"},
+  {no:92,st:"385",map:"54-J-2",target:"砂利　ｳﾞｨｰﾌﾞﾙ"},
+  {no:93,st:"386",map:"54-I-2",target:"ｳﾞｨｰﾌﾞﾙ　ﾊﾞｯｸ"},
+  {no:94,st:"1571",map:"54-I-3",target:"ｼｬﾝﾌﾞﾙA・B"},
+  {no:95,st:"387",map:"54-J-3",target:"壱番亭　看板"},
+  {no:96,st:"1516",map:"55-A-3",target:"ﾆｭｰｳｨﾝｸﾞﾐﾊﾗ向かい"},
+  {no:97,st:"402",map:"55-A-3",target:"ﾆｭｰｳｨﾝｸﾞﾐﾊﾗ"},
+  {no:98,st:"401",map:"55-B-3",target:"分譲地人見邸裏"},
+  {no:99,st:"404",map:"55-B-5",target:"ｳｴｽﾄﾊﾟｰｸ"},
+  {no:100,st:"405",map:"55-C-5",target:"ﾐﾊﾗﾋﾞﾙ"},
+  {no:101,st:"416",map:"55-H-4",target:"ﾃｰﾗｰｵｵﾀﾆ横"},
+  {no:102,st:"417",map:"55-I-3",target:"ｱﾙｺﾊﾟﾚｰﾉ　M"},
+  {no:103,st:"1441",map:"55-J-3",target:"道幅が広くなった角"},
+  {no:104,st:"433",map:"56-C-3",target:"ﾈｲﾙｻﾛﾝ前"},
+  {no:105,st:"434",map:"56-D-2",target:"ﾉｱﾊｲﾑ"}
+];
 </script>
-<script src="../../app.js?v=1792066080"></script>
+<script src="../../app.js?v=1792117992"></script>
 </body>
 </html>
