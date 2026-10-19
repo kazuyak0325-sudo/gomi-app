@@ -461,7 +461,7 @@
 <p class="tagline">今日も一日安全運転・安全作業！</p>
 <div class="region-toggle" id="regionToggle">
   <button type="button" class="region-toggle-btn" data-region="otawara">大田原地区</button>
-  <button type="button" class="region-toggle-btn" data-region="kurobane">黒羽・湯津上地区</button>
+  <button type="button" class="region-toggle-btn" data-region="kurobane" disabled style="opacity:0.4;cursor:not-allowed;">黒羽・湯津上地区<br><small style="font-weight:400;">（準備中）</small></button>
 </div>
 <div class="grid" id="otawaraGrid">
   <a class="card" style="background:#4b2e83" href="murasaki/"><span class="mark">紫</span>コース</a>
@@ -682,7 +682,8 @@ function setTopRegion(v){
   try { localStorage.setItem("gomi_top_region", v); } catch (e) {}
 }
 function applyTopRegion(){
-  const region = getTopRegion();
+  let region = getTopRegion();
+  if (region === "kurobane") { region = "otawara"; setTopRegion(region); }
   document.getElementById("otawaraGrid").style.display = region === "otawara" ? "" : "none";
   document.getElementById("kurobaneGrid").style.display = region === "kurobane" ? "" : "none";
   document.querySelectorAll(".region-toggle-btn").forEach((btn) => {
@@ -690,7 +691,7 @@ function applyTopRegion(){
   });
 }
 applyTopRegion();
-document.querySelectorAll(".region-toggle-btn").forEach((btn) => {
+document.querySelectorAll(".region-toggle-btn:not([disabled])").forEach((btn) => {
   btn.addEventListener("click", () => {
     setTopRegion(btn.dataset.region);
     applyTopRegion();
