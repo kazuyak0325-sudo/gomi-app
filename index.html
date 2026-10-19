@@ -475,8 +475,7 @@
   <a class="card" style="background:#2196f3" href="youpura_ao/"><span class="mark vert">容プラ</span>コース</a>
 </div>
 <div class="grid" id="kurobaneGrid" style="display:none;">
-  <a class="card" style="background:#4e342e" href="kurobane_funen1/"><span class="mark long">不燃①</span>コース</a>
-  <a class="card" style="background:#4e342e" href="kurobane_funen2/"><span class="mark long">不燃②</span>コース</a>
+  <a class="card" style="background:#4e342e" href="kurobane_funen/"><span class="mark">不燃</span>コース</a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen1/"><span class="mark long">可燃①</span>コース</a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen2/"><span class="mark long">可燃②</span>コース</a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen3/"><span class="mark long">可燃③</span>コース</a>
@@ -663,8 +662,7 @@ const COURSE_SCHEDULES = {
   youpura_murasaki: ["kanada", "sakuyama", "nishi", "higashi"],
   youpura_kiiro: ["kanada", "sakuyama", "nishi", "higashi"],
   youpura_ao: ["nishi"],
-  kurobane_funen1: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-  kurobane_funen2: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+  kurobane_funen: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
   kurobane_youpura: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
   kurobane_kaen1: ["getsumoku", "kakin"],
   kurobane_kaen2: ["getsumoku", "kakin"],
@@ -673,7 +671,7 @@ const COURSE_SCHEDULES = {
 
 const REGION_COLORS = {
   otawara: ["murasaki", "midori", "kiiro", "ao", "kuro", "pink", "youpura_murasaki", "youpura_kiiro", "youpura_ao"],
-  kurobane: ["kurobane_funen1", "kurobane_funen2", "kurobane_youpura", "kurobane_kaen1", "kurobane_kaen2", "kurobane_kaen3"]
+  kurobane: ["kurobane_funen", "kurobane_youpura", "kurobane_kaen1", "kurobane_kaen2", "kurobane_kaen3"]
 };
 
 function getTopRegion(){
@@ -822,7 +820,7 @@ async function fetchAllHistory(){
 
 const HIST_COLOR_ORDER = [
   "紫", "緑", "黄", "青", "黒", "ピンク", "容プラ(紫)", "容プラ(黄)", "容プラ(青)",
-  "黒羽・湯津上 不燃①", "黒羽・湯津上 不燃②", "黒羽・湯津上 容プラ",
+  "黒羽・湯津上 不燃", "黒羽・湯津上 容プラ",
   "黒羽・湯津上 可燃①", "黒羽・湯津上 可燃②", "黒羽・湯津上 可燃③"
 ];
 const HIST_COLOR_HEX = {
@@ -835,8 +833,7 @@ const HIST_COLOR_HEX = {
   "容プラ(紫)": "#7c4dbd",
   "容プラ(黄)": "#f2a900",
   "容プラ(青)": "#2196f3",
-  "黒羽・湯津上 不燃①": "#4e342e",
-  "黒羽・湯津上 不燃②": "#4e342e",
+  "黒羽・湯津上 不燃": "#4e342e",
   "黒羽・湯津上 容プラ": "#26a69a",
   "黒羽・湯津上 可燃①": "#ef6c00",
   "黒羽・湯津上 可燃②": "#ef6c00",
