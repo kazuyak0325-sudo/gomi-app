@@ -82,7 +82,7 @@ try {
   const nippouBtn = document.createElement("button");
   nippouBtn.id = "nippouBtn";
   nippouBtn.className = "violation-filter-btn";
-  nippouBtn.textContent = "収集日報を入力（テスト）";
+  nippouBtn.textContent = "収集日報を入力";
   nippouBtn.addEventListener("click", () => {
     location.href = "../../nippou-test/?course=" + encodeURIComponent(COURSE_ID);
   });

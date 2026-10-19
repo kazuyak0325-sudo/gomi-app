@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>収集日報（テスト）</title>
+<title>収集日報</title>
 <style>
   :root {
     --accent: #0d9488;
@@ -211,22 +211,12 @@
   .field-error { border-color: var(--danger) !important; border-width: 2px !important; }
   details.server-setting { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
   details.server-setting select, details.server-setting input { margin-top: 6px; }
-  .test-badge {
-    display: inline-block;
-    background: #fff3cd;
-    color: #8a6d1f;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 999px;
-    margin-left: 6px;
-  }
 </style>
 </head>
 <body>
 <header>
   <a class="back-link" href="../">← トップに戻る</a>
-  <h1>収集日報の入力<span class="test-badge">テスト機能</span></h1>
+  <h1>収集日報の入力</h1>
   <p>市への報告書用データを入力して送信します（既存のタップ記録アプリとは別ページです）</p>
 </header>
 <main>
@@ -234,7 +224,7 @@
     <h2>地区</h2>
     <div class="region-toggle" id="nippouRegionToggle" style="display:flex;gap:8px;">
       <button type="button" class="link-btn region-btn" data-region="otawara" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">大田原地区</button>
-      <button type="button" class="link-btn region-btn" data-region="kurobane" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">黒羽・湯津上地区</button>
+      <button type="button" class="link-btn region-btn" data-region="kurobane" disabled style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;opacity:0.4;cursor:not-allowed;">黒羽・湯津上地区<br><small style="font-weight:400;">（準備中）</small></button>
     </div>
   </div>
 
@@ -1016,7 +1006,8 @@ function currentWeightFieldIds(){
   return getNippouRegion() === "kurobane" ? KUROBANE_WEIGHT_FIELD_IDS : OTAWARA_WEIGHT_FIELD_IDS;
 }
 function applyNippouRegion(){
-  const region = getNippouRegion();
+  let region = getNippouRegion();
+  if (region === "kurobane") { region = "otawara"; setNippouRegion(region); }
   document.getElementById("otawaraWeightCards").style.display = region === "otawara" ? "" : "none";
   document.getElementById("kurobaneWeightCards").style.display = region === "kurobane" ? "" : "none";
   document.querySelectorAll(".region-btn").forEach((btn) => {
@@ -1025,7 +1016,7 @@ function applyNippouRegion(){
   buildDistrictList();
 }
 applyNippouRegion();
-document.querySelectorAll(".region-btn").forEach((btn) => {
+document.querySelectorAll(".region-btn:not([disabled])").forEach((btn) => {
   btn.addEventListener("click", () => {
     setNippouRegion(btn.dataset.region);
     applyNippouRegion();
