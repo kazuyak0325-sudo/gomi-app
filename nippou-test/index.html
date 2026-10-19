@@ -231,6 +231,14 @@
 </header>
 <main>
   <div class="card">
+    <h2>地区</h2>
+    <div class="region-toggle" id="nippouRegionToggle" style="display:flex;gap:8px;">
+      <button type="button" class="link-btn region-btn" data-region="otawara" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">大田原地区</button>
+      <button type="button" class="link-btn region-btn" data-region="kurobane" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">黒羽・湯津上地区</button>
+    </div>
+  </div>
+
+  <div class="card">
     <h2>車両NO・収集地区</h2>
     <div class="auto-field" id="dateField">読み込み中...</div>
 
@@ -266,14 +274,6 @@
 
     <label>助手</label>
     <select id="helperSelect"></select>
-  </div>
-
-  <div class="card">
-    <h2>地区</h2>
-    <div class="region-toggle" id="nippouRegionToggle" style="display:flex;gap:8px;">
-      <button type="button" class="link-btn region-btn" data-region="otawara" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">大田原地区</button>
-      <button type="button" class="link-btn region-btn" data-region="kurobane" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">黒羽・湯津上地区</button>
-    </div>
   </div>
 
   <div id="otawaraWeightCards">
@@ -438,6 +438,7 @@ const DISTRICTS = [
   "加治屋　浅香　親園", "平沢　佐久山　親園", "末広　浅香", "本町　中央　末広", "加治屋　美原", "薄葉　野崎　石上", "宇田川　親園",
   "金田北地区", "金田南地区", "大田原西地区", "大田原東地区", "親園・野崎・佐久山地区"
 ];
+const KUROBANE_DISTRICTS = ["湯津上地区"];
 
 const STAFF_NAMES = [
   "生澤 政雄", "磯 浩之", "伊藤 隆",
@@ -516,7 +517,8 @@ function buildStaffSelects(){
 function buildDistrictList(){
   const list = document.getElementById("districtList");
   list.innerHTML = "";
-  DISTRICTS.forEach(name => {
+  const names = getNippouRegion() === "kurobane" ? KUROBANE_DISTRICTS : DISTRICTS;
+  names.forEach(name => {
     const opt = document.createElement("option");
     opt.value = name;
     list.appendChild(opt);
@@ -1020,6 +1022,7 @@ function applyNippouRegion(){
   document.querySelectorAll(".region-btn").forEach((btn) => {
     btn.classList.toggle("on", btn.dataset.region === region);
   });
+  buildDistrictList();
 }
 applyNippouRegion();
 document.querySelectorAll(".region-btn").forEach((btn) => {
