@@ -150,6 +150,10 @@ function cardboardTimeKeyFor(dateStr){ return "gomi_ct_" + COURSE_ID + "_" + dat
 function cardboardViolationKeyFor(dateStr){ return "gomi_cv_" + COURSE_ID + "_" + dateStr; }
 
 const IS_CARDBOARD_COURSE = /-pet\d/.test(COURSE_ID);
+const IS_RESOURCE_COURSE = /^kurobane_funen/.test(COURSE_ID);
+const HAS_SECONDARY = IS_CARDBOARD_COURSE || IS_RESOURCE_COURSE;
+const SECONDARY_LABEL = IS_RESOURCE_COURSE ? "資源" : "ダンボール";
+const SECONDARY_ICON = IS_RESOURCE_COURSE ? "♻️" : "📦";
 
 const PHOTO_DB_NAME = "gomi_photos";
 const PHOTO_STORE = "photos";
@@ -342,7 +346,7 @@ let cardboardFilterOn = false;
 let violationFilterOn = false;
 
 function activeViolations(){
-  return (IS_CARDBOARD_COURSE && cardboardFilterOn) ? cardboardViolations : violations;
+  return (HAS_SECONDARY && cardboardFilterOn) ? cardboardViolations : violations;
 }
 
 let photoStations = new Set();
@@ -501,8 +505,8 @@ function saveCardboardTimes(){
 
 function toggleCardboard(s){
   if (cardboard[s.st]) {
-    if (IS_CARDBOARD_COURSE && cardboardFilterOn) {
-      showConfirm('「' + s.target + '」の「ダンボールあり」を解除します。絞り込み表示から消えますが、よろしいですか？', () => {
+    if (HAS_SECONDARY && cardboardFilterOn) {
+      showConfirm('「' + s.target + '」の「' + SECONDARY_LABEL + 'あり」を解除します。絞り込み表示から消えますが、よろしいですか？', () => {
         delete cardboard[s.st];
         saveCardboard();
         render(document.getElementById("filter").value);
@@ -837,10 +841,10 @@ function render(filterText){
     if (hasCardboard) cardboardCount++;
     if (cbTime) cardboardDoneCount++;
     if (ft && !(s.target.includes(ft) || String(s.st).includes(ft) || String(s.no).includes(ft))) return;
-    if (IS_CARDBOARD_COURSE && cardboardFilterOn && !hasCardboard) return;
+    if (HAS_SECONDARY && cardboardFilterOn && !hasCardboard) return;
     if (violationFilterOn && !v) return;
 
-    const isDone = (IS_CARDBOARD_COURSE && cardboardFilterOn) ? !!cbTime : !!time;
+    const isDone = (HAS_SECONDARY && cardboardFilterOn) ? !!cbTime : !!time;
     const li = document.createElement("li");
     li.className = "item" + (isDone ? " done" : "") + (v ? " violation" : "");
 
@@ -851,7 +855,7 @@ function render(filterText){
       '<span class="no' + noHighlight + '">' + s.no + '</span>' +
       '<span class="target">' + s.target + '<small>' + s.map + ' / ST' + s.st + '</small></span>' +
       '<span class="time' + (time ? ' filled' : '') + '">' + (IS_CARDBOARD_COURSE ? '<img src="../../pet-icon.png" class="pet-icon-img" alt="">' : "") + (time || "--:--") + '</span>' +
-      (IS_CARDBOARD_COURSE ? '<span class="time cb-time' + (cbTime ? ' filled' : '') + '">📦' + (cbTime || "--:--") + '</span>' : '');
+      (HAS_SECONDARY ? '<span class="time cb-time' + (cbTime ? ' filled' : '') + '">' + SECONDARY_ICON + (cbTime || "--:--") + '</span>' : '');
     rowMain.addEventListener("click", () => onTap(s));
     li.appendChild(rowMain);
 
@@ -893,12 +897,12 @@ function render(filterText){
     }
     li.appendChild(vRow);
 
-    if (IS_CARDBOARD_COURSE) {
+    if (HAS_SECONDARY) {
       const cbRow = document.createElement("div");
       cbRow.className = "cardboard-row";
       const cbBtn = document.createElement("button");
       cbBtn.className = "cardboard-btn" + (hasCardboard ? " on" : "");
-      cbBtn.textContent = hasCardboard ? "ダンボールあり" : "ダンボールなし";
+      cbBtn.textContent = hasCardboard ? (SECONDARY_LABEL + "あり") : (SECONDARY_LABEL + "なし");
       cbBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         toggleCardboard(s);
@@ -931,11 +935,11 @@ function render(filterText){
 
   document.getElementById("progress").textContent =
     doneCount + " / " + stations.length + " 完了　違反ゴミ " + violationStations + "箇所（計" + violationItems + "個）" +
-    (IS_CARDBOARD_COURSE ? "　ダンボール " + cardboardDoneCount + " / " + cardboardCount + "箇所 回収済み" : "");
+    (HAS_SECONDARY ? "　" + SECONDARY_LABEL + " " + cardboardDoneCount + " / " + cardboardCount + "箇所 回収済み" : "");
 }
 
 function onTap(s){
-  if (IS_CARDBOARD_COURSE && cardboardFilterOn) {
+  if (HAS_SECONDARY && cardboardFilterOn) {
     onTapCardboardTime(s);
     return;
   }
@@ -955,7 +959,7 @@ function onTap(s){
 
 function onTapCardboardTime(s){
   if (cardboardTimes[s.st]) {
-    showConfirm('「' + s.target + '」のダンボール回収時刻(' + cardboardTimes[s.st] + ')を取り消しますか？', () => {
+    showConfirm('「' + s.target + '」の' + SECONDARY_LABEL + '回収時刻(' + cardboardTimes[s.st] + ')を取り消しますか？', () => {
       delete cardboardTimes[s.st];
       saveCardboardTimes();
       render(document.getElementById("filter").value);
@@ -969,7 +973,7 @@ function onTapCardboardTime(s){
 }
 
 function saveActiveViolations(){
-  if (IS_CARDBOARD_COURSE && cardboardFilterOn) {
+  if (HAS_SECONDARY && cardboardFilterOn) {
     saveCardboardViolations();
   } else {
     saveViolations();
@@ -998,20 +1002,20 @@ function clearViolation(s){
 
 document.getElementById("filter").addEventListener("input", e => render(e.target.value));
 
-if (IS_CARDBOARD_COURSE) {
+if (HAS_SECONDARY) {
   const h1ForWord = document.querySelector("header h1");
-  if (h1ForWord && h1ForWord.textContent.includes("ダンボール")) {
-    h1ForWord.innerHTML = h1ForWord.textContent.replace("ダンボール", '<span id="cbWord">ダンボール</span>');
+  if (h1ForWord && h1ForWord.textContent.includes(SECONDARY_LABEL)) {
+    h1ForWord.innerHTML = h1ForWord.textContent.replace(SECONDARY_LABEL, '<span id="cbWord">' + SECONDARY_LABEL + '</span>');
   }
 
   const progressEl = document.getElementById("progress");
   const filterBtn = document.createElement("button");
   filterBtn.id = "cardboardFilterBtn";
   filterBtn.className = "cardboard-filter-btn";
-  filterBtn.textContent = "ダンボールありのみ表示";
+  filterBtn.textContent = SECONDARY_LABEL + "ありのみ表示";
   filterBtn.addEventListener("click", () => {
     cardboardFilterOn = !cardboardFilterOn;
-    filterBtn.textContent = cardboardFilterOn ? "すべて表示に戻す" : "ダンボールありのみ表示";
+    filterBtn.textContent = cardboardFilterOn ? "すべて表示に戻す" : (SECONDARY_LABEL + "ありのみ表示");
     filterBtn.classList.toggle("on", cardboardFilterOn);
     const cbWord = document.getElementById("cbWord");
     if (cbWord) cbWord.classList.toggle("cardboard-mode", cardboardFilterOn);
@@ -1070,7 +1074,7 @@ function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj,
   const stationVehicles = getStationVehicles(dateStr);
   const fallbackVehicle = getVehicleFor(dateStr);
   const headers = ["番号", "ST番号", "地図番号", "目標物", "収集時刻", "違反ゴミ個数"];
-  if (IS_CARDBOARD_COURSE) headers.push("ダンボールあり", "ダンボール回収時刻", "ダンボール違反ゴミ個数");
+  if (HAS_SECONDARY) headers.push(SECONDARY_LABEL + "あり", SECONDARY_LABEL + "回収時刻", SECONDARY_LABEL + "違反ゴミ個数");
   headers.push("車両番号");
   const rows = [headers];
   stations.forEach(s => {
@@ -1083,7 +1087,7 @@ function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj,
       recordsObj[s.st] || "",
       v ? String(v.count) : ""
     ];
-    if (IS_CARDBOARD_COURSE) {
+    if (HAS_SECONDARY) {
       const cv = cardboardViolationsObj && cardboardViolationsObj[s.st];
       row.push((cardboardObj && cardboardObj[s.st]) ? "あり" : "");
       row.push((cardboardTimesObj && cardboardTimesObj[s.st]) || "");
