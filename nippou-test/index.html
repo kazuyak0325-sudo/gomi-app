@@ -63,6 +63,8 @@
   .row5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
   .row5 label { text-align: center; margin: 0 0 4px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .row4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+  .region-btn.on { background: var(--accent); color: #fff; border-color: var(--accent) !important; }
   .auto-field {
     background: #f1f5f4;
     border: 1px dashed var(--border);
@@ -267,22 +269,54 @@
   </div>
 
   <div class="card">
-    <h2>可燃収集量（kg）</h2>
-    <div class="row5">
-      <div><label>1回目</label><input type="number" inputmode="decimal" id="b1"></div>
-      <div><label>2回目</label><input type="number" inputmode="decimal" id="b2"></div>
-      <div><label>3回目</label><input type="number" inputmode="decimal" id="b3"></div>
-      <div><label>4回目</label><input type="number" inputmode="decimal" id="b4"></div>
-      <div><label>5回目</label><input type="number" inputmode="decimal" id="b5"></div>
+    <h2>地区</h2>
+    <div class="region-toggle" id="nippouRegionToggle" style="display:flex;gap:8px;">
+      <button type="button" class="link-btn region-btn" data-region="otawara" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">大田原地区</button>
+      <button type="button" class="link-btn region-btn" data-region="kurobane" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">黒羽・湯津上地区</button>
     </div>
   </div>
 
-  <div class="card">
-    <h2>資源ごみ収集量（kg）</h2>
-    <div class="row3">
-      <div><label>ペットボトル</label><input type="number" inputmode="decimal" id="petBottle"></div>
-      <div><label>ダンボール</label><input type="number" inputmode="decimal" id="cardboardKg"></div>
-      <div><label>容プラ</label><input type="number" inputmode="decimal" id="youpura"></div>
+  <div id="otawaraWeightCards">
+    <div class="card">
+      <h2>可燃収集量（kg）</h2>
+      <div class="row5">
+        <div><label>1回目</label><input type="number" inputmode="decimal" id="b1"></div>
+        <div><label>2回目</label><input type="number" inputmode="decimal" id="b2"></div>
+        <div><label>3回目</label><input type="number" inputmode="decimal" id="b3"></div>
+        <div><label>4回目</label><input type="number" inputmode="decimal" id="b4"></div>
+        <div><label>5回目</label><input type="number" inputmode="decimal" id="b5"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>資源ごみ収集量（kg）</h2>
+      <div class="row3">
+        <div><label>ペットボトル</label><input type="number" inputmode="decimal" id="petBottle"></div>
+        <div><label>ダンボール</label><input type="number" inputmode="decimal" id="cardboardKg"></div>
+        <div><label>容プラ</label><input type="number" inputmode="decimal" id="youpura"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="kurobaneWeightCards" style="display:none;">
+    <div class="card">
+      <h2>午前：不燃収集量（kg）</h2>
+      <div class="row4">
+        <div><label>ビン</label><input type="number" inputmode="decimal" id="k_bin"></div>
+        <div><label>カン</label><input type="number" inputmode="decimal" id="k_can"></div>
+        <div><label>不燃</label><input type="number" inputmode="decimal" id="k_funen"></div>
+        <div><label>ペット</label><input type="number" inputmode="decimal" id="k_pet"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>午後：資源ごみ収集量（kg）</h2>
+      <div class="row4">
+        <div><label>雑誌</label><input type="number" inputmode="decimal" id="k_zasshi"></div>
+        <div><label>新聞</label><input type="number" inputmode="decimal" id="k_shinbun"></div>
+        <div><label>ダンボール</label><input type="number" inputmode="decimal" id="k_danball"></div>
+        <div><label>紙パック</label><input type="number" inputmode="decimal" id="k_kamipack"></div>
+      </div>
     </div>
   </div>
 
@@ -360,7 +394,43 @@ const COURSES = [
   { id: "youpura_kiiro-sakuyama", name: "容プラ(黄)コース（佐久山・親園・野崎）", color: "容プラ(黄)" },
   { id: "youpura_kiiro-nishi", name: "容プラ(黄)コース（西地区）", color: "容プラ(黄)" },
   { id: "youpura_kiiro-higashi", name: "容プラ(黄)コース（東地区）", color: "容プラ(黄)" },
-  { id: "youpura_ao-nishi", name: "容プラ(青)コース（西地区）", color: "容プラ(青)" }
+  { id: "youpura_ao-nishi", name: "容プラ(青)コース（西地区）", color: "容プラ(青)" },
+  { id: "kurobane_funen1-1", name: "黒羽・湯津上 不燃①コース（1）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen1-2", name: "黒羽・湯津上 不燃①コース（2）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen1-3", name: "黒羽・湯津上 不燃①コース（3）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen1-4", name: "黒羽・湯津上 不燃①コース（4）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen1-5", name: "黒羽・湯津上 不燃①コース（5）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen1-6", name: "黒羽・湯津上 不燃①コース（6）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen1-7", name: "黒羽・湯津上 不燃①コース（7）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen1-8", name: "黒羽・湯津上 不燃①コース（8）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen1-9", name: "黒羽・湯津上 不燃①コース（9）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen1-10", name: "黒羽・湯津上 不燃①コース（10）", color: "黒羽・湯津上 不燃①" },
+  { id: "kurobane_funen2-1", name: "黒羽・湯津上 不燃②コース（1）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_funen2-2", name: "黒羽・湯津上 不燃②コース（2）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_funen2-3", name: "黒羽・湯津上 不燃②コース（3）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_funen2-4", name: "黒羽・湯津上 不燃②コース（4）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_funen2-5", name: "黒羽・湯津上 不燃②コース（5）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_funen2-6", name: "黒羽・湯津上 不燃②コース（6）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_funen2-7", name: "黒羽・湯津上 不燃②コース（7）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_funen2-8", name: "黒羽・湯津上 不燃②コース（8）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_funen2-9", name: "黒羽・湯津上 不燃②コース（9）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_funen2-10", name: "黒羽・湯津上 不燃②コース（10）", color: "黒羽・湯津上 不燃②" },
+  { id: "kurobane_kaen1-getsumoku", name: "黒羽・湯津上 可燃①コース（月・木）", color: "黒羽・湯津上 可燃①" },
+  { id: "kurobane_kaen1-kakin", name: "黒羽・湯津上 可燃①コース（火・金）", color: "黒羽・湯津上 可燃①" },
+  { id: "kurobane_kaen2-getsumoku", name: "黒羽・湯津上 可燃②コース（月・木）", color: "黒羽・湯津上 可燃②" },
+  { id: "kurobane_kaen2-kakin", name: "黒羽・湯津上 可燃②コース（火・金）", color: "黒羽・湯津上 可燃②" },
+  { id: "kurobane_kaen3-getsumoku", name: "黒羽・湯津上 可燃③コース（月・木）", color: "黒羽・湯津上 可燃③" },
+  { id: "kurobane_kaen3-kakin", name: "黒羽・湯津上 可燃③コース（火・金）", color: "黒羽・湯津上 可燃③" },
+  { id: "kurobane_youpura-1", name: "黒羽・湯津上 容プラコース（1）", color: "黒羽・湯津上 容プラ" },
+  { id: "kurobane_youpura-2", name: "黒羽・湯津上 容プラコース（2）", color: "黒羽・湯津上 容プラ" },
+  { id: "kurobane_youpura-3", name: "黒羽・湯津上 容プラコース（3）", color: "黒羽・湯津上 容プラ" },
+  { id: "kurobane_youpura-4", name: "黒羽・湯津上 容プラコース（4）", color: "黒羽・湯津上 容プラ" },
+  { id: "kurobane_youpura-5", name: "黒羽・湯津上 容プラコース（5）", color: "黒羽・湯津上 容プラ" },
+  { id: "kurobane_youpura-6", name: "黒羽・湯津上 容プラコース（6）", color: "黒羽・湯津上 容プラ" },
+  { id: "kurobane_youpura-7", name: "黒羽・湯津上 容プラコース（7）", color: "黒羽・湯津上 容プラ" },
+  { id: "kurobane_youpura-8", name: "黒羽・湯津上 容プラコース（8）", color: "黒羽・湯津上 容プラ" },
+  { id: "kurobane_youpura-9", name: "黒羽・湯津上 容プラコース（9）", color: "黒羽・湯津上 容プラ" },
+  { id: "kurobane_youpura-10", name: "黒羽・湯津上 容プラコース（10）", color: "黒羽・湯津上 容プラ" }
 ];
 
 const DISTRICTS = [
@@ -694,7 +764,7 @@ function draftKey(){
   const courseId = CURRENT_COURSE ? CURRENT_COURSE.id : "none";
   return "gomi_nippou_draft_" + courseId + "_" + CURRENT_DATE;
 }
-const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "youpura", "odoStart", "odoEnd"];
+const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "youpura", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "odoStart", "odoEnd"];
 function saveDraft(){
   const data = {};
   DRAFT_FIELD_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
@@ -806,11 +876,13 @@ async function submitReport(server){
   ];
   const count = burnable.filter(v => v !== "" && v !== null).length;
 
+  const region = getNippouRegion();
   const payload = {
     date: date,
     courseId: course ? course.id : "",
     courseName: course ? course.name : "",
     color: course ? course.color : "",
+    region: region,
     vehicleNo: vehicleNo,
     vehicleNo2: vehicleNo2,
     driver: document.getElementById("driverSelect").value,
@@ -819,6 +891,14 @@ async function submitReport(server){
     petBottle: document.getElementById("petBottle").value,
     cardboardKg: document.getElementById("cardboardKg").value,
     youpura: document.getElementById("youpura").value,
+    kurobaneBin: document.getElementById("k_bin").value,
+    kurobaneCan: document.getElementById("k_can").value,
+    kurobaneFunen: document.getElementById("k_funen").value,
+    kurobanePet: document.getElementById("k_pet").value,
+    kurobaneZasshi: document.getElementById("k_zasshi").value,
+    kurobaneShinbun: document.getElementById("k_shinbun").value,
+    kurobaneDanball: document.getElementById("k_danball").value,
+    kurobaneKamipack: document.getElementById("k_kamipack").value,
     district: document.getElementById("district").value,
     odoStart: stripCommas(document.getElementById("odoStart").value),
     odoEnd: stripCommas(document.getElementById("odoEnd").value),
@@ -920,10 +1000,37 @@ document.getElementById("toggleVehicle2Btn").addEventListener("click", () => {
 });
 
 const REQUIRED_FIELD_IDS = ["vehicleInput", "driverSelect", "helperSelect", "district", "timeEndInput", "odoStart", "odoEnd"];
-const WEIGHT_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "youpura"];
+const OTAWARA_WEIGHT_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "youpura"];
+const KUROBANE_WEIGHT_FIELD_IDS = ["k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack"];
+const ALL_WEIGHT_FIELD_IDS = OTAWARA_WEIGHT_FIELD_IDS.concat(KUROBANE_WEIGHT_FIELD_IDS);
+
+function getNippouRegion(){
+  try { return localStorage.getItem("gomi_nippou_region") || "otawara"; } catch (e) { return "otawara"; }
+}
+function setNippouRegion(v){
+  try { localStorage.setItem("gomi_nippou_region", v); } catch (e) {}
+}
+function currentWeightFieldIds(){
+  return getNippouRegion() === "kurobane" ? KUROBANE_WEIGHT_FIELD_IDS : OTAWARA_WEIGHT_FIELD_IDS;
+}
+function applyNippouRegion(){
+  const region = getNippouRegion();
+  document.getElementById("otawaraWeightCards").style.display = region === "otawara" ? "" : "none";
+  document.getElementById("kurobaneWeightCards").style.display = region === "kurobane" ? "" : "none";
+  document.querySelectorAll(".region-btn").forEach((btn) => {
+    btn.classList.toggle("on", btn.dataset.region === region);
+  });
+}
+applyNippouRegion();
+document.querySelectorAll(".region-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setNippouRegion(btn.dataset.region);
+    applyNippouRegion();
+  });
+});
 
 function clearFieldErrors(){
-  REQUIRED_FIELD_IDS.concat(WEIGHT_FIELD_IDS).forEach(id => {
+  REQUIRED_FIELD_IDS.concat(ALL_WEIGHT_FIELD_IDS).forEach(id => {
     document.getElementById(id).classList.remove("field-error");
   });
 }
@@ -933,12 +1040,13 @@ function validateNippouForm(){
   REQUIRED_FIELD_IDS.forEach(id => {
     if (!document.getElementById(id).value.trim()) invalidIds.push(id);
   });
-  const hasWeight = WEIGHT_FIELD_IDS.some(id => document.getElementById(id).value.trim() !== "");
-  if (!hasWeight) invalidIds.push(...WEIGHT_FIELD_IDS);
+  const weightIds = currentWeightFieldIds();
+  const hasWeight = weightIds.some(id => document.getElementById(id).value.trim() !== "");
+  if (!hasWeight) invalidIds.push(...weightIds);
   return invalidIds;
 }
 
-REQUIRED_FIELD_IDS.concat(WEIGHT_FIELD_IDS).forEach(id => {
+REQUIRED_FIELD_IDS.concat(ALL_WEIGHT_FIELD_IDS).forEach(id => {
   document.getElementById(id).addEventListener("input", (e) => e.target.classList.remove("field-error"));
   document.getElementById(id).addEventListener("change", (e) => e.target.classList.remove("field-error"));
 });
