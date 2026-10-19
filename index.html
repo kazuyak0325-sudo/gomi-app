@@ -433,7 +433,7 @@
     収集地区
     <select id="regionSelect">
       <option value="otawara">大田原地区</option>
-      <option value="kurobane" disabled>黒羽・湯津上地区（準備中）</option>
+      <option value="kurobane">黒羽・湯津上地区</option>
     </select>
   </div>
   <div class="admin-addr-box">
@@ -675,8 +675,7 @@ function setTopRegion(v){
   try { localStorage.setItem("gomi_top_region", v); } catch (e) {}
 }
 function applyTopRegion(){
-  let region = getTopRegion();
-  if (region === "kurobane") { region = "otawara"; setTopRegion(region); }
+  const region = getTopRegion();
   document.getElementById("otawaraGrid").style.display = region === "otawara" ? "" : "none";
   document.getElementById("kurobaneGrid").style.display = region === "kurobane" ? "" : "none";
   const select = document.getElementById("regionSelect");

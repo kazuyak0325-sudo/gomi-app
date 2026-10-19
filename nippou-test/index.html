@@ -233,7 +233,7 @@
     <h2>地区</h2>
     <div class="region-toggle" id="nippouRegionToggle" style="display:flex;gap:8px;">
       <button type="button" class="link-btn region-btn" data-region="otawara" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">大田原地区</button>
-      <button type="button" class="link-btn region-btn" data-region="kurobane" disabled style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;opacity:0.4;cursor:not-allowed;">黒羽・湯津上地区<br><small style="font-weight:400;">（準備中）</small></button>
+      <button type="button" class="link-btn region-btn" data-region="kurobane" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">黒羽・湯津上地区</button>
     </div>
   </div>
 
@@ -1040,8 +1040,7 @@ function currentWeightFieldIds(){
   return getNippouRegion() === "kurobane" ? KUROBANE_WEIGHT_FIELD_IDS : OTAWARA_WEIGHT_FIELD_IDS;
 }
 function applyNippouRegion(){
-  let region = getNippouRegion();
-  if (region === "kurobane") { region = "otawara"; setNippouRegion(region); }
+  const region = getNippouRegion();
   document.getElementById("otawaraWeightCards").style.display = region === "otawara" ? "" : "none";
   document.getElementById("kurobaneWeightCards").style.display = region === "kurobane" ? "" : "none";
   document.querySelectorAll(".region-btn").forEach((btn) => {
@@ -1050,7 +1049,7 @@ function applyNippouRegion(){
   buildDistrictList();
 }
 applyNippouRegion();
-document.querySelectorAll(".region-btn:not([disabled])").forEach((btn) => {
+document.querySelectorAll(".region-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     setNippouRegion(btn.dataset.region);
     applyNippouRegion();
