@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>黒羽・湯津上 不燃①コース</title>
+<link rel="icon" href="icon.png">
+<meta name="theme-color" content="#4e342e">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #f5f5f5;
+    color: #222;
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
+  }
+  a.back {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #555;
+    text-decoration: none;
+    border-bottom: 1px solid #999;
+  }
+  h1 {
+    font-size: 18px;
+    margin: 0 0 16px;
+    text-align: center;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  a.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 8px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    min-height: 90px;
+  }
+  a.card { text-shadow: 0 1px 3px rgba(0,0,0,0.45); }
+  a.card.disabled {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .card small {
+    font-weight: 400;
+    font-size: 11px;
+    opacity: 0.85;
+  }
+
+  .hist-link {
+    display: block;
+    margin: 14px auto 0;
+    max-width: 480px;
+    text-align: center;
+    padding: 12px;
+    border: 1px dashed #4e342e;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #4e342e;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+  }</style>
+</head>
+<body>
+<a class="back" href="../">← コース選択に戻る</a>
+<h1>黒羽・湯津上 不燃①コース：コースを選んでください</h1>
+<div class="grid">
+  <a class="card" style="background:#4e342e" href="1/">1</a>
+  <a class="card" style="background:#4e342e" href="2/">2</a>
+  <a class="card" style="background:#4e342e" href="3/">3</a>
+  <a class="card" style="background:#4e342e" href="4/">4</a>
+  <a class="card" style="background:#4e342e" href="5/">5</a>
+  <a class="card" style="background:#4e342e" href="6/">6</a>
+  <a class="card" style="background:#4e342e" href="7/">7</a>
+  <a class="card" style="background:#4e342e" href="8/">8</a>
+  <a class="card" style="background:#4e342e" href="9/">9</a>
+  <a class="card" style="background:#4e342e" href="10/">10</a>
+</div>
+<a class="hist-link" href="../?historyColor=%E9%BB%92%E7%BE%BD%E3%83%BB%E6%B9%AF%E6%B4%A5%E4%B8%8A%20%E4%B8%8D%E7%87%83%E2%91%A0">過去の記録を見る</a>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
