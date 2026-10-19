@@ -248,6 +248,7 @@
   }
   .top-menu-panel.open { display: block; }
   .top-menu-panel .admin-addr-box { margin: 8px 4px; }
+  .top-menu-panel .region-toggle { margin: 6px 0 0; max-width: none; }
   .top-menu-panel #editAdminBtn { width: auto; display: inline-block; padding: 6px 14px; }
   .top-menu-panel button {
     display: block;
@@ -440,6 +441,13 @@
   <button id="unsentBtn">未送信データの確認</button>
   <button id="nippouTopBtn">収集日報を入力</button>
   <div class="admin-addr-box">
+    地区
+    <div class="region-toggle" id="regionToggle">
+      <button type="button" class="region-toggle-btn" data-region="otawara">大田原地区</button>
+      <button type="button" class="region-toggle-btn" data-region="kurobane" disabled style="opacity:0.4;cursor:not-allowed;">黒羽・湯津上地区<br><small style="font-weight:400;">（準備中）</small></button>
+    </div>
+  </div>
+  <div class="admin-addr-box">
     アップロード先
     <code id="adminAddrText">未設定</code>
     <button id="editAdminBtn">編集</button>
@@ -459,10 +467,6 @@
   </ol>
 </div>
 <p class="tagline">今日も一日安全運転・安全作業！</p>
-<div class="region-toggle" id="regionToggle">
-  <button type="button" class="region-toggle-btn" data-region="otawara">大田原地区</button>
-  <button type="button" class="region-toggle-btn" data-region="kurobane" disabled style="opacity:0.4;cursor:not-allowed;">黒羽・湯津上地区<br><small style="font-weight:400;">（準備中）</small></button>
-</div>
 <div class="grid" id="otawaraGrid">
   <a class="card" style="background:#4b2e83" href="murasaki/"><span class="mark">紫</span>コース</a>
   <a class="card" style="background:#2e7d32" href="midori/"><span class="mark">緑</span>コース</a>
