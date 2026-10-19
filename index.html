@@ -56,27 +56,17 @@
     max-width: 480px;
     margin: 0 auto;
   }
-  .region-toggle {
-    display: flex;
-    gap: 8px;
-    max-width: 480px;
-    margin: 0 auto 14px;
-  }
-  .region-toggle-btn {
-    flex: 1;
-    padding: 10px 8px;
+  #regionSelect {
+    display: block;
+    width: 100%;
+    margin: 4px 0 0;
+    padding: 9px 10px;
     border: 1px solid #ccc;
-    border-radius: 10px;
-    background: #f5f5f5;
-    color: #333;
-    font-weight: 700;
+    border-radius: 8px;
     font-size: 14px;
     font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
-  }
-  .region-toggle-btn.on {
-    background: #221f28;
-    color: #fff;
-    border-color: #221f28;
+    background: #fff;
+    color: #222;
   }
   /* 左の色帯は、インラインのbackground色を残したまま右側を白で塗りつぶして表現している。
      管理ツールがこのaタグの文字列を書き換えるため、HTML側の構造は変えないこと。 */
@@ -248,7 +238,6 @@
   }
   .top-menu-panel.open { display: block; }
   .top-menu-panel .admin-addr-box { margin: 8px 4px; }
-  .top-menu-panel .region-toggle { margin: 6px 0 0; max-width: none; }
   .top-menu-panel #editAdminBtn { width: auto; display: inline-block; padding: 6px 14px; }
   .top-menu-panel button {
     display: block;
@@ -441,11 +430,11 @@
   <button id="unsentBtn">未送信データの確認</button>
   <button id="nippouTopBtn">収集日報を入力</button>
   <div class="admin-addr-box">
-    地区
-    <div class="region-toggle" id="regionToggle">
-      <button type="button" class="region-toggle-btn" data-region="otawara">大田原地区</button>
-      <button type="button" class="region-toggle-btn" data-region="kurobane" disabled style="opacity:0.4;cursor:not-allowed;">黒羽・湯津上地区<br><small style="font-weight:400;">（準備中）</small></button>
-    </div>
+    収集地区
+    <select id="regionSelect">
+      <option value="otawara">大田原地区</option>
+      <option value="kurobane" disabled>黒羽・湯津上地区（準備中）</option>
+    </select>
   </div>
   <div class="admin-addr-box">
     アップロード先
@@ -690,16 +679,13 @@ function applyTopRegion(){
   if (region === "kurobane") { region = "otawara"; setTopRegion(region); }
   document.getElementById("otawaraGrid").style.display = region === "otawara" ? "" : "none";
   document.getElementById("kurobaneGrid").style.display = region === "kurobane" ? "" : "none";
-  document.querySelectorAll(".region-toggle-btn").forEach((btn) => {
-    btn.classList.toggle("on", btn.dataset.region === region);
-  });
+  const select = document.getElementById("regionSelect");
+  if (select) select.value = region;
 }
 applyTopRegion();
-document.querySelectorAll(".region-toggle-btn:not([disabled])").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    setTopRegion(btn.dataset.region);
-    applyTopRegion();
-  });
+document.getElementById("regionSelect").addEventListener("change", (e) => {
+  setTopRegion(e.target.value);
+  applyTopRegion();
 });
 
 async function precacheAllCourses(){
