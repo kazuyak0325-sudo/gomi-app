@@ -64,6 +64,15 @@
   .row5 label { text-align: center; margin: 0 0 4px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .row4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+  .weight-total-row {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+    text-align: right;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-dark);
+  }
   .region-btn.on { background: var(--accent); color: #fff; border-color: var(--accent) !important; }
   .auto-field {
     background: #f1f5f4;
@@ -276,6 +285,7 @@
         <div><label>4回目</label><input type="number" inputmode="decimal" id="b4"></div>
         <div><label>5回目</label><input type="number" inputmode="decimal" id="b5"></div>
       </div>
+      <div class="weight-total-row">合計：<span id="burnableTotal">0</span> kg</div>
     </div>
 
     <div class="card">
@@ -286,6 +296,7 @@
         <div><label>紙パック</label><input type="number" inputmode="decimal" id="kamipack"></div>
         <div><label>容プラ</label><input type="number" inputmode="decimal" id="youpura"></div>
       </div>
+      <div class="weight-total-row">合計：<span id="resourceTotal">0</span> kg</div>
     </div>
   </div>
 
@@ -780,6 +791,7 @@ function restoreDraft(){
     document.getElementById("vehicle2Wrap").style.display = "block";
     document.getElementById("toggleVehicle2Btn").textContent = "－ 交代車両の入力を閉じる";
   }
+  updateWeightTotals();
 }
 
 function openDestinationPicker(onChoose){
@@ -992,6 +1004,26 @@ document.getElementById("toggleVehicle2Btn").addEventListener("click", () => {
     ? "＋ 車両故障などで途中から別の車両に交代した場合はこちら"
     : "－ 交代車両の入力を閉じる";
 });
+
+const BURNABLE_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5"];
+const RESOURCE_FIELD_IDS = ["petBottle", "cardboardKg", "kamipack", "youpura"];
+
+function sumFieldIds(ids){
+  return ids.reduce((sum, id) => {
+    const v = parseFloat(document.getElementById(id).value);
+    return sum + (isNaN(v) ? 0 : v);
+  }, 0);
+}
+function updateWeightTotals(){
+  const burnableEl = document.getElementById("burnableTotal");
+  const resourceEl = document.getElementById("resourceTotal");
+  if (burnableEl) burnableEl.textContent = sumFieldIds(BURNABLE_FIELD_IDS).toLocaleString("ja-JP");
+  if (resourceEl) resourceEl.textContent = sumFieldIds(RESOURCE_FIELD_IDS).toLocaleString("ja-JP");
+}
+BURNABLE_FIELD_IDS.concat(RESOURCE_FIELD_IDS).forEach(id => {
+  document.getElementById(id).addEventListener("input", updateWeightTotals);
+});
+updateWeightTotals();
 
 const REQUIRED_FIELD_IDS = ["vehicleInput", "driverSelect", "helperSelect", "district", "timeEndInput", "odoStart", "odoEnd"];
 const OTAWARA_WEIGHT_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura"];
