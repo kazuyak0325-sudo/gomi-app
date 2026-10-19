@@ -291,7 +291,7 @@
     <div class="card">
       <h2>資源ごみ収集量（kg）</h2>
       <div class="row4">
-        <div><label>ペットボトル</label><input type="number" inputmode="decimal" id="petBottle"></div>
+        <div><label>ペット</label><input type="number" inputmode="decimal" id="petBottle"></div>
         <div><label>ダンボール</label><input type="number" inputmode="decimal" id="cardboardKg"></div>
         <div><label>紙パック</label><input type="number" inputmode="decimal" id="kamipack"></div>
         <div><label>容プラ</label><input type="number" inputmode="decimal" id="youpura"></div>
@@ -302,23 +302,37 @@
 
   <div id="kurobaneWeightCards" style="display:none;">
     <div class="card">
-      <h2>午前：不燃収集量（kg）</h2>
+      <h2>可燃収集量（kg）</h2>
+      <div class="row5">
+        <div><label>1回目</label><input type="number" inputmode="decimal" id="k_b1"></div>
+        <div><label>2回目</label><input type="number" inputmode="decimal" id="k_b2"></div>
+        <div><label>3回目</label><input type="number" inputmode="decimal" id="k_b3"></div>
+        <div><label>4回目</label><input type="number" inputmode="decimal" id="k_b4"></div>
+        <div><label>5回目</label><input type="number" inputmode="decimal" id="k_b5"></div>
+      </div>
+      <div class="weight-total-row">合計：<span id="kurobaneBurnableTotal">0</span> kg</div>
+    </div>
+
+    <div class="card">
+      <h2>不燃収集量（kg）</h2>
       <div class="row4">
         <div><label>ビン</label><input type="number" inputmode="decimal" id="k_bin"></div>
         <div><label>カン</label><input type="number" inputmode="decimal" id="k_can"></div>
         <div><label>不燃</label><input type="number" inputmode="decimal" id="k_funen"></div>
         <div><label>ペット</label><input type="number" inputmode="decimal" id="k_pet"></div>
       </div>
+      <div class="weight-total-row">合計：<span id="kurobaneFunenTotal">0</span> kg</div>
     </div>
 
     <div class="card">
-      <h2>午後：資源ごみ収集量（kg）</h2>
+      <h2>資源ごみ収集量（kg）</h2>
       <div class="row4">
         <div><label>雑誌</label><input type="number" inputmode="decimal" id="k_zasshi"></div>
         <div><label>新聞</label><input type="number" inputmode="decimal" id="k_shinbun"></div>
         <div><label>ダンボール</label><input type="number" inputmode="decimal" id="k_danball"></div>
         <div><label>紙パック</label><input type="number" inputmode="decimal" id="k_kamipack"></div>
       </div>
+      <div class="weight-total-row">合計：<span id="kurobaneResourceTotal">0</span> kg</div>
     </div>
   </div>
 
@@ -768,7 +782,7 @@ function draftKey(){
   const courseId = CURRENT_COURSE ? CURRENT_COURSE.id : "none";
   return "gomi_nippou_draft_" + courseId + "_" + CURRENT_DATE;
 }
-const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "odoStart", "odoEnd"];
+const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "odoStart", "odoEnd"];
 function saveDraft(){
   const data = {};
   DRAFT_FIELD_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
@@ -897,6 +911,13 @@ async function submitReport(server){
     cardboardKg: document.getElementById("cardboardKg").value,
     kamipack: document.getElementById("kamipack").value,
     youpura: document.getElementById("youpura").value,
+    kurobaneBurnable: [
+      document.getElementById("k_b1").value,
+      document.getElementById("k_b2").value,
+      document.getElementById("k_b3").value,
+      document.getElementById("k_b4").value,
+      document.getElementById("k_b5").value
+    ],
     kurobaneBin: document.getElementById("k_bin").value,
     kurobaneCan: document.getElementById("k_can").value,
     kurobaneFunen: document.getElementById("k_funen").value,
@@ -1005,8 +1026,13 @@ document.getElementById("toggleVehicle2Btn").addEventListener("click", () => {
     : "－ 交代車両の入力を閉じる";
 });
 
-const BURNABLE_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5"];
-const RESOURCE_FIELD_IDS = ["petBottle", "cardboardKg", "kamipack", "youpura"];
+const WEIGHT_TOTAL_GROUPS = [
+  { fieldIds: ["b1", "b2", "b3", "b4", "b5"], totalId: "burnableTotal" },
+  { fieldIds: ["petBottle", "cardboardKg", "kamipack", "youpura"], totalId: "resourceTotal" },
+  { fieldIds: ["k_b1", "k_b2", "k_b3", "k_b4", "k_b5"], totalId: "kurobaneBurnableTotal" },
+  { fieldIds: ["k_bin", "k_can", "k_funen", "k_pet"], totalId: "kurobaneFunenTotal" },
+  { fieldIds: ["k_zasshi", "k_shinbun", "k_danball", "k_kamipack"], totalId: "kurobaneResourceTotal" }
+];
 
 function sumFieldIds(ids){
   return ids.reduce((sum, id) => {
@@ -1015,19 +1041,21 @@ function sumFieldIds(ids){
   }, 0);
 }
 function updateWeightTotals(){
-  const burnableEl = document.getElementById("burnableTotal");
-  const resourceEl = document.getElementById("resourceTotal");
-  if (burnableEl) burnableEl.textContent = sumFieldIds(BURNABLE_FIELD_IDS).toLocaleString("ja-JP");
-  if (resourceEl) resourceEl.textContent = sumFieldIds(RESOURCE_FIELD_IDS).toLocaleString("ja-JP");
+  WEIGHT_TOTAL_GROUPS.forEach(group => {
+    const el = document.getElementById(group.totalId);
+    if (el) el.textContent = sumFieldIds(group.fieldIds).toLocaleString("ja-JP");
+  });
 }
-BURNABLE_FIELD_IDS.concat(RESOURCE_FIELD_IDS).forEach(id => {
-  document.getElementById(id).addEventListener("input", updateWeightTotals);
+WEIGHT_TOTAL_GROUPS.forEach(group => {
+  group.fieldIds.forEach(id => {
+    document.getElementById(id).addEventListener("input", updateWeightTotals);
+  });
 });
 updateWeightTotals();
 
 const REQUIRED_FIELD_IDS = ["vehicleInput", "driverSelect", "helperSelect", "district", "timeEndInput", "odoStart", "odoEnd"];
 const OTAWARA_WEIGHT_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura"];
-const KUROBANE_WEIGHT_FIELD_IDS = ["k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack"];
+const KUROBANE_WEIGHT_FIELD_IDS = ["k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack"];
 const ALL_WEIGHT_FIELD_IDS = OTAWARA_WEIGHT_FIELD_IDS.concat(KUROBANE_WEIGHT_FIELD_IDS);
 
 function getNippouRegion(){
