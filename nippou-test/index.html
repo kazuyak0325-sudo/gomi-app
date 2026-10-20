@@ -334,6 +334,13 @@
       </div>
       <div class="weight-total-row">合計：<span id="kurobaneResourceTotal">0</span> kg</div>
     </div>
+
+    <div class="card">
+      <h2>容プラ収集量（kg）</h2>
+      <div class="row4">
+        <div><label>容プラ</label><input type="number" inputmode="decimal" id="k_youpura"></div>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -782,7 +789,7 @@ function draftKey(){
   const courseId = CURRENT_COURSE ? CURRENT_COURSE.id : "none";
   return "gomi_nippou_draft_" + courseId + "_" + CURRENT_DATE;
 }
-const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "odoStart", "odoEnd"];
+const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura", "odoStart", "odoEnd"];
 function saveDraft(){
   const data = {};
   DRAFT_FIELD_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
@@ -926,6 +933,7 @@ async function submitReport(server){
     kurobaneShinbun: document.getElementById("k_shinbun").value,
     kurobaneDanball: document.getElementById("k_danball").value,
     kurobaneKamipack: document.getElementById("k_kamipack").value,
+    kurobaneYoupura: document.getElementById("k_youpura").value,
     district: document.getElementById("district").value,
     odoStart: stripCommas(document.getElementById("odoStart").value),
     odoEnd: stripCommas(document.getElementById("odoEnd").value),
@@ -1055,7 +1063,7 @@ updateWeightTotals();
 
 const REQUIRED_FIELD_IDS = ["vehicleInput", "driverSelect", "helperSelect", "district", "timeEndInput", "odoStart", "odoEnd"];
 const OTAWARA_WEIGHT_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura"];
-const KUROBANE_WEIGHT_FIELD_IDS = ["k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack"];
+const KUROBANE_WEIGHT_FIELD_IDS = ["k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura"];
 const ALL_WEIGHT_FIELD_IDS = OTAWARA_WEIGHT_FIELD_IDS.concat(KUROBANE_WEIGHT_FIELD_IDS);
 
 function getNippouRegion(){
