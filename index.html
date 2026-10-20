@@ -682,7 +682,16 @@ function applyTopRegion(){
   if (select) select.value = region;
 }
 applyTopRegion();
+const KUROBANE_REGION_PIN = "0706";
 document.getElementById("regionSelect").addEventListener("change", (e) => {
+  if (e.target.value === "kurobane" && getTopRegion() !== "kurobane") {
+    const pin = prompt("黒羽・湯津上地区は準備中です。暗証番号を入力してください。");
+    if (pin !== KUROBANE_REGION_PIN) {
+      if (pin !== null) alert("暗証番号が違います。");
+      applyTopRegion();
+      return;
+    }
+  }
   setTopRegion(e.target.value);
   applyTopRegion();
 });
