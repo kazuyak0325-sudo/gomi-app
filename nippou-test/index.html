@@ -815,59 +815,6 @@ function restoreDraft(){
   updateWeightTotals();
 }
 
-function openDestinationPicker(onChoose){
-  const current = getAdminServer();
-  const matchedPreset = ADMIN_PRESETS.find(p => p.url === current);
-  const options = ADMIN_PRESETS.map(p => ({ label: p.label, value: p.url }));
-  if (current && !matchedPreset) {
-    options.push({ label: "設定済みのアドレス（" + current + "）", value: current });
-  }
-  if (ADMIN_PRESETS.length > 1) {
-    options.push({ label: "両方（" + ADMIN_PRESETS.map(p => p.label).join("・") + "）", value: ADMIN_PRESETS.map(p => p.url) });
-  }
-
-  const overlay = document.createElement("div");
-  overlay.className = "staff-modal-overlay open";
-  const box = document.createElement("div");
-  box.className = "staff-modal-box";
-  box.style.maxWidth = "320px";
-
-  const header = document.createElement("div");
-  header.className = "staff-modal-header";
-  const h3 = document.createElement("h3");
-  h3.textContent = "送信先を選んでください";
-  const closeBtn = document.createElement("button");
-  closeBtn.type = "button";
-  closeBtn.className = "staff-modal-close";
-  closeBtn.textContent = "×";
-  closeBtn.addEventListener("click", () => overlay.remove());
-  header.appendChild(h3);
-  header.appendChild(closeBtn);
-  box.appendChild(header);
-
-  const wrap = document.createElement("div");
-  wrap.style.display = "flex";
-  wrap.style.flexDirection = "column";
-  wrap.style.gap = "8px";
-  options.forEach(opt => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "btn-primary";
-    btn.style.marginTop = "0";
-    btn.textContent = opt.label + "に送信";
-    btn.addEventListener("click", () => {
-      overlay.remove();
-      onChoose(opt.value);
-    });
-    wrap.appendChild(btn);
-  });
-  box.appendChild(wrap);
-
-  overlay.appendChild(box);
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
-  document.body.appendChild(overlay);
-}
-
 async function submitReport(server){
   const statusMsg = document.getElementById("statusMsg");
   const course = CURRENT_COURSE;
@@ -1118,13 +1065,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
     document.getElementById(invalidIds[0]).scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
-  openDestinationPicker((url) => {
-    if (!Array.isArray(url)) {
-      setAdminServer(url);
-      initServerField();
-    }
-    submitReport(url);
-  });
+  submitReport(ADMIN_PRESETS.map(p => p.url));
 });
 updateAutoField();
 restoreDraft();
