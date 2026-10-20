@@ -818,8 +818,7 @@ function restoreDraft(){
 function openDestinationPicker(onChoose){
   const current = getAdminServer();
   const matchedPreset = ADMIN_PRESETS.find(p => p.url === current);
-  // 両PCのデータがずれないよう、個別送信は一時的に無効化し「両方」のみ選べるようにしている。
-  const options = ADMIN_PRESETS.map(p => ({ label: p.label, value: p.url, disabledForNow: true }));
+  const options = ADMIN_PRESETS.map(p => ({ label: p.label, value: p.url }));
   if (current && !matchedPreset) {
     options.push({ label: "設定済みのアドレス（" + current + "）", value: current });
   }
@@ -856,16 +855,10 @@ function openDestinationPicker(onChoose){
     btn.className = "btn-primary";
     btn.style.marginTop = "0";
     btn.textContent = opt.label + "に送信";
-    if (opt.disabledForNow) {
-      btn.disabled = true;
-      btn.style.opacity = "0.4";
-      btn.style.cursor = "not-allowed";
-    } else {
-      btn.addEventListener("click", () => {
-        overlay.remove();
-        onChoose(opt.value);
-      });
-    }
+    btn.addEventListener("click", () => {
+      overlay.remove();
+      onChoose(opt.value);
+    });
     wrap.appendChild(btn);
   });
   box.appendChild(wrap);
