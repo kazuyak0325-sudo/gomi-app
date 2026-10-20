@@ -235,8 +235,6 @@
       <button type="button" class="link-btn region-btn" data-region="otawara" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">大田原地区</button>
       <button type="button" class="link-btn region-btn" data-region="kurobane" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">黒羽・湯津上地区</button>
     </div>
-    <label style="margin-top:10px;">コース</label>
-    <select id="courseSelect"></select>
   </div>
 
   <div class="card">
@@ -1038,25 +1036,6 @@ function currentWeightFieldIds(){
 function courseRegion(course){
   return ("" + course.id).startsWith("kurobane_") ? "kurobane" : "otawara";
 }
-function buildCourseSelect(){
-  const region = getNippouRegion();
-  const select = document.getElementById("courseSelect");
-  const filtered = COURSES.filter(c => courseRegion(c) === region);
-  select.innerHTML = "";
-  filtered.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.name;
-    select.appendChild(opt);
-  });
-  if (CURRENT_COURSE && courseRegion(CURRENT_COURSE) === region) {
-    select.value = CURRENT_COURSE.id;
-  } else if (filtered.length > 0) {
-    CURRENT_COURSE = filtered[0];
-    select.value = CURRENT_COURSE.id;
-    try { localStorage.setItem(LAST_COURSE_KEY, CURRENT_COURSE.id); } catch (e) {}
-  }
-}
 function updateDistrictLabel(){
   const region = getNippouRegion();
   const label = document.getElementById("districtLabel");
@@ -1077,7 +1056,6 @@ function applyNippouRegion(){
   document.querySelectorAll(".region-btn").forEach((btn) => {
     btn.classList.toggle("on", btn.dataset.region === region);
   });
-  buildCourseSelect();
   updateDistrictLabel();
   buildDistrictList();
 }
@@ -1087,14 +1065,6 @@ document.querySelectorAll(".region-btn").forEach((btn) => {
     setNippouRegion(btn.dataset.region);
     applyNippouRegion();
   });
-});
-document.getElementById("courseSelect").addEventListener("change", (e) => {
-  CURRENT_COURSE = findCourse(e.target.value);
-  try { if (CURRENT_COURSE) localStorage.setItem(LAST_COURSE_KEY, CURRENT_COURSE.id); } catch (err) {}
-  updateDistrictLabel();
-  buildDistrictList();
-  updateAutoField();
-  restoreDraft();
 });
 
 function clearFieldErrors(){
