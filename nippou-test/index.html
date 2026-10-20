@@ -320,6 +320,16 @@
         <div><label>4回目</label><input type="number" inputmode="decimal" id="k_b4"></div>
         <div><label>5回目</label><input type="number" inputmode="decimal" id="k_b5"></div>
       </div>
+      <button type="button" class="link-btn" id="toggleKaenMoreBtn">＋ 正月明けなど、6回目以降の計量がある場合はこちら</button>
+      <div id="kaenMoreWrap" style="display:none;">
+        <div class="row5">
+          <div><label>6回目</label><input type="number" inputmode="decimal" id="k_b6"></div>
+          <div><label>7回目</label><input type="number" inputmode="decimal" id="k_b7"></div>
+          <div><label>8回目</label><input type="number" inputmode="decimal" id="k_b8"></div>
+          <div><label>9回目</label><input type="number" inputmode="decimal" id="k_b9"></div>
+          <div><label>10回目</label><input type="number" inputmode="decimal" id="k_b10"></div>
+        </div>
+      </div>
       <div class="weight-total-row">合計：<span id="kurobaneBurnableTotal">0</span> kg</div>
     </div>
 
@@ -811,7 +821,7 @@ function draftKey(){
   const courseId = CURRENT_COURSE ? CURRENT_COURSE.id : "none";
   return "gomi_nippou_draft_" + courseId + "_" + CURRENT_DATE;
 }
-const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "districtFunen", "districtKaen", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura", "odoStart", "odoEnd"];
+const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "districtFunen", "districtKaen", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_b6", "k_b7", "k_b8", "k_b9", "k_b10", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura", "odoStart", "odoEnd"];
 function saveDraft(){
   const data = {};
   DRAFT_FIELD_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
@@ -833,6 +843,10 @@ function restoreDraft(){
   if (data.vehicle2Input) {
     document.getElementById("vehicle2Wrap").style.display = "block";
     document.getElementById("toggleVehicle2Btn").textContent = "－ 交代車両の入力を閉じる";
+  }
+  if (data.k_b6 || data.k_b7 || data.k_b8 || data.k_b9 || data.k_b10) {
+    document.getElementById("kaenMoreWrap").style.display = "block";
+    document.getElementById("toggleKaenMoreBtn").textContent = "－ 6回目以降の入力を閉じる";
   }
   updateWeightTotals();
 }
@@ -885,7 +899,12 @@ async function submitReport(server){
       document.getElementById("k_b2").value,
       document.getElementById("k_b3").value,
       document.getElementById("k_b4").value,
-      document.getElementById("k_b5").value
+      document.getElementById("k_b5").value,
+      document.getElementById("k_b6").value,
+      document.getElementById("k_b7").value,
+      document.getElementById("k_b8").value,
+      document.getElementById("k_b9").value,
+      document.getElementById("k_b10").value
     ],
     kurobaneBin: document.getElementById("k_bin").value,
     kurobaneCan: document.getElementById("k_can").value,
@@ -1000,11 +1019,20 @@ document.getElementById("toggleVehicle2Btn").addEventListener("click", () => {
     ? "＋ 車両故障などで途中から別の車両に交代した場合はこちら"
     : "－ 交代車両の入力を閉じる";
 });
+document.getElementById("toggleKaenMoreBtn").addEventListener("click", () => {
+  const wrap = document.getElementById("kaenMoreWrap");
+  const btn = document.getElementById("toggleKaenMoreBtn");
+  const showing = wrap.style.display !== "none";
+  wrap.style.display = showing ? "none" : "block";
+  btn.textContent = showing
+    ? "＋ 正月明けなど、6回目以降の計量がある場合はこちら"
+    : "－ 6回目以降の入力を閉じる";
+});
 
 const WEIGHT_TOTAL_GROUPS = [
   { fieldIds: ["b1", "b2", "b3", "b4", "b5"], totalId: "burnableTotal" },
   { fieldIds: ["petBottle", "cardboardKg", "kamipack", "youpura"], totalId: "resourceTotal" },
-  { fieldIds: ["k_b1", "k_b2", "k_b3", "k_b4", "k_b5"], totalId: "kurobaneBurnableTotal" },
+  { fieldIds: ["k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_b6", "k_b7", "k_b8", "k_b9", "k_b10"], totalId: "kurobaneBurnableTotal" },
   { fieldIds: ["k_bin", "k_can", "k_funen", "k_pet"], totalId: "kurobaneFunenTotal" },
   { fieldIds: ["k_zasshi", "k_shinbun", "k_danball", "k_kamipack"], totalId: "kurobaneResourceTotal" }
 ];
@@ -1031,7 +1059,7 @@ updateWeightTotals();
 const REQUIRED_FIELD_IDS = ["vehicleInput", "driverSelect", "helperSelect", "timeEndInput", "odoStart", "odoEnd"];
 const DISTRICT_FIELD_IDS = ["district", "districtFunen", "districtKaen"];
 const OTAWARA_WEIGHT_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura"];
-const KUROBANE_WEIGHT_FIELD_IDS = ["k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura"];
+const KUROBANE_WEIGHT_FIELD_IDS = ["k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_b6", "k_b7", "k_b8", "k_b9", "k_b10", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura"];
 const ALL_WEIGHT_FIELD_IDS = OTAWARA_WEIGHT_FIELD_IDS.concat(KUROBANE_WEIGHT_FIELD_IDS);
 
 function getNippouRegion(){
