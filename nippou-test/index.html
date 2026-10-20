@@ -250,9 +250,19 @@
       <input type="text" inputmode="numeric" id="vehicle2Input" placeholder="例：0450">
     </div>
 
-    <label id="districtLabel">収集地区</label>
-    <input type="text" id="district" list="districtList" placeholder="例：新富　城山" autocomplete="off">
-    <datalist id="districtList"></datalist>
+    <div id="otawaraDistrictWrap">
+      <label>収集地区</label>
+      <input type="text" id="district" list="districtListOtawara" placeholder="例：新富　城山" autocomplete="off">
+      <datalist id="districtListOtawara"></datalist>
+    </div>
+    <div id="kurobaneDistrictWrap" style="display:none;">
+      <label>収集地区（不燃・容プラ）</label>
+      <input type="text" id="districtFunen" list="districtListFunen" placeholder="例：品川　片府田" autocomplete="off">
+      <datalist id="districtListFunen"></datalist>
+      <label>収集地区（可燃）</label>
+      <input type="text" id="districtKaen" list="districtListKaen" placeholder="例：大豆田　両郷" autocomplete="off">
+      <datalist id="districtListKaen"></datalist>
+    </div>
 
     <label>収集時間 開始</label>
     <div class="auto-field">8:30（固定）</div>
@@ -545,19 +555,19 @@ function buildStaffSelects(){
   });
 }
 
-function buildDistrictList(){
-  const list = document.getElementById("districtList");
+function fillDatalist(listId, names){
+  const list = document.getElementById(listId);
   list.innerHTML = "";
-  let names = DISTRICTS;
-  if (getNippouRegion() === "kurobane") {
-    const isKaen = ("" + (CURRENT_COURSE ? CURRENT_COURSE.id : "")).startsWith("kurobane_kaen");
-    names = isKaen ? KUROBANE_KAEN_DISTRICTS : KUROBANE_FUNEN_DISTRICTS;
-  }
   names.forEach(name => {
     const opt = document.createElement("option");
     opt.value = name;
     list.appendChild(opt);
   });
+}
+function buildDistrictLists(){
+  fillDatalist("districtListOtawara", DISTRICTS);
+  fillDatalist("districtListFunen", KUROBANE_FUNEN_DISTRICTS);
+  fillDatalist("districtListKaen", KUROBANE_KAEN_DISTRICTS);
 }
 
 async function fetchStaffList(){
@@ -801,7 +811,7 @@ function draftKey(){
   const courseId = CURRENT_COURSE ? CURRENT_COURSE.id : "none";
   return "gomi_nippou_draft_" + courseId + "_" + CURRENT_DATE;
 }
-const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura", "odoStart", "odoEnd"];
+const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "districtFunen", "districtKaen", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura", "odoStart", "odoEnd"];
 function saveDraft(){
   const data = {};
   DRAFT_FIELD_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
@@ -886,7 +896,7 @@ async function submitReport(server){
     kurobaneDanball: document.getElementById("k_danball").value,
     kurobaneKamipack: document.getElementById("k_kamipack").value,
     kurobaneYoupura: document.getElementById("k_youpura").value,
-    district: document.getElementById("district").value,
+    district: currentDistrictValue(),
     odoStart: stripCommas(document.getElementById("odoStart").value),
     odoEnd: stripCommas(document.getElementById("odoEnd").value),
     timeStart: "8:30",
@@ -1019,7 +1029,8 @@ WEIGHT_TOTAL_GROUPS.forEach(group => {
 });
 updateWeightTotals();
 
-const REQUIRED_FIELD_IDS = ["vehicleInput", "driverSelect", "helperSelect", "district", "timeEndInput", "odoStart", "odoEnd"];
+const REQUIRED_FIELD_IDS = ["vehicleInput", "driverSelect", "helperSelect", "timeEndInput", "odoStart", "odoEnd"];
+const DISTRICT_FIELD_IDS = ["district", "districtFunen", "districtKaen"];
 const OTAWARA_WEIGHT_FIELD_IDS = ["b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura"];
 const KUROBANE_WEIGHT_FIELD_IDS = ["k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura"];
 const ALL_WEIGHT_FIELD_IDS = OTAWARA_WEIGHT_FIELD_IDS.concat(KUROBANE_WEIGHT_FIELD_IDS);
@@ -1036,29 +1047,30 @@ function currentWeightFieldIds(){
 function courseRegion(course){
   return ("" + course.id).startsWith("kurobane_") ? "kurobane" : "otawara";
 }
-function updateDistrictLabel(){
-  const region = getNippouRegion();
-  const label = document.getElementById("districtLabel");
-  const districtInput = document.getElementById("district");
-  if (region === "kurobane") {
-    const isKaen = ("" + (CURRENT_COURSE ? CURRENT_COURSE.id : "")).startsWith("kurobane_kaen");
-    label.textContent = isKaen ? "収集地区（可燃）" : "収集地区（不燃・容プラ）";
-    districtInput.placeholder = isKaen ? "例：大豆田　両郷" : "例：品川　片府田";
-  } else {
-    label.textContent = "収集地区";
-    districtInput.placeholder = "例：新富　城山";
-  }
+function isKaenCourse(){
+  return ("" + (CURRENT_COURSE ? CURRENT_COURSE.id : "")).startsWith("kurobane_kaen");
+}
+function currentDistrictFieldId(){
+  if (getNippouRegion() !== "kurobane") return "district";
+  return isKaenCourse() ? "districtKaen" : "districtFunen";
+}
+function currentDistrictValue(){
+  if (getNippouRegion() !== "kurobane") return document.getElementById("district").value;
+  const kaenVal = document.getElementById("districtKaen").value.trim();
+  const funenVal = document.getElementById("districtFunen").value.trim();
+  return isKaenCourse() ? (kaenVal || funenVal) : (funenVal || kaenVal);
 }
 function applyNippouRegion(){
   const region = getNippouRegion();
   document.getElementById("otawaraWeightCards").style.display = region === "otawara" ? "" : "none";
   document.getElementById("kurobaneWeightCards").style.display = region === "kurobane" ? "" : "none";
+  document.getElementById("otawaraDistrictWrap").style.display = region === "otawara" ? "" : "none";
+  document.getElementById("kurobaneDistrictWrap").style.display = region === "kurobane" ? "" : "none";
   document.querySelectorAll(".region-btn").forEach((btn) => {
     btn.classList.toggle("on", btn.dataset.region === region);
   });
-  updateDistrictLabel();
-  buildDistrictList();
 }
+buildDistrictLists();
 applyNippouRegion();
 document.querySelectorAll(".region-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -1068,7 +1080,7 @@ document.querySelectorAll(".region-btn").forEach((btn) => {
 });
 
 function clearFieldErrors(){
-  REQUIRED_FIELD_IDS.concat(ALL_WEIGHT_FIELD_IDS).forEach(id => {
+  REQUIRED_FIELD_IDS.concat(ALL_WEIGHT_FIELD_IDS).concat(DISTRICT_FIELD_IDS).forEach(id => {
     document.getElementById(id).classList.remove("field-error");
   });
 }
@@ -1078,13 +1090,14 @@ function validateNippouForm(){
   REQUIRED_FIELD_IDS.forEach(id => {
     if (!document.getElementById(id).value.trim()) invalidIds.push(id);
   });
+  if (!currentDistrictValue().trim()) invalidIds.push(currentDistrictFieldId());
   const weightIds = currentWeightFieldIds();
   const hasWeight = weightIds.some(id => document.getElementById(id).value.trim() !== "");
   if (!hasWeight) invalidIds.push(...weightIds);
   return invalidIds;
 }
 
-REQUIRED_FIELD_IDS.concat(ALL_WEIGHT_FIELD_IDS).forEach(id => {
+REQUIRED_FIELD_IDS.concat(ALL_WEIGHT_FIELD_IDS).concat(DISTRICT_FIELD_IDS).forEach(id => {
   document.getElementById(id).addEventListener("input", (e) => e.target.classList.remove("field-error"));
   document.getElementById(id).addEventListener("change", (e) => e.target.classList.remove("field-error"));
 });
