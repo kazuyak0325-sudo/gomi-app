@@ -1028,6 +1028,7 @@ function applyNippouRegion(){
   document.querySelectorAll(".region-btn").forEach((btn) => {
     btn.classList.toggle("on", btn.dataset.region === region);
   });
+  document.getElementById("district").placeholder = region === "kurobane" ? "例：品川　片府田" : "例：新富　城山";
   buildDistrictList();
 }
 applyNippouRegion();
