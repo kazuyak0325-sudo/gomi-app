@@ -235,6 +235,8 @@
       <button type="button" class="link-btn region-btn" data-region="otawara" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">大田原地区</button>
       <button type="button" class="link-btn region-btn" data-region="kurobane" style="flex:1;text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;">黒羽・湯津上地区</button>
     </div>
+    <label style="margin-top:10px;">コース</label>
+    <select id="courseSelect"></select>
   </div>
 
   <div class="card">
@@ -250,7 +252,7 @@
       <input type="text" inputmode="numeric" id="vehicle2Input" placeholder="例：0450">
     </div>
 
-    <label>収集地区</label>
+    <label id="districtLabel">収集地区</label>
     <input type="text" id="district" list="districtList" placeholder="例：新富　城山" autocomplete="off">
     <datalist id="districtList"></datalist>
 
@@ -970,6 +972,13 @@ if (CURRENT_COURSE) {
     if (lastCourseId) CURRENT_COURSE = findCourse(lastCourseId);
   } catch (e) {}
 }
+// URL/保存済みのコースが分かっている場合は、そのコースの地域(大田原/黒羽)に
+// リージョン設定も合わせる。ここで合わせておかないと、あとでbuildCourseSelect()が
+// 「選ばれているコースが現在のリージョンと合わない」と判断して、せっかく
+// 指定されたコースを無関係な地域の先頭コースに上書きしてしまう。
+if (CURRENT_COURSE) {
+  setNippouRegion(("" + CURRENT_COURSE.id).startsWith("kurobane_") ? "kurobane" : "otawara");
+}
 
 const dateField = document.getElementById("dateField");
 const weekday = WEEKDAYS[new Date(CURRENT_DATE + "T00:00:00").getDay()];
@@ -1026,6 +1035,41 @@ function setNippouRegion(v){
 function currentWeightFieldIds(){
   return getNippouRegion() === "kurobane" ? KUROBANE_WEIGHT_FIELD_IDS : OTAWARA_WEIGHT_FIELD_IDS;
 }
+function courseRegion(course){
+  return ("" + course.id).startsWith("kurobane_") ? "kurobane" : "otawara";
+}
+function buildCourseSelect(){
+  const region = getNippouRegion();
+  const select = document.getElementById("courseSelect");
+  const filtered = COURSES.filter(c => courseRegion(c) === region);
+  select.innerHTML = "";
+  filtered.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.name;
+    select.appendChild(opt);
+  });
+  if (CURRENT_COURSE && courseRegion(CURRENT_COURSE) === region) {
+    select.value = CURRENT_COURSE.id;
+  } else if (filtered.length > 0) {
+    CURRENT_COURSE = filtered[0];
+    select.value = CURRENT_COURSE.id;
+    try { localStorage.setItem(LAST_COURSE_KEY, CURRENT_COURSE.id); } catch (e) {}
+  }
+}
+function updateDistrictLabel(){
+  const region = getNippouRegion();
+  const label = document.getElementById("districtLabel");
+  const districtInput = document.getElementById("district");
+  if (region === "kurobane") {
+    const isKaen = ("" + (CURRENT_COURSE ? CURRENT_COURSE.id : "")).startsWith("kurobane_kaen");
+    label.textContent = isKaen ? "収集地区（可燃）" : "収集地区（不燃・容プラ）";
+    districtInput.placeholder = isKaen ? "例：大豆田　両郷" : "例：品川　片府田";
+  } else {
+    label.textContent = "収集地区";
+    districtInput.placeholder = "例：新富　城山";
+  }
+}
 function applyNippouRegion(){
   const region = getNippouRegion();
   document.getElementById("otawaraWeightCards").style.display = region === "otawara" ? "" : "none";
@@ -1033,12 +1077,8 @@ function applyNippouRegion(){
   document.querySelectorAll(".region-btn").forEach((btn) => {
     btn.classList.toggle("on", btn.dataset.region === region);
   });
-  if (region === "kurobane") {
-    const isKaen = ("" + (CURRENT_COURSE ? CURRENT_COURSE.id : "")).startsWith("kurobane_kaen");
-    document.getElementById("district").placeholder = isKaen ? "例：大豆田　両郷" : "例：品川　片府田";
-  } else {
-    document.getElementById("district").placeholder = "例：新富　城山";
-  }
+  buildCourseSelect();
+  updateDistrictLabel();
   buildDistrictList();
 }
 applyNippouRegion();
@@ -1047,6 +1087,14 @@ document.querySelectorAll(".region-btn").forEach((btn) => {
     setNippouRegion(btn.dataset.region);
     applyNippouRegion();
   });
+});
+document.getElementById("courseSelect").addEventListener("change", (e) => {
+  CURRENT_COURSE = findCourse(e.target.value);
+  try { if (CURRENT_COURSE) localStorage.setItem(LAST_COURSE_KEY, CURRENT_COURSE.id); } catch (err) {}
+  updateDistrictLabel();
+  buildDistrictList();
+  updateAutoField();
+  restoreDraft();
 });
 
 function clearFieldErrors(){
