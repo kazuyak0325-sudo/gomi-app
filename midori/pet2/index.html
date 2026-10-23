@@ -3,23 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>緑コース（ペット・ダンボール第2/第4） 回収記録</title>
+<title>緑コース（ペット・ダンボール②） 回収記録</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="緑コース（ペット・ダンボール第2/第4）">
+<meta name="apple-mobile-web-app-title" content="緑コース（ペット・ダンボール②）">
 <meta name="theme-color" content="#2e7d32">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792381646">
+<link rel="stylesheet" href="../../style.css?v=1792739788">
 <style>
   :root { --accent: #2e7d32; --accent-contrast: #ffffff; --surface-done: #e3f6e6; --done-text: #2c8c3f; }
 </style>
 </head>
 <body>
 <header>
-  <h1>緑コース（ペット・ダンボール第2/第4）</h1>
+  <h1>緑コース（ペット・ダンボール②）</h1>
   <p class="meta" id="dateVersion"></p>
   <div id="progress">0 / 0 完了</div>
   <input type="search" id="filter" placeholder="番号・目標物・ST№で検索">
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -37,7 +37,7 @@
 
 <script>
 const COURSE_ID = "midori-pet2";
-const COURSE_NAME = "緑コース（ペット・ダンボール第2/第4）";
+const COURSE_NAME = "緑コース（ペット・ダンボール②）";
 const APP_VERSION = "v6.3";
 
 const DEFAULT_STATIONS = [
@@ -56,7 +56,7 @@ const DEFAULT_STATIONS = [
   {no:13,st:"677",map:"63-F-3",target:"佐貫治療院　前"},
   {no:14,st:"675",map:"63-G-2",target:"大阪屋農機倉庫U"},
   {no:15,st:"662",map:"63-E-3",target:"大岩建設P隣り"},
-  {no:16,st:"1662",map:"63-D-4",target:"新設ｱﾊﾟｰﾄ"},
+  {no:16,st:"1662",map:"63-D-4",target:"ﾒｿﾞﾝﾄﾞﾌﾙｰﾙAP"},
   {no:17,st:"663",map:"63-D-4",target:"原眼科　P角"},
   {no:18,st:"664",map:"63-D-4",target:"ﾃｨｱﾗ　1"},
   {no:19,st:"1498",map:"63-D-4",target:"ﾃｨｱﾗ　2"},
@@ -206,6 +206,6 @@ const DEFAULT_STATIONS = [
   {no:163,st:"1176",map:"109-C-1",target:"ﾋﾞｰﾙ缶ST"}
 ];
 </script>
-<script src="../../app.js?v=1792381646"></script>
+<script src="../../app.js?v=1792739788"></script>
 </body>
 </html>
