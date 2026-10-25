@@ -452,7 +452,10 @@
     <li>常務のPCのトップ画面をブラウザで開く（常務のPC自身で操作）</li>
     <li>「📡 タブレットのアップロード先設定・証明書」を開く</li>
     <li>証明書をタブレットにダウンロードしてインストールする（使っている全タブレットで実施）</li>
-    <li>設定アプリ→一般→VPNとデバイス管理からインストール後、設定アプリ→一般→情報→証明書信頼設定で信頼をオンにする</li>
+    <li>
+      iPad／iPhoneの場合：設定アプリ→一般→VPNとデバイス管理からインストール後、設定アプリ→一般→情報→証明書信頼設定で信頼をオンにする<br>
+      Androidの場合：設定アプリ→セキュリティ（または「セキュリティとプライバシー」）→詳細設定→暗号化と認証情報（機種により呼び方が異なります。見当たらない場合は設定アプリ内の検索で「証明書」と検索してください）→証明書のインストール→「CA証明書」を選んでインストール
+    </li>
     <li>常務のPC・みんなのPC、両方の証明書を使っている場合は、両方について同じ手順を行う</li>
   </ol>
 </div>
@@ -479,7 +482,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v6.3";
+const TOP_VERSION = "v6.4";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 (function(){
@@ -710,6 +713,13 @@ async function precacheAllCourses(){
       );
     });
   });
+  // kurobane_funenだけ「コース」選択の中間ページ(number picker)が別途あり、
+  // COURSE_SCHEDULESのスケジュール一覧には出てこないため個別に登録する。
+  jobs.push(
+    navigator.serviceWorker
+      .register("kurobane_funen/course/sw.js", { scope: "kurobane_funen/course/" })
+      .catch(() => {})
+  );
   await Promise.all(jobs);
   try { localStorage.setItem("gomi_precache_date", new Date().toDateString()); } catch (e) {}
 }
