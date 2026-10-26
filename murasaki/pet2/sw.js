@@ -1,6 +1,6 @@
 const CACHE_NAME = "gomi-app-murasaki-pet2-1790222860";
 const CACHE_PREFIX = "gomi-app-murasaki-pet2-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1792978975", "../../app.js?v=1792978975", "../../pet-icon.png"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1792979217", "../../app.js?v=1792979217", "../../pet-icon.png"];
 const NETWORK_TIMEOUT_MS = 3000;
 
 self.addEventListener("install", (event) => {

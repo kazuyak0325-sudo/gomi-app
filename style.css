@@ -234,10 +234,10 @@ main {
   border-radius: 10px;
   padding: 12px 14px;
 }
-.item.done { background: var(--surface-done); }
 .item.violation { outline: 2px solid var(--danger); }
-.item.group-a { border-left: 6px solid #81c995; }
-.item.group-b { border-left: 6px solid #90caf9; }
+.item.group-a { background: #e3f6e9; border-color: #81c995; }
+.item.group-b { background: #e3eefc; border-color: #90caf9; }
+.item.done { background: var(--surface-done); }
 
 .row-main { display: flex; align-items: center; gap: 4px; }
 .no {
