@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 可燃②コース（火・金）">
 <meta name="theme-color" content="#ef6c00">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979217">
+<link rel="stylesheet" href="../../style.css?v=1792980590">
 <style>
-  :root { --accent: #ef6c00; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #ef6c00; }
+  :root { --accent: #ef6c00; --accent-contrast: #ffffff; --surface-done: #fff3e0; --done-text: #e65100; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -40,8 +40,89 @@ const COURSE_ID = "kurobane_kaen2-kakin";
 const COURSE_NAME = "黒羽・湯津上 可燃②コース（火・金）";
 const APP_VERSION = "v6.5";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"396",map:"60",target:"池沢義光宅脇"},
+  {no:2,st:"237",map:"60",target:"黒羽中学校入り口"},
+  {no:3,st:"235",map:"60",target:"稲葉輪業脇"},
+  {no:4,st:"185",map:"57",target:"黒沢金物店前"},
+  {no:5,st:"184",map:"57",target:"金子木材前"},
+  {no:6,st:"182",map:"57",target:"元黒羽貨物車庫脇"},
+  {no:7,st:"136",map:"47",target:"前田集会所脇"},
+  {no:8,st:"138",map:"47",target:"吉成正悟宅前"},
+  {no:9,st:"183",map:"57",target:"黒沢秀雄宅前"},
+  {no:10,st:"190",map:"57",target:"愛宕山神社下"},
+  {no:11,st:"188",map:"57",target:"大島善治宅前"},
+  {no:12,st:"238",map:"61",target:"平成団地　東"},
+  {no:13,st:"189",map:"57",target:"平成団地　中央"},
+  {no:14,st:"139",map:"47",target:"前田町営団地"},
+  {no:15,st:"146",map:"48",target:"みきはな前"},
+  {no:16,st:"239",map:"61",target:"黒羽高校下"},
+  {no:17,st:"240",map:"61",target:"阿久津縫製前"},
+  {no:18,st:"241",map:"61",target:"荒牧清一宅脇"},
+  {no:19,st:"143",map:"48",target:"深沢庄吉宅前"},
+  {no:20,st:"144",map:"48",target:"印南昭雄宅前"},
+  {no:21,st:"145",map:"48",target:"鉢木停留所"},
+  {no:22,st:"147",map:"48",target:"荒牧農機具店前"},
+  {no:23,st:"148",map:"48",target:"王将食堂脇"},
+  {no:24,st:"142",map:"48",target:"松本商店前"},
+  {no:25,st:"140",map:"47",target:"飯村酒店前"},
+  {no:26,st:"135",map:"47",target:"編淨寺跡"},
+  {no:27,st:"134",map:"47",target:"飯縄山神社前"},
+  {no:28,st:"133",map:"47",target:"小室右宅前"},
+  {no:29,st:"132",map:"47",target:"青山駐車場"},
+  {no:30,st:"131",map:"47",target:"稲野正文宅前"},
+  {no:31,st:"141",map:"48",target:"鈴木巳之重宅前"},
+  {no:32,st:"101",map:"39",target:"小林正太郎宅前"},
+  {no:33,st:"109",map:"40",target:"三森新一宅前"},
+  {no:34,st:"110",map:"40",target:"高戸屋橋"},
+  {no:35,st:"86",map:"35",target:"黒羽中学校"},
+  {no:36,st:"85",map:"35",target:"屋内温水プ－ル"},
+  {no:37,st:"103",map:"39",target:"五峰ヶ丘団地"},
+  {no:38,st:"99",map:"39",target:"下鳥養蜂園前"},
+  {no:39,st:"128",map:"47",target:"田中正平宅前"},
+  {no:40,st:"130",map:"47",target:"体育館"},
+  {no:41,st:"129",map:"47",target:"体育館裏"},
+  {no:42,st:"179",map:"56",target:"稲荷神社前(鍵1256）"},
+  {no:43,st:"186",map:"57",target:"大雄寺入り口坂"},
+  {no:44,st:"150",map:"50",target:"佐川末吉宅前"},
+  {no:45,st:"151",map:"50",target:"伊藤勝巳宅裏"},
+  {no:46,st:"245",map:"63",target:"塩畑橋"},
+  {no:47,st:"246",map:"63",target:"アサヒアート前"},
+  {no:48,st:"279",map:"76",target:"佐川昭二宅脇"},
+  {no:49,st:"284",map:"84",target:"協栄自動車前"},
+  {no:50,st:"434",map:"84",target:"元須佐木小学校上"},
+  {no:51,st:"285",map:"84",target:"佐藤進宅前"},
+  {no:52,st:"286",map:"84",target:"佐藤等宅前"},
+  {no:53,st:"288",map:"84",target:"須佐木保育園脇"},
+  {no:54,st:"292",map:"85",target:"星文具店脇"},
+  {no:55,st:"293",map:"85",target:"阿久津橋"},
+  {no:56,st:"291",map:"85",target:"須賀川小学校"},
+  {no:57,st:"247",map:"65",target:"神社前バス停"},
+  {no:58,st:"248",map:"66",target:"露久保堰上"},
+  {no:59,st:"153",map:"52",target:"佐藤武宅前"},
+  {no:60,st:"112",map:"44",target:"南方１区公民館"},
+  {no:61,st:"113",map:"44",target:"田中林道入り口"},
+  {no:62,st:"74",map:"31",target:"高取橋"},
+  {no:63,st:"59",map:"23",target:"上蛇木橋"},
+  {no:64,st:"15",map:"11",target:"帝国造林社宅前"},
+  {no:65,st:"75",map:"31",target:"阿寺バス停"},
+  {no:66,st:"111",map:"44",target:"西の入林道入り口"},
+  {no:67,st:"152",map:"52",target:"旧ポンプ置場"},
+  {no:68,st:"154",map:"52",target:"露久保公民館"},
+  {no:69,st:"280",map:"78",target:"梅船橋"},
+  {no:70,st:"281",map:"78",target:"雲岩寺宿"},
+  {no:71,st:"290",map:"85",target:"山形屋脇"},
+  {no:72,st:"289",map:"85",target:"鈴木重幸宅前"},
+  {no:73,st:"287",map:"84",target:"須藤理容店前"},
+  {no:74,st:"302",map:"88",target:"佐藤義夫宅前"},
+  {no:75,st:"303",map:"88",target:"須崎神社入り口"},
+  {no:76,st:"311",map:"101",target:"池口バス停"},
+  {no:77,st:"310",map:"101",target:"高橋バス停"},
+  {no:78,st:"301",map:"88",target:"益子清作宅入り口"},
+  {no:79,st:"397",map:"100",target:"田代信夫宅前"},
+  {no:80,st:"451",map:"94",target:"トラックランド寮"}
+];
 </script>
-<script src="../../app.js?v=1792979217"></script>
+<script src="../../app.js?v=1792980590"></script>
 </body>
 </html>
