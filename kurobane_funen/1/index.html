@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 不燃コース（1）">
 <meta name="theme-color" content="#607d8b">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792381646">
+<link rel="stylesheet" href="../../style.css?v=1792978617">
 <style>
-  :root { --accent: #607d8b; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #607d8b; }
+  :root { --accent: #607d8b; --accent-contrast: #ffffff; --surface-done: #eceff1; --done-text: #37474f; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -38,51 +38,42 @@
 <script>
 const COURSE_ID = "kurobane_funen-1";
 const COURSE_NAME = "黒羽・湯津上 不燃コース（1）";
-const APP_VERSION = "v6.3";
+const APP_VERSION = "v6.5";
 
 const DEFAULT_STATIONS = [
-  {no:1,st:"9001",map:"K-1",target:"仮ステーション1"},
-  {no:2,st:"9002",map:"K-1",target:"仮ステーション2"},
-  {no:3,st:"9003",map:"K-1",target:"仮ステーション3"},
-  {no:4,st:"9004",map:"K-2",target:"仮ステーション4"},
-  {no:5,st:"9005",map:"K-2",target:"仮ステーション5"},
-  {no:6,st:"9006",map:"K-2",target:"仮ステーション6"},
-  {no:7,st:"9007",map:"K-2",target:"仮ステーション7"},
-  {no:8,st:"9008",map:"K-3",target:"仮ステーション8"},
-  {no:9,st:"9009",map:"K-3",target:"仮ステーション9"},
-  {no:10,st:"9010",map:"K-3",target:"仮ステーション10"},
-  {no:11,st:"9011",map:"K-3",target:"仮ステーション11"},
-  {no:12,st:"9012",map:"K-4",target:"仮ステーション12"},
-  {no:13,st:"9013",map:"K-4",target:"仮ステーション13"},
-  {no:14,st:"9014",map:"K-4",target:"仮ステーション14"},
-  {no:15,st:"9015",map:"K-5",target:"仮ステーション15"},
-  {no:16,st:"9016",map:"K-5",target:"仮ステーション16"},
-  {no:17,st:"9017",map:"K-5",target:"仮ステーション17"},
-  {no:18,st:"9018",map:"K-5",target:"仮ステーション18"},
-  {no:19,st:"9019",map:"K-6",target:"仮ステーション19"},
-  {no:20,st:"9020",map:"K-6",target:"仮ステーション20"},
-  {no:21,st:"9021",map:"K-6",target:"仮ステーション21"},
-  {no:22,st:"9022",map:"K-7",target:"仮ステーション22"},
-  {no:23,st:"9023",map:"K-7",target:"仮ステーション23"},
-  {no:24,st:"9024",map:"K-7",target:"仮ステーション24"},
-  {no:25,st:"9025",map:"K-7",target:"仮ステーション25"},
-  {no:26,st:"9026",map:"K-8",target:"仮ステーション26"},
-  {no:27,st:"9027",map:"K-8",target:"仮ステーション27"},
-  {no:28,st:"9028",map:"K-8",target:"仮ステーション28"},
-  {no:29,st:"9029",map:"K-9",target:"仮ステーション29"},
-  {no:30,st:"9030",map:"K-9",target:"仮ステーション30"},
-  {no:31,st:"9031",map:"K-9",target:"仮ステーション31"},
-  {no:32,st:"9032",map:"K-9",target:"仮ステーション32"},
-  {no:33,st:"9033",map:"K-10",target:"仮ステーション33"},
-  {no:34,st:"9034",map:"K-10",target:"仮ステーション34"},
-  {no:35,st:"9035",map:"K-10",target:"仮ステーション35"},
-  {no:36,st:"9036",map:"K-11",target:"仮ステーション36"},
-  {no:37,st:"9037",map:"K-11",target:"仮ステーション37"},
-  {no:38,st:"9038",map:"K-11",target:"仮ステーション38"},
-  {no:39,st:"9039",map:"K-11",target:"仮ステーション39"},
-  {no:40,st:"9040",map:"K-12",target:"仮ステーション40"}
+  {no:1,st:"341",map:"90",target:"佐藤秀男宅前(ヤマト近く）"},
+  {no:2,st:"357",map:"95",target:"蛭田小学校入り口"},
+  {no:3,st:"358",map:"96",target:"品川センター"},
+  {no:4,st:"359",map:"96",target:"小高鉄工所前"},
+  {no:5,st:"369",map:"103",target:"墨谷正夫宅前"},
+  {no:6,st:"367",map:"103",target:"蛭田小学校前"},
+  {no:7,st:"366",map:"103",target:"上蛭田集落センター"},
+  {no:8,st:"374",map:"109",target:"中蛭田集落センター"},
+  {no:9,st:"375",map:"109",target:"下蛭田集落センター"},
+  {no:10,st:"376",map:"110",target:"穴山工務店前"},
+  {no:11,st:"439",map:"110",target:"吉成建設前"},
+  {no:12,st:"356",map:"95",target:"新宿集会所"},
+  {no:13,st:"365",map:"102",target:"菊の里前"},
+  {no:14,st:"354",map:"94",target:"片府田生活センター"},
+  {no:15,st:"353",map:"94",target:"阿久津藤雄宅前"},
+  {no:16,st:"340",map:"89",target:"愛と光の会"},
+  {no:17,st:"352",map:"93",target:"岩船集会所"},
+  {no:18,st:"351",map:"93",target:"湯津上小学校"},
+  {no:19,st:"363",map:"98",target:"永山建設脇"},
+  {no:20,st:"364",map:"98",target:"石田公民館"},
+  {no:21,st:"373",map:"106",target:"侍塚生活センター"},
+  {no:22,st:"438",map:"105",target:"江連伸男宅脇"},
+  {no:23,st:"451",map:"94",target:"トラックランド寮"},
+  {no:24,st:"372",map:"105",target:"湯津上中学校"},
+  {no:25,st:"371",map:"105",target:"三浦板金脇"},
+  {no:26,st:"437",map:"104",target:"二本松ニュウータウン 1"},
+  {no:27,st:"449",map:"104",target:"二本松ニュウータウン 2"},
+  {no:28,st:"436",map:"104",target:"黒谷政男宅前"},
+  {no:29,st:"370",map:"104",target:"二本松食堂前"},
+  {no:30,st:"378",map:"110",target:"蛭畑倉庫前"},
+  {no:31,st:"379",map:"111",target:"那須コンクリート前"}
 ];
 </script>
-<script src="../../app.js?v=1792381646"></script>
+<script src="../../app.js?v=1792978617"></script>
 </body>
 </html>
