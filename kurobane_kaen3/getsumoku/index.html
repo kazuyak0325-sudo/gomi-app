@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 可燃③コース（月・木）">
 <meta name="theme-color" content="#ef6c00">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979217">
+<link rel="stylesheet" href="../../style.css?v=1792980594">
 <style>
-  :root { --accent: #ef6c00; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #ef6c00; }
+  :root { --accent: #ef6c00; --accent-contrast: #ffffff; --surface-done: #fff3e0; --done-text: #e65100; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -40,8 +40,67 @@ const COURSE_ID = "kurobane_kaen3-getsumoku";
 const COURSE_NAME = "黒羽・湯津上 可燃③コース（月・木）";
 const APP_VERSION = "v6.5";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"331",map:"73",target:"根本倉庫前"},
+  {no:2,st:"332",map:"74",target:"狭原公民館"},
+  {no:3,st:"339",map:"81",target:"花塚文義宅前"},
+  {no:4,st:"350",map:"93",target:"花塚壱之助宅前"},
+  {no:5,st:"338",map:"81",target:"大武商店脇"},
+  {no:6,st:"337",map:"81",target:"神長宅前"},
+  {no:7,st:"335",map:"80",target:"藤田紀昭宅前"},
+  {no:8,st:"336",map:"80",target:"入山倉庫脇"},
+  {no:9,st:"346",map:"92",target:"深沢喜市宅前"},
+  {no:10,st:"349",map:"93",target:"高瀬茂宅脇"},
+  {no:11,st:"347",map:"92",target:"西の根生活センター"},
+  {no:12,st:"348",map:"92",target:"星縫製入り口"},
+  {no:13,st:"360",map:"97",target:"改善センター"},
+  {no:14,st:"361",map:"97",target:"湯津上支所"},
+  {no:15,st:"345",map:"91",target:"ＳＯＣ寮前"},
+  {no:16,st:"342",map:"91",target:"小藤圭助宅前"},
+  {no:17,st:"343",map:"91",target:"鈴木英雄宅前"},
+  {no:18,st:"344",map:"91",target:"中の原改良区事務所脇"},
+  {no:19,st:"334",map:"79",target:"畜産技術センター"},
+  {no:20,st:"432",map:"79",target:"石川五郎宅前"},
+  {no:21,st:"1197",map:"112-J-4",target:"鹿畑南部公民館"},
+  {no:22,st:"1282",map:"128-A-4",target:"引地牧場前"},
+  {no:23,st:"1195",map:"112-H-4",target:"つたや手前"},
+  {no:24,st:"1196",map:"112-G-4",target:"鹿畑東部集落ｾﾝﾀｰ"},
+  {no:25,st:"1308",map:"137-J-1",target:"坂ﾊﾞｯｸ"},
+  {no:26,st:"1309",map:"137-G-5",target:"ﾔﾏﾄ裏"},
+  {no:27,st:"1307",map:"137-D-1",target:"笹原公民館"},
+  {no:28,st:"1281",map:"127-C-2",target:"倉骨NT"},
+  {no:29,st:"1194",map:"112-C-5",target:"松井商店前"},
+  {no:30,st:"1193",map:"112-A-5",target:"鹿畑西部集落ｾﾝﾀｰ"},
+  {no:31,st:"1192",map:"112-B-3",target:"鹿畑ほほえみｾﾝﾀｰ"},
+  {no:32,st:"1063",map:"87-H-5",target:"Y字路"},
+  {no:33,st:"695",map:"67-B-3",target:"大川ｽﾃﾝﾚｽDIｴｸｾﾙ"},
+  {no:34,st:"776",map:"67-G-1",target:"ｾﾌﾞﾝ裏河川敷"},
+  {no:35,st:"777",map:"67-I-5",target:"奥沢小学校　手前"},
+  {no:36,st:"1062",map:"87-H-1",target:"分譲地"},
+  {no:37,st:"1066",map:"88-B-2",target:"奥沢小学校"},
+  {no:38,st:"1067",map:"88-C-2",target:"小学校さき移動"},
+  {no:39,st:"1065",map:"88-C-5",target:"東坪研修会館　前"},
+  {no:40,st:"1064",map:"88-A-4",target:"藤久建設まえUﾀｰﾝ"},
+  {no:41,st:"1068",map:"88-I-3",target:"ﾊｼﾓ手前"},
+  {no:42,st:"1069",map:"88-J-2",target:"酪農農家　前"},
+  {no:43,st:"1071",map:"89-B-2",target:"塩那ｴﾝｼﾞﾆｱ"},
+  {no:44,st:"1072",map:"89-E-3",target:"藤喜金物1"},
+  {no:45,st:"1073",map:"89-G-4",target:"藤喜金物2"},
+  {no:46,st:"1074",map:"89-I-2",target:"南金丸南部公民館"},
+  {no:47,st:"791",map:"72-E-5",target:"細道　川の近く"},
+  {no:48,st:"1075",map:"90-D-2",target:"ｺｽﾓ石油　裏"},
+  {no:49,st:"1070",map:"89-C-1",target:"金田南地区公民館"},
+  {no:50,st:"787",map:"69-B-5",target:"金田南中学校"},
+  {no:51,st:"1565",map:"68-J-4",target:"新設住宅前"},
+  {no:52,st:"781",map:"68-H-3",target:"大学から斜めST"},
+  {no:53,st:"1188",map:"70-I-1",target:"共和直線ST"},
+  {no:54,st:"1061",map:"87-A-5",target:"千丈橋住宅地１"},
+  {no:55,st:"1060",map:"86-I-2",target:"千丈橋住宅地２"},
+  {no:56,st:"1189",map:"111-C-1",target:"北大和久"},
+  {no:57,st:"1191",map:"111-D-5",target:"田んぼ沿い"},
+  {no:58,st:"1190",map:"111-C-3",target:"やすらぎの里"}
+];
 </script>
-<script src="../../app.js?v=1792979217"></script>
+<script src="../../app.js?v=1792980594"></script>
 </body>
 </html>
