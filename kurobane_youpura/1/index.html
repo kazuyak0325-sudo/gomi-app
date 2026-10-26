@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 容プラコース（1）">
 <meta name="theme-color" content="#26a69a">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979217">
+<link rel="stylesheet" href="../../style.css?v=1792979796">
 <style>
-  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #26a69a; }
+  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e0f2f1; --done-text: #00796b; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -40,8 +40,41 @@ const COURSE_ID = "kurobane_youpura-1";
 const COURSE_NAME = "黒羽・湯津上 容プラコース（1）";
 const APP_VERSION = "v6.5";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"341",map:"90",target:"佐藤秀男宅前（ヤマト近く）"},
+  {no:2,st:"357",map:"95",target:"蛭田小学校入り口"},
+  {no:3,st:"365",map:"102",target:"菊の里前"},
+  {no:4,st:"354",map:"94",target:"片府田生活センター"},
+  {no:5,st:"353",map:"94",target:"阿久津藤雄宅前"},
+  {no:6,st:"340",map:"89",target:"愛と光の会"},
+  {no:7,st:"356",map:"95",target:"新宿集会所"},
+  {no:8,st:"358",map:"96",target:"品川センター"},
+  {no:9,st:"359",map:"96",target:"小高鉄工所前"},
+  {no:10,st:"369",map:"103",target:"墨谷正夫宅前"},
+  {no:11,st:"367",map:"103",target:"蛭田小学校前"},
+  {no:12,st:"366",map:"103",target:"上蛭田集落センター"},
+  {no:13,st:"374",map:"109",target:"中蛭田集落センター"},
+  {no:14,st:"375",map:"109",target:"下蛭田集落センター"},
+  {no:15,st:"376",map:"110",target:"穴山工務店前"},
+  {no:16,st:"439",map:"110",target:"吉成建設前"},
+  {no:17,st:"379",map:"111",target:"那須コンクリート前"},
+  {no:18,st:"378",map:"110",target:"蛭畑倉庫前"},
+  {no:19,st:"370",map:"104",target:"二本松食堂前"},
+  {no:20,st:"436",map:"104",target:"黒谷政男宅前"},
+  {no:21,st:"437",map:"104",target:"二本松ニュウータウン 1"},
+  {no:22,st:"449",map:"104",target:"二本松ニュウータウン 2"},
+  {no:23,st:"371",map:"105",target:"三浦板金脇"},
+  {no:24,st:"372",map:"105",target:"湯津上中学校"},
+  {no:25,st:"438",map:"105",target:"江連伸男宅脇"},
+  {no:26,st:"451",map:"94",target:"トラックランド寮"},
+  {no:27,st:"373",map:"106",target:"侍塚生活センター"},
+  {no:28,st:"364",map:"98",target:"石田公民館"},
+  {no:29,st:"363",map:"98",target:"永山建設脇"},
+  {no:30,st:"351",map:"93",target:"湯津上小学校"},
+  {no:31,st:"352",map:"93",target:"岩船集会所"},
+  {no:32,st:"",map:"",target:"蜂巣　桧木沢"}
+];
 </script>
-<script src="../../app.js?v=1792979217"></script>
+<script src="../../app.js?v=1792979796"></script>
 </body>
 </html>
