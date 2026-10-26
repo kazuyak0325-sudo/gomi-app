@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 容プラコース（2）">
 <meta name="theme-color" content="#26a69a">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979217">
+<link rel="stylesheet" href="../../style.css?v=1792979800">
 <style>
-  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #26a69a; }
+  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e0f2f1; --done-text: #00796b; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -40,8 +40,38 @@ const COURSE_ID = "kurobane_youpura-2";
 const COURSE_NAME = "黒羽・湯津上 容プラコース（2）";
 const APP_VERSION = "v6.5";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"94",map:"38",target:"黒田博宅前"},
+  {no:2,st:"92",map:"38",target:"共同墓地前"},
+  {no:3,st:"90",map:"37",target:"室井英雄宅前"},
+  {no:4,st:"91",map:"38",target:"大黒電線寮前"},
+  {no:5,st:"79",map:"33",target:"上ノ台裏班"},
+  {no:6,st:"95",map:"38",target:"サイプレス　１"},
+  {no:7,st:"96",map:"38",target:"サイプレス　２"},
+  {no:8,st:"97",map:"38",target:"サイプレス　３"},
+  {no:9,st:"405",map:"33",target:"佐藤信一宅前"},
+  {no:10,st:"406",map:"33",target:"猪股一彦宅脇"},
+  {no:11,st:"407",map:"33",target:"大宮司製作所脇"},
+  {no:12,st:"60",map:"25",target:"渡辺宅裏"},
+  {no:13,st:"61",map:"25",target:"砂の目Ｔ字路"},
+  {no:14,st:"65",map:"25",target:"益子清宅前"},
+  {no:15,st:"63",map:"25",target:"さつき台団地　１"},
+  {no:16,st:"42",map:"17",target:"本多政義宅前"},
+  {no:17,st:"16",map:"13",target:"奥山宅脇"},
+  {no:18,st:"19",map:"13",target:"緑新ニュータウン"},
+  {no:19,st:"46",map:"17",target:"フジソク(株)脇"},
+  {no:20,st:"22",map:"14",target:"菊地三郎宅脇"},
+  {no:21,st:"23",map:"14",target:"旧寒井小学校入り口"},
+  {no:22,st:"21",map:"13",target:"白井誠一郎宅入り口"},
+  {no:23,st:"20",map:"13",target:"北部公民館"},
+  {no:24,st:"24",map:"14",target:"矢野目一郎宅脇"},
+  {no:25,st:"26",map:"14",target:"小室金物店前"},
+  {no:26,st:"25",map:"14",target:"星野清宅前"},
+  {no:27,st:"48",map:"18",target:"花塚熊雄宅前"},
+  {no:28,st:"47",map:"18",target:"村田魚店脇"},
+  {no:29,st:"408",map:"34",target:"池沢良行宅前"}
+];
 </script>
-<script src="../../app.js?v=1792979217"></script>
+<script src="../../app.js?v=1792979800"></script>
 </body>
 </html>
