@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 可燃①コース（月・木）">
 <meta name="theme-color" content="#ef6c00">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979217">
+<link rel="stylesheet" href="../../style.css?v=1792980575">
 <style>
-  :root { --accent: #ef6c00; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #ef6c00; }
+  :root { --accent: #ef6c00; --accent-contrast: #ffffff; --surface-done: #fff3e0; --done-text: #e65100; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -40,8 +40,90 @@ const COURSE_ID = "kurobane_kaen1-getsumoku";
 const COURSE_NAME = "黒羽・湯津上 可燃①コース（月・木）";
 const APP_VERSION = "v6.5";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"198",map:"58",target:"斎藤書店前"},
+  {no:2,st:"201",map:"58",target:"室井昭宅前"},
+  {no:3,st:"202",map:"58",target:"旭橋脇"},
+  {no:4,st:"216",map:"59",target:"鈴木正八宅前"},
+  {no:5,st:"258",map:"68",target:"烏山信用金庫脇"},
+  {no:6,st:"257",map:"68",target:"磯医院前"},
+  {no:7,st:"210",map:"58",target:"公会堂前"},
+  {no:8,st:"206",map:"58",target:"米沢英則宅前"},
+  {no:9,st:"197",map:"58",target:"綱川秀人宅前"},
+  {no:10,st:"200",map:"58",target:"福寿脇"},
+  {no:11,st:"162",map:"55",target:"那須工業前"},
+  {no:12,st:"165",map:"55",target:"藤田初太郎宅前"},
+  {no:13,st:"166",map:"55",target:"遠藤米店所"},
+  {no:14,st:"167",map:"55",target:"土谷橋脇"},
+  {no:15,st:"203",map:"58",target:"那須製作所前"},
+  {no:16,st:"195",map:"58",target:"第１ｸﾘｰﾝC入り口"},
+  {no:17,st:"194",map:"58",target:"菊地英雄宅前"},
+  {no:18,st:"163",map:"55",target:"稲葉清宅前"},
+  {no:19,st:"191",map:"58",target:"ＪＡパテオ館"},
+  {no:20,st:"192",map:"58",target:"萩原英雄宅前"},
+  {no:21,st:"193",map:"58",target:"鈴木昭吾宅前"},
+  {no:22,st:"196",map:"58",target:"山田　守宅前"},
+  {no:23,st:"164",map:"55",target:"ヒルトップ"},
+  {no:24,st:"161",map:"55",target:"ひばりヶ丘団地　１"},
+  {no:25,st:"160",map:"55",target:"ひばりヶ丘団地　２"},
+  {no:26,st:"157",map:"54",target:"メッツ黒羽"},
+  {no:27,st:"156",map:"54",target:"かめのや団地"},
+  {no:28,st:"104",map:"54",target:"グリーンハイツ"},
+  {no:29,st:"118",map:"46",target:"余瀬８班"},
+  {no:30,st:"117",map:"46",target:"高尾嘉彦宅前"},
+  {no:31,st:"114",map:"45",target:"白旗城跡入り口"},
+  {no:32,st:"116",map:"46",target:"小川義一宅前"},
+  {no:33,st:"115",map:"46",target:"高橋橋"},
+  {no:34,st:"124",map:"46",target:"佐藤勝彦宅前"},
+  {no:35,st:"92",map:"38",target:"共同墓地前"},
+  {no:36,st:"90",map:"37",target:"室井英雄宅前"},
+  {no:37,st:"77",map:"32",target:"篠原公民館"},
+  {no:38,st:"76",map:"32",target:"渡辺勝雄宅入り口"},
+  {no:39,st:"78",map:"32",target:"高蕨団地"},
+  {no:40,st:"91",map:"38",target:"大黒電線寮前"},
+  {no:41,st:"95",map:"38",target:"サイプレス　2"},
+  {no:42,st:"96",map:"38",target:"サイプレス　1"},
+  {no:43,st:"81",map:"34",target:"小池英雄宅裏"},
+  {no:44,st:"82",map:"34",target:"大野要一宅前"},
+  {no:45,st:"66",map:"26",target:"大宮司商店脇"},
+  {no:46,st:"68",map:"26",target:"大森利行宅脇"},
+  {no:47,st:"69",map:"26",target:"小沢喜好宅裏"},
+  {no:48,st:"67",map:"26",target:"矢板進宅脇"},
+  {no:49,st:"100",map:"39",target:"樋山一男宅裏"},
+  {no:50,st:"127",map:"47",target:"第２ｸﾘｰﾝC(木曜)"},
+  {no:51,st:"126",map:"47",target:"室井自動車車庫"},
+  {no:52,st:"47",map:"18",target:"村田魚店脇"},
+  {no:53,st:"48",map:"18",target:"花塚熊雄宅前"},
+  {no:54,st:"26",map:"14",target:"小室金物店前"},
+  {no:55,st:"65",map:"25",target:"益子清宅前"},
+  {no:56,st:"62",map:"25",target:"さつき台団地(南側)"},
+  {no:57,st:"64",map:"25",target:"鈴木正一宅前"},
+  {no:58,st:"63",map:"25",target:"さつき台団地(北側）"},
+  {no:59,st:"42",map:"17",target:"本多政義宅前"},
+  {no:60,st:"16",map:"13",target:"奥山宅脇"},
+  {no:61,st:"19",map:"13",target:"緑新ニュータウン"},
+  {no:62,st:"46",map:"17",target:"フジソク(株)脇"},
+  {no:63,st:"22",map:"14",target:"菊地三郎宅脇"},
+  {no:64,st:"23",map:"14",target:"旧寒井小学校入り口"},
+  {no:65,st:"21",map:"13",target:"白井誠一郎宅入り口"},
+  {no:66,st:"20",map:"13",target:"北部公民館"},
+  {no:67,st:"24",map:"14",target:"矢野目一郎宅脇"},
+  {no:68,st:"25",map:"14",target:"星野清宅前"},
+  {no:69,st:"27",map:"14",target:"旧川田公民館"},
+  {no:70,st:"29",map:"15",target:"高崎板金前"},
+  {no:71,st:"30",map:"15",target:"高林重宣宅脇"},
+  {no:72,st:"7",map:"8",target:"益子清宅前"},
+  {no:73,st:"6",map:"7",target:"益子健一宅前"},
+  {no:74,st:"8",map:"8",target:"藤田正男宅裏"},
+  {no:75,st:"31",map:"15",target:"狸塚英祐宅前"},
+  {no:76,st:"34",map:"16",target:"関谷商店脇"},
+  {no:77,st:"35",map:"16",target:"両郷支所"},
+  {no:78,st:"398",map:"16",target:"旧両郷支所跡"},
+  {no:79,st:"36",map:"16",target:"保育所前"},
+  {no:80,st:"32",map:"16",target:"中野内中山講中倉"},
+  {no:81,st:"50",map:"19",target:"両郷中学校入り口"}
+];
 </script>
-<script src="../../app.js?v=1792979217"></script>
+<script src="../../app.js?v=1792980575"></script>
 </body>
 </html>
