@@ -1,6 +1,6 @@
-﻿const CACHE_NAME = "gomi-app-kurobane_container-6-1792979764";
+﻿const CACHE_NAME = "gomi-app-kurobane_container-6-1792982781";
 const CACHE_PREFIX = "gomi-app-kurobane_container-6-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1792979764", "../../app.js?v=1792979764"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1792982781", "../../app.js?v=1792982781"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
