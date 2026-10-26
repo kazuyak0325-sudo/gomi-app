@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 コンテナ配りコース（10）">
 <meta name="theme-color" content="#607d8b">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979780">
+<link rel="stylesheet" href="../../style.css?v=1792982798">
 <style>
   :root { --accent: #607d8b; --accent-contrast: #ffffff; --surface-done: #eceff1; --done-text: #37474f; }
 </style>
@@ -41,46 +41,46 @@ const COURSE_NAME = "黒羽・湯津上 コンテナ配りコース（10）";
 const APP_VERSION = "v6.5";
 
 const DEFAULT_STATIONS = [
-  {no:1,st:"76",map:"32",target:"渡辺勝雄宅入り口"},
-  {no:2,st:"404",map:"32",target:"磯洋治宅前"},
-  {no:3,st:"78",map:"32",target:"高蕨団地"},
-  {no:4,st:"98",map:"39",target:"稲葉カーショプ脇"},
-  {no:5,st:"100",map:"39",target:"樋山一男宅裏"},
-  {no:6,st:"126",map:"47",target:"室井自動車駐車場"},
-  {no:7,st:"172",map:"56",target:"上町公民館"},
-  {no:8,st:"123",map:"46",target:"村上三郎宅前"},
-  {no:9,st:"121",map:"46",target:"川西中学校前"},
-  {no:10,st:"413",map:"46",target:"朝野建設裏"},
-  {no:11,st:"125",map:"46",target:"三幸設備倉庫前"},
-  {no:12,st:"199",map:"46",target:"矢崎部品（株）前"},
-  {no:13,st:"418",map:"55",target:"川西小学校"},
-  {no:14,st:"169",map:"55",target:"金沢一男宅脇"},
-  {no:15,st:"178",map:"56",target:"下町１公民館⇒井上哲宅前"},
-  {no:16,st:"213",map:"59",target:"よりたか燃料店前"},
-  {no:17,st:"167",map:"55",target:"土谷橋脇"},
-  {no:18,st:"164",map:"55",target:"ヒルトップ"},
-  {no:19,st:"191",map:"58",target:"ＪＡパテオ館"},
-  {no:20,st:"192",map:"58",target:"萩原英雄宅前"},
-  {no:21,st:"193",map:"58",target:"鈴木昭吾宅前"},
-  {no:22,st:"196",map:"58",target:"農協倉庫脇"},
-  {no:23,st:"420",map:"58",target:"下町２公民館"},
-  {no:24,st:"204",map:"58",target:"ほほえみセンター脇"},
-  {no:25,st:"210",map:"58",target:"公会堂前"},
-  {no:26,st:"203",map:"58",target:"那須製作所脇"},
-  {no:27,st:"195",map:"58",target:"第１クリーンセンター入り口"},
-  {no:28,st:"194",map:"58",target:"菊地英雄宅前"},
-  {no:29,st:"163",map:"55",target:"稲葉清宅前"},
-  {no:30,st:"161",map:"55",target:"ひばりヶ丘団地　１"},
-  {no:31,st:"157",map:"54",target:"メッツ黒羽"},
-  {no:32,st:"156",map:"54",target:"かめのや団地"},
-  {no:33,st:"117",map:"46",target:"高尾嘉彦宅前"},
-  {no:34,st:"118",map:"46",target:"余瀬８班"},
-  {no:35,st:"114",map:"45",target:"白旗城跡入り口"},
-  {no:36,st:"116",map:"46",target:"小川義一宅前"},
-  {no:37,st:"115",map:"46",target:"高橋橋"},
-  {no:38,st:"124",map:"46",target:"佐藤勝彦宅前"}
+  {no:1,st:"76",map:"32",target:"渡辺勝雄宅入り口",brown:1,white:1,green:1},
+  {no:2,st:"404",map:"32",target:"磯洋治宅前",brown:1,white:1,green:1},
+  {no:3,st:"78",map:"32",target:"高蕨団地",brown:1,white:1,green:1},
+  {no:4,st:"98",map:"39",target:"稲葉カーショプ脇",brown:1,white:1,green:1},
+  {no:5,st:"100",map:"39",target:"樋山一男宅裏",brown:2,white:2,green:1},
+  {no:6,st:"126",map:"47",target:"室井自動車駐車場",brown:1,white:1,green:1},
+  {no:7,st:"172",map:"56",target:"上町公民館",brown:2,white:2,green:1},
+  {no:8,st:"123",map:"46",target:"村上三郎宅前",brown:1,white:1,green:1},
+  {no:9,st:"121",map:"46",target:"川西中学校前",brown:1,white:1,green:1},
+  {no:10,st:"413",map:"46",target:"朝野建設裏",brown:1,white:1,green:1},
+  {no:11,st:"125",map:"46",target:"三幸設備倉庫前",brown:2,white:2,green:1},
+  {no:12,st:"199",map:"46",target:"矢崎部品（株）前",brown:1,white:1,green:1},
+  {no:13,st:"418",map:"55",target:"川西小学校",brown:1,white:1,green:1},
+  {no:14,st:"169",map:"55",target:"金沢一男宅脇",brown:2,white:2,green:1},
+  {no:15,st:"178",map:"56",target:"下町１公民館⇒井上哲宅前",brown:2,white:2,green:1},
+  {no:16,st:"213",map:"59",target:"よりたか燃料店前",brown:1,white:1,green:1},
+  {no:17,st:"167",map:"55",target:"土谷橋脇",brown:3,white:3,green:1},
+  {no:18,st:"164",map:"55",target:"ヒルトップ",brown:1,white:1,green:1},
+  {no:19,st:"191",map:"58",target:"ＪＡパテオ館",brown:1,white:1,green:1},
+  {no:20,st:"192",map:"58",target:"萩原英雄宅前",brown:1,white:1,green:1},
+  {no:21,st:"193",map:"58",target:"鈴木昭吾宅前",brown:2,white:2,green:1},
+  {no:22,st:"196",map:"58",target:"農協倉庫脇",brown:1,white:1,green:1},
+  {no:23,st:"420",map:"58",target:"下町２公民館",brown:2,white:2,green:1},
+  {no:24,st:"204",map:"58",target:"ほほえみセンター脇",brown:1,white:1,green:1},
+  {no:25,st:"210",map:"58",target:"公会堂前",brown:1,white:1,green:1},
+  {no:26,st:"203",map:"58",target:"那須製作所脇",brown:2,white:2,green:1},
+  {no:27,st:"195",map:"58",target:"第１クリーンセンター入り口",brown:2,white:1,green:1},
+  {no:28,st:"194",map:"58",target:"菊地英雄宅前",brown:1,white:1,green:1},
+  {no:29,st:"163",map:"55",target:"稲葉清宅前",brown:1,white:1,green:1},
+  {no:30,st:"161",map:"55",target:"ひばりヶ丘団地　１",brown:1,white:1,green:1},
+  {no:31,st:"157",map:"54",target:"メッツ黒羽",brown:1,white:1,green:1},
+  {no:32,st:"156",map:"54",target:"かめのや団地",brown:1,white:1,green:1},
+  {no:33,st:"117",map:"46",target:"高尾嘉彦宅前",brown:1,white:1,green:1},
+  {no:34,st:"118",map:"46",target:"余瀬８班",brown:1,white:1,green:1},
+  {no:35,st:"114",map:"45",target:"白旗城跡入り口",brown:2,white:1,green:1},
+  {no:36,st:"116",map:"46",target:"小川義一宅前",brown:1,white:1,green:1},
+  {no:37,st:"115",map:"46",target:"高橋橋",brown:1,white:1,green:1},
+  {no:38,st:"124",map:"46",target:"佐藤勝彦宅前",brown:1,white:1,green:1}
 ];
 </script>
-<script src="../../app.js?v=1792979780"></script>
+<script src="../../app.js?v=1792982798"></script>
 </body>
 </html>
