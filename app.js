@@ -810,6 +810,21 @@ function mkStepperBtn(label, onClick){
 
 const RED_NO_FROM = { "youpura_kiiro-higashi": 283, "youpura_murasaki-higashi": 223 };
 
+// 黒羽・湯津上 不燃コースは1コースを2台で分担しており、番号のこの位置から
+// 2台目の担当に切り替わる(元のExcelでの色分けの境目と一致)。
+const GROUP_B_FROM = {
+  "kurobane_funen-1": 17,
+  "kurobane_funen-2": 15,
+  "kurobane_funen-3": 17,
+  "kurobane_funen-4": 22,
+  "kurobane_funen-5": 20,
+  "kurobane_funen-6": 17,
+  "kurobane_funen-7": 18,
+  "kurobane_funen-8": 17,
+  "kurobane_funen-9": 20,
+  "kurobane_funen-10": 22
+};
+
 function render(filterText){
   const list = document.getElementById("list");
   list.innerHTML = "";
@@ -845,8 +860,10 @@ function render(filterText){
     if (violationFilterOn && !v) return;
 
     const isDone = (HAS_SECONDARY && cardboardFilterOn) ? !!cbTime : !!time;
+    const groupFrom = GROUP_B_FROM[COURSE_ID];
+    const groupClass = groupFrom === undefined ? "" : (s.no >= groupFrom ? " group-b" : " group-a");
     const li = document.createElement("li");
-    li.className = "item" + (isDone ? " done" : "") + (v ? " violation" : "");
+    li.className = "item" + (isDone ? " done" : "") + (v ? " violation" : "") + groupClass;
 
     const rowMain = document.createElement("div");
     rowMain.className = "row-main";

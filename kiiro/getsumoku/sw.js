@@ -1,6 +1,6 @@
 const CACHE_NAME = "gomi-app-kiiro-getsumoku-1789966439";
 const CACHE_PREFIX = "gomi-app-kiiro-getsumoku-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1792381646", "../../app.js?v=1792381646"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1792978975", "../../app.js?v=1792978975"];
 const NETWORK_TIMEOUT_MS = 3000;
 
 self.addEventListener("install", (event) => {

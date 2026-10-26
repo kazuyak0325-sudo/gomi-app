@@ -236,6 +236,8 @@ main {
 }
 .item.done { background: var(--surface-done); }
 .item.violation { outline: 2px solid var(--danger); }
+.item.group-a { border-left: 6px solid #81c995; }
+.item.group-b { border-left: 6px solid #90caf9; }
 
 .row-main { display: flex; align-items: center; gap: 4px; }
 .no {
