@@ -1,6 +1,6 @@
 const CACHE_NAME = "gomi-app-kuro-kakin-1792134205";
 const CACHE_PREFIX = "gomi-app-kuro-kakin-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1792979217", "../../app.js?v=1792979217"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1792983166", "../../app.js?v=1792983166"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

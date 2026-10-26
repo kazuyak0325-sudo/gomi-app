@@ -268,14 +268,14 @@ main {
 }
 .container-counts {
   display: flex;
-  gap: 6px;
-  margin-top: 4px;
+  gap: 8px;
+  margin-top: 6px;
 }
 .container-count {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 5px 14px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 700;
   color: #fff;
 }
