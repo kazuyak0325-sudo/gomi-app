@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 不燃コース（3）">
 <meta name="theme-color" content="#607d8b">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792381646">
+<link rel="stylesheet" href="../../style.css?v=1792978691">
 <style>
-  :root { --accent: #607d8b; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #607d8b; }
+  :root { --accent: #607d8b; --accent-contrast: #ffffff; --surface-done: #eceff1; --done-text: #37474f; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -40,8 +40,43 @@ const COURSE_ID = "kurobane_funen-3";
 const COURSE_NAME = "黒羽・湯津上 不燃コース（3）";
 const APP_VERSION = "v6.5";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"85",map:"35",target:"屋内温水プール"},
+  {no:2,st:"86",map:"35",target:"黒羽中学校"},
+  {no:3,st:"88",map:"35",target:"山百合荘前"},
+  {no:4,st:"89",map:"35",target:"不動院下"},
+  {no:5,st:"71",map:"28",target:"佐藤憲司宅入り口"},
+  {no:6,st:"72",map:"28",target:"消防センター前"},
+  {no:7,st:"51",map:"20",target:"大久保公民館"},
+  {no:8,st:"52",map:"20",target:"藤田孝宅裏"},
+  {no:9,st:"27",map:"14",target:"旧川田公民館"},
+  {no:10,st:"69",map:"26",target:"小沢喜好宅裏"},
+  {no:11,st:"68",map:"26",target:"大森利行宅脇"},
+  {no:12,st:"67",map:"26",target:"矢板進宅脇"},
+  {no:13,st:"403",map:"26",target:"荒牧商店脇"},
+  {no:14,st:"66",map:"26",target:"大宮司商店脇"},
+  {no:15,st:"82",map:"34",target:"大野要一宅前"},
+  {no:16,st:"81",map:"34",target:"小池英雄宅裏"},
+  {no:17,st:"99",map:"39",target:"下鳥養蜂園前"},
+  {no:18,st:"103",map:"39",target:"五峰ヶ丘団地"},
+  {no:19,st:"84",map:"34",target:"生田目文治宅前"},
+  {no:20,st:"83",map:"34",target:"駒込の池前"},
+  {no:21,st:"106",map:"39",target:"長谷田新班"},
+  {no:22,st:"102",map:"39",target:"ピアートホール"},
+  {no:23,st:"141",map:"48",target:"鈴木巳之重宅前"},
+  {no:24,st:"133",map:"47",target:"小室右宅前"},
+  {no:25,st:"132",map:"47",target:"青山駐車場"},
+  {no:26,st:"131",map:"47",target:"稲野正文宅前"},
+  {no:27,st:"101",map:"39",target:"小林正太郎宅前"},
+  {no:28,st:"410",map:"40",target:"朝日屋商店脇"},
+  {no:29,st:"109",map:"40",target:"三森新一宅前"},
+  {no:30,st:"411",map:"40",target:"石川進宅前"},
+  {no:31,st:"409",map:"36",target:"荒牧工務店店脇"},
+  {no:32,st:"110",map:"40",target:"高戸屋橋"},
+  {no:33,st:"412",map:"40",target:"豊田隆夫宅前"},
+  {no:34,st:"416",map:"48",target:"鈴木幸雄宅前"}
+];
 </script>
-<script src="../../app.js?v=1792381646"></script>
+<script src="../../app.js?v=1792978691"></script>
 </body>
 </html>
