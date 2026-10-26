@@ -1,9 +1,10 @@
-{
+﻿{
   "name": "黒羽・湯津上 可燃①コース（火・金） 回収記録",
   "short_name": "黒羽・湯津上 可燃①コース（火・金）",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#ef6c00",
   "icons": [
