@@ -1,9 +1,10 @@
-{
-  "name": "黒羽・湯津上 コンテナ配り（3） 回収記録",
-  "short_name": "黒羽・湯津上 コンテナ配り（3）",
+﻿{
+  "name": "黒羽・湯津上 コンテナ配りコース（3） 回収記録",
+  "short_name": "黒羽・湯津上 コンテナ配りコース（3）",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#607d8b",
   "icons": [
