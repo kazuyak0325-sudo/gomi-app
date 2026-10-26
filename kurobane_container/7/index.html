@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 コンテナ配りコース（7）">
 <meta name="theme-color" content="#607d8b">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979768">
+<link rel="stylesheet" href="../../style.css?v=1792982785">
 <style>
   :root { --accent: #607d8b; --accent-contrast: #ffffff; --surface-done: #eceff1; --done-text: #37474f; }
 </style>
@@ -41,42 +41,42 @@ const COURSE_NAME = "黒羽・湯津上 コンテナ配りコース（7）";
 const APP_VERSION = "v6.5";
 
 const DEFAULT_STATIONS = [
-  {no:1,st:"28",map:"15",target:"青木機械置場前"},
-  {no:2,st:"29",map:"15",target:"高崎板金前"},
-  {no:3,st:"30",map:"15",target:"高林重宣宅脇"},
-  {no:4,st:"33",map:"8",target:"大戸集会所"},
-  {no:5,st:"8",map:"8",target:"藤田正男宅裏"},
-  {no:6,st:"35",map:"16",target:"両郷支所"},
-  {no:7,st:"37",map:"16",target:"中野内公民館"},
-  {no:8,st:"38",map:"16",target:"両郷中央小学校"},
-  {no:9,st:"39",map:"16",target:"井上一義宅前"},
-  {no:10,st:"40",map:"16",target:"かどや魚店脇"},
-  {no:11,st:"11",map:"8",target:"河原公民館"},
-  {no:12,st:"10",map:"8",target:"鈴木芳雄宅前"},
-  {no:13,st:"9",map:"8",target:"深谷勝夫宅前"},
-  {no:14,st:"1",map:"1",target:"大塚公男宅前"},
-  {no:15,st:"2",map:"2",target:"菊池元紀宅前"},
-  {no:16,st:"4",map:"2",target:"三森清宅前"},
-  {no:17,st:"5",map:"2",target:"講中蔵脇"},
-  {no:18,st:"394",map:"2",target:"御堂前"},
-  {no:19,st:"3",map:"2",target:"消防センター前"},
-  {no:20,st:"395",map:"8",target:"富貴田入り口"},
-  {no:21,st:"12",map:"9",target:"深沢末蔵宅前"},
-  {no:22,st:"13",map:"9",target:"早乙女正宅前"},
-  {no:23,st:"14",map:"9",target:"鍛冶内集会所"},
-  {no:24,st:"398",map:"16",target:"旧両郷支所跡"},
-  {no:25,st:"36",map:"16",target:"保育所前"},
-  {no:26,st:"53",map:"21",target:"寺宿公民館"},
-  {no:27,st:"54",map:"21",target:"大森洋宅前"},
-  {no:28,st:"57",map:"9",target:"鈴木勉宅前"},
-  {no:29,st:"41",map:"16",target:"消防詰め所"},
-  {no:30,st:"56",map:"21",target:"横倉一男宅前"},
-  {no:31,st:"58",map:"21",target:"田代一典宅前"},
-  {no:32,st:"73",map:"29",target:"深堀橋"},
-  {no:33,st:"55",map:"21",target:"鈴木商店前"},
-  {no:34,st:"",map:"",target:"北滝　片田　亀久　矢倉"}
+  {no:1,st:"28",map:"15",target:"青木機械置場前",brown:2,white:1,green:1},
+  {no:2,st:"29",map:"15",target:"高崎板金前",brown:1,white:1,green:1},
+  {no:3,st:"30",map:"15",target:"高林重宣宅脇",brown:2,white:1,green:1},
+  {no:4,st:"33",map:"8",target:"大戸集会所",brown:1,white:1,green:1},
+  {no:5,st:"8",map:"8",target:"藤田正男宅裏",brown:1,white:1,green:1},
+  {no:6,st:"35",map:"16",target:"両郷支所",brown:0,white:0,green:0},
+  {no:7,st:"37",map:"16",target:"中野内公民館",brown:2,white:2,green:1},
+  {no:8,st:"38",map:"16",target:"両郷中央小学校",brown:1,white:1,green:1},
+  {no:9,st:"39",map:"16",target:"井上一義宅前",brown:2,white:1,green:1},
+  {no:10,st:"40",map:"16",target:"かどや魚店脇",brown:1,white:1,green:1},
+  {no:11,st:"11",map:"8",target:"河原公民館",brown:2,white:2,green:1},
+  {no:12,st:"10",map:"8",target:"鈴木芳雄宅前",brown:1,white:1,green:1},
+  {no:13,st:"9",map:"8",target:"深谷勝夫宅前",brown:1,white:1,green:1},
+  {no:14,st:"1",map:"1",target:"大塚公男宅前",brown:2,white:1,green:1},
+  {no:15,st:"2",map:"2",target:"菊池元紀宅前",brown:1,white:1,green:1},
+  {no:16,st:"4",map:"2",target:"三森清宅前",brown:1,white:1,green:1},
+  {no:17,st:"5",map:"2",target:"講中蔵脇",brown:1,white:1,green:1},
+  {no:18,st:"394",map:"2",target:"御堂前",brown:1,white:1,green:1},
+  {no:19,st:"3",map:"2",target:"消防センター前",brown:1,white:1,green:1},
+  {no:20,st:"395",map:"8",target:"富貴田入り口",brown:1,white:1,green:1},
+  {no:21,st:"12",map:"9",target:"深沢末蔵宅前",brown:1,white:1,green:1},
+  {no:22,st:"13",map:"9",target:"早乙女正宅前",brown:1,white:1,green:1},
+  {no:23,st:"14",map:"9",target:"鍛冶内集会所",brown:1,white:1,green:1},
+  {no:24,st:"398",map:"16",target:"旧両郷支所跡",brown:2,white:2,green:1},
+  {no:25,st:"36",map:"16",target:"保育所前",brown:1,white:1,green:1},
+  {no:26,st:"53",map:"21",target:"寺宿公民館",brown:2,white:1,green:1},
+  {no:27,st:"54",map:"21",target:"大森洋宅前",brown:1,white:1,green:1},
+  {no:28,st:"57",map:"9",target:"鈴木勉宅前",brown:1,white:1,green:1},
+  {no:29,st:"41",map:"16",target:"消防詰め所",brown:1,white:1,green:1},
+  {no:30,st:"56",map:"21",target:"横倉一男宅前",brown:1,white:1,green:1},
+  {no:31,st:"58",map:"21",target:"田代一典宅前",brown:1,white:1,green:1},
+  {no:32,st:"73",map:"29",target:"深堀橋",brown:1,white:1,green:1},
+  {no:33,st:"55",map:"21",target:"鈴木商店前",brown:1,white:1,green:1},
+  {no:34,st:"",map:"",target:"北滝　片田　亀久　矢倉",brown:0,white:0,green:0}
 ];
 </script>
-<script src="../../app.js?v=1792979768"></script>
+<script src="../../app.js?v=1792982785"></script>
 </body>
 </html>
