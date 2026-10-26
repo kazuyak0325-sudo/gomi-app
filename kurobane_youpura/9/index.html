@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 容プラコース（9）">
 <meta name="theme-color" content="#26a69a">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979217">
+<link rel="stylesheet" href="../../style.css?v=1792979829">
 <style>
-  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #26a69a; }
+  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e0f2f1; --done-text: #00796b; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -40,8 +40,42 @@ const COURSE_ID = "kurobane_youpura-9";
 const COURSE_NAME = "黒羽・湯津上 容プラコース（9）";
 const APP_VERSION = "v6.5";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"298",map:"87",target:"藤田板金前"},
+  {no:2,st:"444",map:"121",target:"谷地友三宅前"},
+  {no:3,st:"320",map:"121",target:"川島万依宅下"},
+  {no:4,st:"322",map:"124",target:"谷地孝志宅前"},
+  {no:5,st:"323",map:"124",target:"鹿島神社下"},
+  {no:6,st:"324",map:"125",target:"樽沢入口"},
+  {no:7,st:"325",map:"125",target:"斎藤建設倉庫脇"},
+  {no:8,st:"446",map:"126",target:"鈴木商店奥"},
+  {no:9,st:"327",map:"126",target:"綿引章文宅前"},
+  {no:10,st:"328",map:"127",target:"須賀川下公民館"},
+  {no:11,st:"447",map:"128",target:"波止橋"},
+  {no:12,st:"448",map:"128",target:"石畑"},
+  {no:13,st:"329",map:"127",target:"能登進宅下"},
+  {no:14,st:"321",map:"123",target:"小西酒店前"},
+  {no:15,st:"319",map:"121",target:"須賀川宿公民館"},
+  {no:16,st:"299",map:"87",target:"益子剛一宅入り口"},
+  {no:17,st:"297",map:"87",target:"協和商事前"},
+  {no:18,st:"381",map:"112",target:"運動公園入り口"},
+  {no:19,st:"380",map:"112",target:"柏一美宅脇(線路道）"},
+  {no:20,st:"387",map:"114",target:"佐良土駐在所脇"},
+  {no:21,st:"391",map:"117",target:"佐良土多目的交流センター"},
+  {no:22,st:"426",map:"119",target:"田宿コミュニテイセンター"},
+  {no:23,st:"388",map:"115",target:"生田目栄宅脇"},
+  {no:24,st:"386",map:"114",target:"佐良土郵便局裏"},
+  {no:25,st:"390",map:"117",target:"４００号駐車場"},
+  {no:26,st:"385",map:"114",target:"大金酒店裏"},
+  {no:27,st:"389",map:"117",target:"ＪＡ南部支所前"},
+  {no:28,st:"384",map:"114",target:"佐良土小学校"},
+  {no:29,st:"399",map:"114",target:"館林工業手前"},
+  {no:30,st:"441",map:"111",target:"竹の皮農業倉庫"},
+  {no:31,st:"382",map:"113",target:"江口勝雄宅前"},
+  {no:32,st:"440",map:"111",target:"川又康夫宅入り口"},
+  {no:33,st:"",map:"",target:"余瀬　築地　篠原　奥沢"}
+];
 </script>
-<script src="../../app.js?v=1792979217"></script>
+<script src="../../app.js?v=1792979829"></script>
 </body>
 </html>
