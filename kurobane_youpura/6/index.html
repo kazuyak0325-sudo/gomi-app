@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 容プラコース（6）">
 <meta name="theme-color" content="#26a69a">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979217">
+<link rel="stylesheet" href="../../style.css?v=1792979817">
 <style>
-  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #26a69a; }
+  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e0f2f1; --done-text: #00796b; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -40,8 +40,41 @@ const COURSE_ID = "kurobane_youpura-6";
 const COURSE_NAME = "黒羽・湯津上 容プラコース（6）";
 const APP_VERSION = "v6.5";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"434",map:"84",target:"須佐木小学校上"},
+  {no:2,st:"285",map:"84",target:"佐藤進宅前"},
+  {no:3,st:"286",map:"84",target:"佐藤等宅前"},
+  {no:4,st:"288",map:"84",target:"須佐木保育園脇"},
+  {no:5,st:"292",map:"85",target:"星文具店脇"},
+  {no:6,st:"293",map:"85",target:"阿久津橋"},
+  {no:7,st:"294",map:"85",target:"須賀川出張所"},
+  {no:8,st:"291",map:"85",target:"須賀川小学校"},
+  {no:9,st:"248",map:"66",target:"露久保堰上"},
+  {no:10,st:"153",map:"52",target:"佐藤武宅前"},
+  {no:11,st:"112",map:"44",target:"南方１区公民館"},
+  {no:12,st:"113",map:"44",target:"田中林道入り口"},
+  {no:13,st:"59",map:"23",target:"上蛇木橋"},
+  {no:14,st:"15",map:"11",target:"帝国造林社宅前"},
+  {no:15,st:"75",map:"31",target:"阿寺バス停"},
+  {no:16,st:"74",map:"31",target:"高取橋"},
+  {no:17,st:"111",map:"44",target:"西の入林道入り口"},
+  {no:18,st:"152",map:"52",target:"旧ポンプ置場"},
+  {no:19,st:"154",map:"52",target:"露久保公民館"},
+  {no:20,st:"280",map:"78",target:"梅船橋"},
+  {no:21,st:"281",map:"78",target:"雲岩寺宿"},
+  {no:22,st:"290",map:"85",target:"山形屋脇"},
+  {no:23,st:"289",map:"85",target:"鈴木重幸宅前"},
+  {no:24,st:"287",map:"84",target:"須藤理容店前"},
+  {no:25,st:"304",map:"88",target:"寅卯神社前"},
+  {no:26,st:"311",map:"101",target:"池口バス停"},
+  {no:27,st:"310",map:"101",target:"高橋バス停"},
+  {no:28,st:"303",map:"88",target:"須崎神社入り口"},
+  {no:29,st:"302",map:"88",target:"佐藤義夫宅前"},
+  {no:30,st:"301",map:"88",target:"益子清作宅入り口"},
+  {no:31,st:"300",map:"88",target:"須佐木中公民館"},
+  {no:32,st:"",map:"",target:"河原　両郷"}
+];
 </script>
-<script src="../../app.js?v=1792979217"></script>
+<script src="../../app.js?v=1792979817"></script>
 </body>
 </html>
