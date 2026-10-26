@@ -868,9 +868,16 @@ function render(filterText){
     const rowMain = document.createElement("div");
     rowMain.className = "row-main";
     const noHighlight = (RED_NO_FROM[COURSE_ID] !== undefined && s.no >= RED_NO_FROM[COURSE_ID]) ? " no-highlight" : "";
+    const containerInfo = (s.brown !== undefined)
+      ? '<span class="container-counts">' +
+          (s.brown ? '<span class="container-count brown">茶' + s.brown + '</span>' : '') +
+          (s.white ? '<span class="container-count white">白' + s.white + '</span>' : '') +
+          (s.green ? '<span class="container-count green">緑' + s.green + '</span>' : '') +
+        '</span>'
+      : '';
     rowMain.innerHTML =
       '<span class="no' + noHighlight + '">' + s.no + '</span>' +
-      '<span class="target">' + s.target + '<small>' + s.map + ' / ST' + s.st + '</small></span>' +
+      '<span class="target">' + s.target + '<small>' + s.map + ' / ST' + s.st + '</small>' + containerInfo + '</span>' +
       '<span class="time' + (time ? ' filled' : '') + '">' + (IS_CARDBOARD_COURSE ? '<img src="../../pet-icon.png" class="pet-icon-img" alt="">' : "") + (time || "--:--") + '</span>' +
       (HAS_SECONDARY ? '<span class="time cb-time' + (cbTime ? ' filled' : '') + '">' + SECONDARY_ICON + (cbTime || "--:--") + '</span>' : '');
     rowMain.addEventListener("click", () => onTap(s));
