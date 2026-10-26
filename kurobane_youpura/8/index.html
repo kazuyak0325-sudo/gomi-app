@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -12,9 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 容プラコース（8）">
 <meta name="theme-color" content="#26a69a">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792979217">
+<link rel="stylesheet" href="../../style.css?v=1792979824">
 <style>
-  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e8e4e0; --done-text: #26a69a; }
+  :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e0f2f1; --done-text: #00796b; }
 </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
   <div class="actions actions-2">
     <button id="editBtn">ステーションを編集</button>
-    <button id="saveBtn">本日の収集データを送信</button>
+    <button id="saveBtn">本日の収集データをアップロード</button>
   </div>
 </header>
 <main>
@@ -40,8 +40,50 @@ const COURSE_ID = "kurobane_youpura-8";
 const COURSE_NAME = "黒羽・湯津上 容プラコース（8）";
 const APP_VERSION = "v6.5";
 
-const DEFAULT_STATIONS = [];
+const DEFAULT_STATIONS = [
+  {no:1,st:"264",map:"59",target:"蒲生宅前"},
+  {no:2,st:"222",map:"59",target:"桝田屋前"},
+  {no:3,st:"429",map:"68",target:"岡崎電設脇①(追加)"},
+  {no:4,st:"262",map:"68",target:"岡崎電設脇②(追加)"},
+  {no:5,st:"263",map:"68",target:"上田屋前(追加)"},
+  {no:6,st:"261",map:"68",target:"岡崎電設前(追加)"},
+  {no:7,st:"224",map:"59",target:"旧役場前"},
+  {no:8,st:"234",map:"59",target:"黒羽石造倉庫前"},
+  {no:9,st:"396",map:"60",target:"旧給食センター"},
+  {no:10,st:"272",map:"68",target:"市営団地　２"},
+  {no:11,st:"273",map:"68",target:"市営団地　３"},
+  {no:12,st:"271",map:"68",target:"市営団地　１"},
+  {no:13,st:"270",map:"68",target:"八塩公民館 1"},
+  {no:14,st:"401",map:"68",target:"八塩公民館 2"},
+  {no:15,st:"276",map:"71",target:"(株)なほく前"},
+  {no:16,st:"431",map:"74",target:"福田守雄宅前"},
+  {no:17,st:"282",map:"81",target:"石材置場脇"},
+  {no:18,st:"283",map:"81",target:"機械倉庫前"},
+  {no:19,st:"305",map:"93",target:"北滝公民館"},
+  {no:20,st:"306",map:"98",target:"湯殿十字路"},
+  {no:21,st:"400",map:"107",target:"片田公民館"},
+  {no:22,st:"316",map:"116",target:"下山田Ｙ字路"},
+  {no:23,st:"315",map:"116",target:"矢倉集会所"},
+  {no:24,st:"443",map:"116",target:"大金勝宅前"},
+  {no:25,st:"317",map:"116",target:"大久保集会所"},
+  {no:26,st:"314",map:"107",target:"藤田商店脇"},
+  {no:27,st:"308",map:"99",target:"山口誠一宅前"},
+  {no:28,st:"309",map:"100",target:"黒羽清掃センター"},
+  {no:29,st:"397",map:"100",target:"田代信夫宅前"},
+  {no:30,st:"313",map:"107",target:"亀久公民館"},
+  {no:31,st:"312",map:"107",target:"改良区記念碑前"},
+  {no:32,st:"307",map:"99",target:"農業倉庫前"},
+  {no:33,st:"269",map:"68",target:"鉄屋商店前"},
+  {no:34,st:"268",map:"68",target:"瀬古隆生宅前"},
+  {no:35,st:"225",map:"59",target:"田町集会所前"},
+  {no:36,st:"228",map:"59",target:"岸村宅前"},
+  {no:37,st:"422",map:"60",target:"小泉隆行宅脇"},
+  {no:38,st:"230",map:"59",target:"黒羽小学校"},
+  {no:39,st:"419",map:"56",target:"警察官舎前"},
+  {no:40,st:"229",map:"59",target:"元第２保育所前"},
+  {no:41,st:"",map:"",target:"須賀川"}
+];
 </script>
-<script src="../../app.js?v=1792979217"></script>
+<script src="../../app.js?v=1792979824"></script>
 </body>
 </html>
