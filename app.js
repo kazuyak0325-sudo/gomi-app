@@ -151,6 +151,7 @@ function cardboardViolationKeyFor(dateStr){ return "gomi_cv_" + COURSE_ID + "_" 
 
 const IS_CARDBOARD_COURSE = /-pet\d/.test(COURSE_ID);
 const IS_RESOURCE_COURSE = /^kurobane_funen/.test(COURSE_ID);
+const IS_CONTAINER_COURSE = /^kurobane_container/.test(COURSE_ID);
 const HAS_SECONDARY = IS_CARDBOARD_COURSE || IS_RESOURCE_COURSE;
 const SECONDARY_LABEL = IS_RESOURCE_COURSE ? "資源" : "ダンボール";
 const SECONDARY_ICON = IS_RESOURCE_COURSE ? "♻️" : "📦";
@@ -840,6 +841,9 @@ function render(filterText){
   let violationItems = 0;
   let cardboardCount = 0;
   let cardboardDoneCount = 0;
+  let totalBrown = 0;
+  let totalWhite = 0;
+  let totalGreen = 0;
   const ft = (filterText || "").trim();
 
   const violationsInView = activeViolations();
@@ -855,6 +859,11 @@ function render(filterText){
     }
     if (hasCardboard) cardboardCount++;
     if (cbTime) cardboardDoneCount++;
+    if (IS_CONTAINER_COURSE) {
+      totalBrown += s.brown || 0;
+      totalWhite += s.white || 0;
+      totalGreen += s.green || 0;
+    }
     if (ft && !(s.target.includes(ft) || String(s.st).includes(ft) || String(s.no).includes(ft))) return;
     if (HAS_SECONDARY && cardboardFilterOn && !hasCardboard) return;
     if (violationFilterOn && !v) return;
@@ -959,7 +968,8 @@ function render(filterText){
 
   document.getElementById("progress").textContent =
     doneCount + " / " + stations.length + " 完了　違反ゴミ " + violationStations + "箇所（計" + violationItems + "個）" +
-    (HAS_SECONDARY ? "　" + SECONDARY_LABEL + " " + cardboardDoneCount + " / " + cardboardCount + "箇所 回収済み" : "");
+    (HAS_SECONDARY ? "　" + SECONDARY_LABEL + " " + cardboardDoneCount + " / " + cardboardCount + "箇所 回収済み" : "") +
+    (IS_CONTAINER_COURSE ? "　コンテナ合計　茶" + totalBrown + " 白" + totalWhite + " 緑" + totalGreen : "");
 }
 
 function onTap(s){
