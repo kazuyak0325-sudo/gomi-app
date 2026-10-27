@@ -510,6 +510,33 @@ main {
   line-height: 1.4;
   color: var(--text);
 }
+.violation-detail-box {
+  max-width: 420px;
+}
+.violation-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.violation-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.violation-item-label {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+.violation-total {
+  margin: 4px 0 14px !important;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--danger);
+}
 .modal-textarea {
   width: 100%;
   min-height: 120px;

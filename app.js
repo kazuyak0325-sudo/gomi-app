@@ -159,6 +159,16 @@ const HAS_SECONDARY = IS_CARDBOARD_COURSE || IS_RESOURCE_COURSE;
 const SECONDARY_LABEL = IS_RESOURCE_COURSE ? "資源" : "ダンボール";
 const SECONDARY_ICON = IS_RESOURCE_COURSE ? "♻️" : "📦";
 
+const RESOURCE_VIOLATION_ITEMS = ["ビン", "カン", "不燃", "ペット", "雑誌・新聞", "ダンボール", "紙パック"];
+function sumByItem(byItem){
+  if (!byItem) return 0;
+  return RESOURCE_VIOLATION_ITEMS.reduce((sum, k) => sum + (byItem[k] || 0), 0);
+}
+function encodeByItem(byItem){
+  if (!byItem) return "";
+  return RESOURCE_VIOLATION_ITEMS.filter(k => byItem[k]).map(k => k + byItem[k]).join(",");
+}
+
 const PHOTO_DB_NAME = "gomi_photos";
 const PHOTO_STORE = "photos";
 
@@ -350,6 +360,7 @@ let cardboardFilterOn = false;
 let violationFilterOn = false;
 
 function activeViolations(){
+  if (IS_RESOURCE_COURSE) return violations;
   return (HAS_SECONDARY && cardboardFilterOn) ? cardboardViolations : violations;
 }
 
@@ -897,13 +908,29 @@ function render(filterText){
 
     const vRow = document.createElement("div");
     vRow.className = "violation-row";
+    const showResourceDetail = IS_RESOURCE_COURSE;
     if (v) {
-      vRow.appendChild(mkStepperBtn("－", () => changeViolationCount(s, -1)));
-      const countSpan = document.createElement("span");
-      countSpan.className = "count-display";
-      countSpan.textContent = v.count + "個";
-      vRow.appendChild(countSpan);
-      vRow.appendChild(mkStepperBtn("＋", () => changeViolationCount(s, 1)));
+      if (showResourceDetail) {
+        const countSpan = document.createElement("span");
+        countSpan.className = "count-display";
+        countSpan.textContent = v.count + "個";
+        vRow.appendChild(countSpan);
+        const detailBtn = document.createElement("button");
+        detailBtn.className = "mark-btn";
+        detailBtn.textContent = "内訳を編集";
+        detailBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openResourceViolationModal(s);
+        });
+        vRow.appendChild(detailBtn);
+      } else {
+        vRow.appendChild(mkStepperBtn("－", () => changeViolationCount(s, -1)));
+        const countSpan = document.createElement("span");
+        countSpan.className = "count-display";
+        countSpan.textContent = v.count + "個";
+        vRow.appendChild(countSpan);
+        vRow.appendChild(mkStepperBtn("＋", () => changeViolationCount(s, 1)));
+      }
       const clearBtn = document.createElement("button");
       clearBtn.className = "clear-btn";
       clearBtn.textContent = "解除";
@@ -927,7 +954,11 @@ function render(filterText){
       markBtn.textContent = "違反ゴミあり";
       markBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        markViolation(s);
+        if (showResourceDetail) {
+          openResourceViolationModal(s);
+        } else {
+          markViolation(s);
+        }
       });
       vRow.appendChild(markBtn);
     }
@@ -1024,7 +1055,9 @@ function onTapCardboardTime(s){
 }
 
 function saveActiveViolations(){
-  if (HAS_SECONDARY && cardboardFilterOn) {
+  if (IS_RESOURCE_COURSE) {
+    saveViolations();
+  } else if (HAS_SECONDARY && cardboardFilterOn) {
     saveCardboardViolations();
   } else {
     saveViolations();
@@ -1037,10 +1070,89 @@ function markViolation(s){
   render(document.getElementById("filter").value);
 }
 
+function openResourceViolationModal(s){
+  const existing = violations[s.st];
+  const byItem = Object.assign({}, existing && existing.byItem);
+  RESOURCE_VIOLATION_ITEMS.forEach(k => { if (!byItem[k]) byItem[k] = 0; });
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box violation-detail-box";
+  const p = document.createElement("p");
+  p.textContent = "「" + s.target + "」の違反の内容を選んでください";
+  box.appendChild(p);
+
+  const itemList = document.createElement("div");
+  itemList.className = "violation-item-list";
+  const totalP = document.createElement("p");
+  totalP.className = "violation-total";
+
+  function renderItems(){
+    itemList.innerHTML = "";
+    RESOURCE_VIOLATION_ITEMS.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "violation-item-row";
+      const label = document.createElement("span");
+      label.className = "violation-item-label";
+      label.textContent = item;
+      row.appendChild(label);
+      row.appendChild(mkStepperBtn("－", () => {
+        byItem[item] = Math.max(0, byItem[item] - 1);
+        renderItems();
+      }));
+      const countSpan = document.createElement("span");
+      countSpan.className = "count-display";
+      countSpan.textContent = byItem[item] + "個";
+      row.appendChild(countSpan);
+      row.appendChild(mkStepperBtn("＋", () => {
+        byItem[item] = byItem[item] + 1;
+        renderItems();
+      }));
+      itemList.appendChild(row);
+    });
+    totalP.textContent = "合計 " + sumByItem(byItem) + "個";
+  }
+  renderItems();
+  box.appendChild(itemList);
+  box.appendChild(totalP);
+
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "modal-btn-ok";
+  closeBtn.textContent = "閉じる";
+  closeBtn.addEventListener("click", () => {
+    const total = sumByItem(byItem);
+    overlay.remove();
+    if (total === 0) {
+      delete violations[s.st];
+    } else {
+      violations[s.st] = {
+        count: total,
+        byItem: byItem,
+        time: (existing && existing.time) || fmtTime(new Date())
+      };
+    }
+    saveViolations();
+    render(document.getElementById("filter").value);
+  });
+  actions.appendChild(closeBtn);
+  box.appendChild(actions);
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
 function changeViolationCount(s, delta){
   const v = activeViolations()[s.st];
   if (!v) return;
-  v.count = Math.max(1, v.count + delta);
+  const newCount = v.count + delta;
+  if (newCount <= 0) {
+    delete activeViolations()[s.st];
+  } else {
+    v.count = newCount;
+  }
   saveActiveViolations();
   render(document.getElementById("filter").value);
 }
@@ -1125,7 +1237,9 @@ function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj,
   const stationVehicles = getStationVehicles(dateStr);
   const fallbackVehicle = getVehicleFor(dateStr);
   const headers = ["番号", "ST番号", "地図番号", "目標物", "収集時刻", "違反ゴミ個数"];
-  if (HAS_SECONDARY) headers.push(SECONDARY_LABEL + "あり", SECONDARY_LABEL + "回収時刻", SECONDARY_LABEL + "違反ゴミ個数");
+  if (IS_RESOURCE_COURSE) headers.push("違反内訳");
+  if (HAS_SECONDARY) headers.push(SECONDARY_LABEL + "あり", SECONDARY_LABEL + "回収時刻");
+  if (HAS_SECONDARY && !IS_RESOURCE_COURSE) headers.push(SECONDARY_LABEL + "違反ゴミ個数");
   headers.push("車両番号");
   const rows = [headers];
   stations.forEach(s => {
@@ -1138,11 +1252,14 @@ function buildCsvFor(recordsObj, violationsObj, cardboardObj, cardboardTimesObj,
       recordsObj[s.st] || "",
       v ? String(v.count) : ""
     ];
+    if (IS_RESOURCE_COURSE) row.push(v ? encodeByItem(v.byItem) : "");
     if (HAS_SECONDARY) {
-      const cv = cardboardViolationsObj && cardboardViolationsObj[s.st];
       row.push((cardboardObj && cardboardObj[s.st]) ? "あり" : "");
       row.push((cardboardTimesObj && cardboardTimesObj[s.st]) || "");
-      row.push(cv ? String(cv.count) : "");
+      if (!IS_RESOURCE_COURSE) {
+        const cv = cardboardViolationsObj && cardboardViolationsObj[s.st];
+        row.push(cv ? String(cv.count) : "");
+      }
     }
     const hasRecord = row.slice(4).some(v => v !== "");
     row.push(hasRecord ? (stationVehicles[s.st] || fallbackVehicle) : "");
