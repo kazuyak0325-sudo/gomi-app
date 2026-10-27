@@ -134,12 +134,12 @@ header {
 .past-data-btn:disabled { opacity: 0.6; }
 header h1 {
   margin: 0 0 2px;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
 }
 header .meta {
   margin: 0 0 10px;
-  font-size: 15px;
+  font-size: 18px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   opacity: 0.85;
@@ -169,7 +169,7 @@ header .meta {
 #progress {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 19px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.5;
   margin-bottom: 8px;
