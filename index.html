@@ -57,17 +57,26 @@
     max-width: 480px;
     margin: 0 auto;
   }
-  #regionSelect {
-    display: block;
-    width: 100%;
-    margin: 4px 0 0;
-    padding: 9px 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: #fff;
-    color: #222;
+  .region-toggle {
+    display: flex;
+    gap: 10px;
+    max-width: 480px;
+    margin: 0 auto 16px;
+  }
+  .region-btn {
+    flex: 1;
+    padding: 16px 10px;
+    border: none;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: inherit;
+    background: #eee;
+    color: #333;
+  }
+  .region-btn.active {
+    background: #222;
+    color: #fff;
   }
   /* 左の色帯は、インラインのbackground色を残したまま右側を白で塗りつぶして表現している。
      管理ツールがこのaタグの文字列を書き換えるため、HTML側の構造は変えないこと。 */
@@ -431,13 +440,6 @@
   <button id="unsentBtn">未送信データの確認</button>
   <button id="nippouTopBtn">収集日報を入力</button>
   <div class="admin-addr-box">
-    収集地区
-    <select id="regionSelect">
-      <option value="otawara">大田原地区</option>
-      <option value="kurobane">黒羽・湯津上地区</option>
-    </select>
-  </div>
-  <div class="admin-addr-box">
     アップロード先
     <code id="adminAddrText">未設定</code>
     <button id="editAdminBtn">編集</button>
@@ -445,6 +447,10 @@
   <button id="updateBtn">最新版に更新する</button>
 </div>
 <h1>コースを選んでください</h1>
+<div class="region-toggle" id="regionToggle">
+  <button type="button" class="region-btn" data-region="otawara">大田原地区</button>
+  <button type="button" class="region-btn" data-region="kurobane">黒羽・湯津上地区</button>
+</div>
 <div class="cert-warning-banner" id="certWarningBanner" style="display:none;">
   <strong>⚠️ サーバーの証明書の有効期限が近づいています（2036年9月21日まで）</strong>
   <p>期限が切れると、タブレットが事務所PCに接続できなくなります。以下の手順で各タブレットの証明書を入れ直してください。</p>
@@ -473,6 +479,7 @@
 </div>
 <div class="grid" id="kurobaneGrid" style="display:none;">
   <a class="card" style="background:#607d8b" href="kurobane_funen/"><span class="mark vert">不燃</span>コース</a>
+  <a class="card" style="background:#607d8b" href="kurobane_container/"><span class="mark vert">コンテナ</span>コース</a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen1/"><span class="mark vert">可燃①</span>コース</a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen2/"><span class="mark vert">可燃②</span>コース</a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen3/"><span class="mark vert">可燃③</span>コース</a>
@@ -482,7 +489,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v6.6";
+const TOP_VERSION = "v6.7";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 (function(){
@@ -682,13 +689,16 @@ function applyTopRegion(){
   const region = getTopRegion();
   document.getElementById("otawaraGrid").style.display = region === "otawara" ? "" : "none";
   document.getElementById("kurobaneGrid").style.display = region === "kurobane" ? "" : "none";
-  const select = document.getElementById("regionSelect");
-  if (select) select.value = region;
+  document.querySelectorAll(".region-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.region === region);
+  });
 }
 applyTopRegion();
-document.getElementById("regionSelect").addEventListener("change", (e) => {
-  setTopRegion(e.target.value);
-  applyTopRegion();
+document.querySelectorAll(".region-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setTopRegion(btn.dataset.region);
+    applyTopRegion();
+  });
 });
 
 async function precacheAllCourses(){
