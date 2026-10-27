@@ -159,7 +159,7 @@ const HAS_SECONDARY = IS_CARDBOARD_COURSE || IS_RESOURCE_COURSE;
 const SECONDARY_LABEL = IS_RESOURCE_COURSE ? "資源" : "ダンボール";
 const SECONDARY_ICON = IS_RESOURCE_COURSE ? "♻️" : "📦";
 
-const RESOURCE_VIOLATION_ITEMS = ["ビン", "カン", "不燃", "ペット", "雑誌・新聞", "ダンボール", "紙パック"];
+const RESOURCE_VIOLATION_ITEMS = ["ビン", "カン", "不燃", "ペット", "雑誌・新聞", "ダンボール・紙パック"];
 function sumByItem(byItem){
   if (!byItem) return 0;
   return RESOURCE_VIOLATION_ITEMS.reduce((sum, k) => sum + (byItem[k] || 0), 0);
