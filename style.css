@@ -22,11 +22,14 @@ body {
 }
 header {
   position: relative;
+  display: flex;
+  flex-direction: column;
   background: var(--accent);
   color: var(--accent-contrast);
   padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
+header .meta { order: -1; }
 .menu-toggle {
   position: absolute;
   top: calc(10px + env(safe-area-inset-top, 0px));
