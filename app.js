@@ -968,8 +968,22 @@ function render(filterText){
 
   document.getElementById("progress").textContent =
     doneCount + " / " + stations.length + " 完了　違反ゴミ " + violationStations + "箇所（計" + violationItems + "個）" +
-    (HAS_SECONDARY ? "　" + SECONDARY_LABEL + " " + cardboardDoneCount + " / " + cardboardCount + "箇所 回収済み" : "") +
-    (IS_CONTAINER_COURSE ? "　コンテナ合計　茶" + totalBrown + " 白" + totalWhite + " 緑" + totalGreen : "");
+    (HAS_SECONDARY ? "　" + SECONDARY_LABEL + " " + cardboardDoneCount + " / " + cardboardCount + "箇所 回収済み" : "");
+
+  if (IS_CONTAINER_COURSE) {
+    let totalEl = document.getElementById("containerTotal");
+    if (!totalEl) {
+      totalEl = document.createElement("div");
+      totalEl.id = "containerTotal";
+      totalEl.className = "container-total";
+      document.getElementById("progress").insertAdjacentElement("afterend", totalEl);
+    }
+    totalEl.innerHTML =
+      '<span class="container-total-label">コンテナ合計</span>' +
+      '<span class="container-count brown">茶' + totalBrown + '</span>' +
+      '<span class="container-count white">白' + totalWhite + '</span>' +
+      '<span class="container-count green">緑' + totalGreen + '</span>';
+  }
 }
 
 function onTap(s){

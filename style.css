@@ -174,6 +174,22 @@ header .meta {
   line-height: 1.5;
   margin-bottom: 8px;
 }
+.container-total {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.container-total-label {
+  font-size: 16px;
+  font-weight: 700;
+  opacity: 0.9;
+}
+.container-total .container-count {
+  font-size: 22px;
+  padding: 7px 18px;
+}
 #filter {
   width: 100%;
   padding: 10px 12px;
