@@ -139,7 +139,7 @@ header h1 {
 }
 header .meta {
   margin: 0 0 10px;
-  font-size: 13px;
+  font-size: 15px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   opacity: 0.85;
@@ -169,7 +169,9 @@ header .meta {
 #progress {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 15px;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.5;
   margin-bottom: 8px;
 }
 #filter {
