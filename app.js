@@ -35,10 +35,15 @@ try {
   const topRow = document.createElement("div");
   topRow.className = "hdr-top";
   topRow.id = "hdrTop";
+  const topLeft = document.createElement("div");
+  topLeft.className = "hdr-left";
   const backLink = document.createElement("a");
   backLink.href = "../";
   backLink.className = "back-link";
   backLink.textContent = "← 戻る";
+  const dateVersion = document.getElementById("dateVersion");
+  topLeft.appendChild(backLink);
+  topLeft.appendChild(dateVersion);
   const topRight = document.createElement("div");
   topRight.className = "hdr-right";
   const menuToggle = document.createElement("button");
@@ -46,17 +51,15 @@ try {
   menuToggle.setAttribute("aria-label", "メニュー");
   menuToggle.textContent = "☰";
   topRight.appendChild(menuToggle);
-  topRow.appendChild(backLink);
+  topRow.appendChild(topLeft);
   topRow.appendChild(topRight);
   header.insertBefore(topRow, header.firstChild);
 
   const statusRow = document.createElement("div");
   statusRow.className = "hdr-status";
   const progress = document.getElementById("progress");
-  const dateVersion = document.getElementById("dateVersion");
   header.insertBefore(statusRow, progress);
   statusRow.appendChild(progress);
-  statusRow.appendChild(dateVersion);
 
   const menuPanel = document.createElement("div");
   menuPanel.className = "menu-panel";

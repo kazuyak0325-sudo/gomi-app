@@ -29,7 +29,6 @@ header {
   padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
-header .meta { order: -1; }
 .menu-toggle {
   position: absolute;
   top: calc(10px + env(safe-area-inset-top, 0px));
@@ -155,6 +154,8 @@ header .meta {
   margin-bottom: 8px;
 }
 .hdr-top .back-link { margin: 0; opacity: 1; font-weight: 700; font-size: 14px; }
+.hdr-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.hdr-left .meta { margin: 0; font-size: 14px; }
 .hdr-right { display: flex; align-items: center; gap: 8px; }
 .hdr-right .menu-toggle { position: static; }
 .hdr-right .vehicle-change-btn { margin: 0; font-size: 13px; color: var(--accent-contrast); }
@@ -166,9 +167,8 @@ header .meta {
   gap: 4px 8px;
   margin-bottom: 8px;
 }
-.hdr-status #progress { margin: 0; min-width: 0; font-size: 14px; }
-.hdr-status .meta { flex: none; }
-.hdr-status .meta { margin: 0; font-size: 12px; }
+.hdr-status #progress { margin: 0; min-width: 0; }
+.hdr-status .container-total { margin: 0; }
 #progress {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
