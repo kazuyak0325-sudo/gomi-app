@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 容プラコース（5）">
 <meta name="theme-color" content="#26a69a">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792983166">
+<link rel="stylesheet" href="../../style.css?v=1793069520">
 <style>
   :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e0f2f1; --done-text: #00796b; }
 </style>
@@ -38,42 +38,43 @@
 <script>
 const COURSE_ID = "kurobane_youpura-5";
 const COURSE_NAME = "黒羽・湯津上 容プラコース（5）";
-const APP_VERSION = "v6.5";
+const APP_VERSION = "v6.6";
 
 const DEFAULT_STATIONS = [
-  {no:1,st:"253",map:"68",target:"阿久津悦子宅前"},
-  {no:2,st:"254",map:"67",target:"大豆田市営団地1"},
-  {no:3,st:"255",map:"67",target:"大豆田市営団地2"},
-  {no:4,st:"256",map:"67",target:"大豆田市営団地3"},
-  {no:5,st:"251",map:"67",target:"警察官舎前"},
-  {no:6,st:"421",map:"59",target:"下町１公民館"},
-  {no:7,st:"427",map:"68",target:"烏山信用金庫裏河原"},
-  {no:8,st:"428",map:"68",target:"大豆田公民館下"},
-  {no:9,st:"430",map:"70",target:"藤田和俊宅前"},
-  {no:10,st:"331",map:"73",target:"根本倉庫前"},
-  {no:11,st:"332",map:"74",target:"狭原公民館"},
-  {no:12,st:"339",map:"81",target:"花塚文義宅前"},
-  {no:13,st:"350",map:"93",target:"花塚壱之助宅前"},
-  {no:14,st:"338",map:"81",target:"大武商店脇"},
-  {no:15,st:"335",map:"80",target:"藤田紀昭宅前"},
-  {no:16,st:"433",map:"80",target:"入山倉庫脇"},
-  {no:17,st:"333",map:"79",target:"菊池修一宅前"},
-  {no:18,st:"349",map:"93",target:"深沢喜市宅前"},
-  {no:19,st:"346",map:"92",target:"高瀬茂宅脇"},
-  {no:20,st:"347",map:"92",target:"西の根生活センター"},
-  {no:21,st:"348",map:"92",target:"星縫製入り口"},
-  {no:22,st:"360",map:"97",target:"改善センター"},
-  {no:23,st:"361",map:"97",target:"湯津上支所"},
-  {no:24,st:"345",map:"91",target:"ＳＯＣ寮前"},
-  {no:25,st:"342",map:"91",target:"小藤圭助宅前"},
-  {no:26,st:"343",map:"91",target:"鈴木英雄宅前"},
-  {no:27,st:"344",map:"91",target:"中の原改良区事務所脇"},
-  {no:28,st:"336",map:"80",target:"畜産技術センター"},
-  {no:29,st:"333",map:"79",target:"船山儀市宅前"},
-  {no:30,st:"334",map:"79",target:"石川五郎宅前"},
-  {no:31,st:"",map:"",target:"南方地区"}
+  {no:1,st:"249",map:"67",target:"二葉産業資材置き場前"},
+  {no:2,st:"212",map:"58",target:"黒羽フエルト社宅前"},
+  {no:3,st:"253",map:"68",target:"阿久津悦子宅前"},
+  {no:4,st:"254",map:"67",target:"大豆田市営団地1"},
+  {no:5,st:"255",map:"67",target:"大豆田市営団地2"},
+  {no:6,st:"256",map:"67",target:"大豆田市営団地3"},
+  {no:7,st:"251",map:"67",target:"警察官舎前"},
+  {no:8,st:"421",map:"59",target:"下町１公民館"},
+  {no:9,st:"427",map:"68",target:"烏山信用金庫裏河原"},
+  {no:10,st:"428",map:"68",target:"大豆田公民館下"},
+  {no:11,st:"430",map:"70",target:"藤田和俊宅前"},
+  {no:12,st:"331",map:"73",target:"根本倉庫前"},
+  {no:13,st:"332",map:"74",target:"狭原公民館"},
+  {no:14,st:"339",map:"81",target:"花塚文義宅前"},
+  {no:15,st:"350",map:"93",target:"花塚壱之助宅前"},
+  {no:16,st:"338",map:"81",target:"大武商店脇"},
+  {no:17,st:"335",map:"80",target:"藤田紀昭宅前"},
+  {no:18,st:"433",map:"80",target:"入山倉庫脇"},
+  {no:19,st:"333",map:"79",target:"菊池修一宅前"},
+  {no:20,st:"349",map:"93",target:"深沢喜市宅前"},
+  {no:21,st:"346",map:"92",target:"高瀬茂宅脇"},
+  {no:22,st:"347",map:"92",target:"西の根生活センター"},
+  {no:23,st:"348",map:"92",target:"星縫製入り口"},
+  {no:24,st:"360",map:"97",target:"改善センター"},
+  {no:25,st:"361",map:"97",target:"湯津上支所"},
+  {no:26,st:"345",map:"91",target:"ＳＯＣ寮前"},
+  {no:27,st:"342",map:"91",target:"小藤圭助宅前"},
+  {no:28,st:"343",map:"91",target:"鈴木英雄宅前"},
+  {no:29,st:"344",map:"91",target:"中の原改良区事務所脇"},
+  {no:30,st:"336",map:"80",target:"畜産技術センター"},
+  {no:31,st:"333",map:"79",target:"船山儀市宅前"},
+  {no:32,st:"334",map:"79",target:"石川五郎宅前"}
 ];
 </script>
-<script src="../../app.js?v=1792983166"></script>
+<script src="../../app.js?v=1793069520"></script>
 </body>
 </html>

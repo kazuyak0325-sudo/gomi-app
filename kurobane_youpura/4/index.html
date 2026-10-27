@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="黒羽・湯津上 容プラコース（4）">
 <meta name="theme-color" content="#26a69a">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../style.css?v=1792983166">
+<link rel="stylesheet" href="../../style.css?v=1793069520">
 <style>
   :root { --accent: #26a69a; --accent-contrast: #ffffff; --surface-done: #e0f2f1; --done-text: #00796b; }
 </style>
@@ -38,51 +38,51 @@
 <script>
 const COURSE_ID = "kurobane_youpura-4";
 const COURSE_NAME = "黒羽・湯津上 容プラコース（4）";
-const APP_VERSION = "v6.5";
+const APP_VERSION = "v6.6";
 
 const DEFAULT_STATIONS = [
-  {no:1,st:"185",map:"57",target:"黒沢金物店前"},
-  {no:2,st:"182",map:"57",target:"元黒羽貨物車庫脇"},
-  {no:3,st:"136",map:"47",target:"前田集会所脇"},
-  {no:4,st:"137",map:"47",target:"給食センター"},
-  {no:5,st:"138",map:"47",target:"吉成正悟宅前"},
-  {no:6,st:"183",map:"57",target:"黒沢秀雄宅前"},
-  {no:7,st:"190",map:"57",target:"愛宕山神社下"},
-  {no:8,st:"188",map:"57",target:"大島善治宅前"},
-  {no:9,st:"238",map:"61",target:"平成ニューウタウン(東側）"},
-  {no:10,st:"189",map:"57",target:"平成ニューウタウン(中央）"},
-  {no:11,st:"139",map:"47",target:"前田町営団地(星が丘）"},
-  {no:12,st:"146",map:"48",target:"みきはな前"},
-  {no:13,st:"239",map:"61",target:"黒羽高校下"},
-  {no:14,st:"240",map:"61",target:"阿久津縫製前"},
-  {no:15,st:"241",map:"61",target:"荒牧清一宅脇"},
-  {no:16,st:"143",map:"48",target:"深沢庄吉宅前"},
-  {no:17,st:"144",map:"48",target:"印南昭雄宅前"},
-  {no:18,st:"145",map:"48",target:"鉢木停留所"},
-  {no:19,st:"147",map:"48",target:"荒牧農機具店前"},
-  {no:20,st:"148",map:"48",target:"王将食堂脇"},
-  {no:21,st:"415",map:"48",target:"荒牧大作宅前"},
-  {no:22,st:"149",map:"49",target:"元北野上小下"},
-  {no:23,st:"497",map:"49",target:"益子勝夫宅入り口"},
-  {no:24,st:"242",map:"62",target:"佐藤善四郎宅脇"},
-  {no:25,st:"243",map:"62",target:"尻高田入り口から佐藤性冶宅前に変更"},
-  {no:26,st:"150",map:"50",target:"佐川末吉宅前"},
-  {no:27,st:"151",map:"50",target:"伊藤勝巳宅裏"},
-  {no:28,st:"244",map:"63",target:"平野栄治宅脇"},
-  {no:29,st:"279",map:"76",target:"佐川昭二宅脇"},
-  {no:30,st:"245",map:"63",target:"塩畑橋"},
-  {no:31,st:"246",map:"63",target:"アサヒアート前"},
-  {no:32,st:"425",map:"63",target:"佐藤善一宅前"},
-  {no:33,st:"142",map:"48",target:"松本商店前"},
-  {no:34,st:"140",map:"47",target:"飯村酒店前"},
-  {no:35,st:"135",map:"47",target:"編淨寺跡"},
-  {no:36,st:"134",map:"47",target:"飯縄山神社前"},
-  {no:37,st:"128",map:"47",target:"田中正平宅前"},
-  {no:38,st:"414",map:"47",target:"体育館前"},
-  {no:39,st:"179",map:"56",target:"稲荷神社前"},
-  {no:40,st:"",map:"",target:"下町１、大豆田、狭原"}
+  {no:1,st:"423",map:"60",target:"町民プール脇"},
+  {no:2,st:"185",map:"57",target:"黒沢金物店前"},
+  {no:3,st:"182",map:"57",target:"元黒羽貨物車庫脇"},
+  {no:4,st:"136",map:"47",target:"前田集会所脇"},
+  {no:5,st:"137",map:"47",target:"給食センター"},
+  {no:6,st:"138",map:"47",target:"吉成正悟宅前"},
+  {no:7,st:"183",map:"57",target:"黒沢秀雄宅前"},
+  {no:8,st:"190",map:"57",target:"愛宕山神社下"},
+  {no:9,st:"188",map:"57",target:"大島善治宅前"},
+  {no:10,st:"238",map:"61",target:"平成ニューウタウン(東側）"},
+  {no:11,st:"189",map:"57",target:"平成ニューウタウン(中央）"},
+  {no:12,st:"139",map:"47",target:"前田町営団地(星が丘）"},
+  {no:13,st:"146",map:"48",target:"みきはな前"},
+  {no:14,st:"239",map:"61",target:"黒羽高校下"},
+  {no:15,st:"240",map:"61",target:"阿久津縫製前"},
+  {no:16,st:"241",map:"61",target:"荒牧清一宅脇"},
+  {no:17,st:"143",map:"48",target:"深沢庄吉宅前"},
+  {no:18,st:"144",map:"48",target:"印南昭雄宅前"},
+  {no:19,st:"145",map:"48",target:"鉢木停留所"},
+  {no:20,st:"147",map:"48",target:"荒牧農機具店前"},
+  {no:21,st:"148",map:"48",target:"王将食堂脇"},
+  {no:22,st:"415",map:"48",target:"荒牧大作宅前"},
+  {no:23,st:"149",map:"49",target:"元北野上小下"},
+  {no:24,st:"497",map:"49",target:"益子勝夫宅入り口"},
+  {no:25,st:"242",map:"62",target:"佐藤善四郎宅脇"},
+  {no:26,st:"243",map:"62",target:"尻高田入り口から佐藤性冶宅前に変更"},
+  {no:27,st:"150",map:"50",target:"佐川末吉宅前"},
+  {no:28,st:"151",map:"50",target:"伊藤勝巳宅裏"},
+  {no:29,st:"244",map:"63",target:"平野栄治宅脇"},
+  {no:30,st:"279",map:"76",target:"佐川昭二宅脇"},
+  {no:31,st:"245",map:"63",target:"塩畑橋"},
+  {no:32,st:"246",map:"63",target:"アサヒアート前"},
+  {no:33,st:"425",map:"63",target:"佐藤善一宅前"},
+  {no:34,st:"142",map:"48",target:"松本商店前"},
+  {no:35,st:"140",map:"47",target:"飯村酒店前"},
+  {no:36,st:"135",map:"47",target:"編淨寺跡"},
+  {no:37,st:"134",map:"47",target:"飯縄山神社前"},
+  {no:38,st:"128",map:"47",target:"田中正平宅前"},
+  {no:39,st:"414",map:"47",target:"体育館前"},
+  {no:40,st:"179",map:"56",target:"稲荷神社前"}
 ];
 </script>
-<script src="../../app.js?v=1792983166"></script>
+<script src="../../app.js?v=1793069520"></script>
 </body>
 </html>
