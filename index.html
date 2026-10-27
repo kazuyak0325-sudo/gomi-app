@@ -61,7 +61,7 @@
     display: flex;
     gap: 10px;
     max-width: 480px;
-    margin: 0 auto 16px;
+    margin: 40px auto 16px;
   }
   .region-btn {
     flex: 1;
@@ -446,7 +446,6 @@
   </div>
   <button id="updateBtn">最新版に更新する</button>
 </div>
-<h1>コースを選んでください</h1>
 <div class="region-toggle" id="regionToggle">
   <button type="button" class="region-btn" data-region="otawara">大田原地区</button>
   <button type="button" class="region-btn" data-region="kurobane">黒羽・湯津上地区</button>
@@ -478,7 +477,7 @@
   <a class="card" style="background:#2196f3" href="youpura_ao/"><span class="mark vert">容プラ</span>コース</a>
 </div>
 <div class="grid" id="kurobaneGrid" style="display:none;">
-  <a class="card" style="background:#607d8b" href="kurobane_funen/"><span class="mark vert">不燃</span>コース</a>
+  <a class="card" style="background:#607d8b" href="kurobane_funen/course/"><span class="mark vert">不燃</span>コース</a>
   <a class="card" style="background:#607d8b" href="kurobane_container/"><span class="mark vert">コンテナ</span>コース</a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen1/"><span class="mark vert">可燃①</span>コース</a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen2/"><span class="mark vert">可燃②</span>コース</a>
@@ -489,7 +488,7 @@
   <p class="version-tag" id="versionTag"></p>
 </div>
 <script>
-const TOP_VERSION = "v6.7";
+const TOP_VERSION = "v6.8";
 document.getElementById("versionTag").textContent = TOP_VERSION;
 
 (function(){
