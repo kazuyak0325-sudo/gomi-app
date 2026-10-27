@@ -125,6 +125,17 @@
     font-weight: 700;
   }
   a.card .mark { text-shadow: 0 1px 3px rgba(0,0,0,0.45); }
+  a.card .card-title {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+  }
+  a.card .card-title small {
+    font-size: 16px;
+    font-weight: 700;
+    color: #4a4552;
+    margin-top: 2px;
+  }
   a.card.disabled {
     opacity: 0.55;
     pointer-events: none;
@@ -479,9 +490,9 @@
 <div class="grid" id="kurobaneGrid" style="display:none;">
   <a class="card" style="background:#607d8b" href="kurobane_funen/course/"><span class="mark vert">不燃</span>コース</a>
   <a class="card" style="background:#607d8b" href="kurobane_container/"><span class="mark vert">コンテナ</span>コース</a>
-  <a class="card" style="background:#ef6c00" href="kurobane_kaen1/"><span class="mark vert">可燃①</span>コース</a>
-  <a class="card" style="background:#ef6c00" href="kurobane_kaen2/"><span class="mark vert">可燃②</span>コース</a>
-  <a class="card" style="background:#ef6c00" href="kurobane_kaen3/"><span class="mark vert">可燃③</span>コース</a>
+  <a class="card" style="background:#ef6c00" href="kurobane_kaen1/"><span class="mark vert">可燃①</span><span class="card-title"><small>下町・寒井<br>田町・須賀川</small></span></a>
+  <a class="card" style="background:#ef6c00" href="kurobane_kaen2/"><span class="mark vert">可燃②</span><span class="card-title"><small>大豆田・両郷<br>前田・南方</small></span></a>
+  <a class="card" style="background:#ef6c00" href="kurobane_kaen3/"><span class="mark vert">可燃③</span><span class="card-title"><small>狭原・中野内<br>佐良土・片府田</small></span></a>
   <a class="card" style="background:#26a69a" href="kurobane_youpura/"><span class="mark vert">容プラ</span>コース</a>
 </div>
 <div class="footer">
