@@ -1549,4 +1549,4 @@ function showVehicleModal(fromHeader){
 }
 
 refreshDateVersion();
-if (stations.length > 0) showVehicleModal();
+if (stations.length > 0 && !getVehicleFor(todayDateStr())) showVehicleModal();
