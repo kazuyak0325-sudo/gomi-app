@@ -1,6 +1,6 @@
-const CACHE_NAME = "gomi-app-top-v4";
+const CACHE_NAME = "gomi-app-top-v5";
 const CACHE_PREFIX = "gomi-app-top-";
-const ASSETS = ["./", "index.html", "icon.png"];
+const ASSETS = ["./", "index.html", "icon.png", "nippou-test/", "nippou-test/index.html"];
 const NETWORK_TIMEOUT_MS = 3000;
 
 self.addEventListener("install", (event) => {
@@ -21,7 +21,13 @@ self.addEventListener("activate", (event) => {
 });
 
 async function fallbackResponse(request){
-  const cached = await caches.match(request);
+  let cached = await caches.match(request);
+  // nippou-testは「?course=コースID」付きで開かれるので、クエリ付きURLの
+  // 完全一致ではキャッシュに無いことが多い。クエリを無視した一致も試してから
+  // トップ画面にフォールバックする（そうしないと常にトップ画面に戻ってしまう）。
+  if (!cached && request.mode === "navigate") {
+    cached = await caches.match(request, { ignoreSearch: true });
+  }
   if (cached) return cached;
   if (request.mode === "navigate") {
     const shell = await caches.match(new URL("./", self.registration.scope).href);
