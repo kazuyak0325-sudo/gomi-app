@@ -1099,14 +1099,8 @@ function applyNippouRegion(){
 }
 buildDistrictLists();
 applyNippouRegion();
-const KUROBANE_REGION_PIN = "0706";
 document.querySelectorAll(".region-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    if (btn.dataset.region === "kurobane" && getNippouRegion() !== "kurobane") {
-      const pin = prompt("黒羽・湯津上地区は準備中です。暗証番号を入力してください。");
-      if (pin === null) return;
-      if (pin !== KUROBANE_REGION_PIN) { alert("暗証番号が違います。"); return; }
-    }
     setNippouRegion(btn.dataset.region);
     applyNippouRegion();
   });
