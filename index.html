@@ -442,6 +442,27 @@
     a.card::after { right: 12px; }
     .footer { max-width: 1100px; margin-top: 16px; }
   }
+  /* 縦向きの大きめタブレット：2列にして、スマホよりカードを大きく表示する */
+  @media (orientation: portrait) and (min-width: 600px) {
+    h1 { max-width: 680px; font-size: 30px; }
+    .tagline { max-width: 680px; }
+    .region-toggle { max-width: 680px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      max-width: 680px;
+    }
+    a.card {
+      min-height: 92px;
+      padding: 12px 36px 12px 78px;
+      font-size: 21px;
+    }
+    a.card .mark { width: 62px; font-size: 25px; }
+    a.card .mark.long { font-size: 16px; }
+    a.card .mark.vert { font-size: 22px; }
+    .footer { max-width: 680px; }
+  }
 </style>
 </head>
 <body>
