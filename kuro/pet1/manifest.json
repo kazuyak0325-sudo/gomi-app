@@ -1,9 +1,10 @@
-{
-  "name": "黒コース（ペット・ダンボール第1/第3） 回収記録",
-  "short_name": "黒コース（ペット・ダンボール第1/第3）",
+﻿{
+  "name": "黒コース（ペット・ダンボール①） 回収記録",
+  "short_name": "黒コース（ペット・ダンボール①）",
   "start_url": "./index.html",
-  "scope": "/gomi-app/",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#2b2b2b",
   "icons": [
