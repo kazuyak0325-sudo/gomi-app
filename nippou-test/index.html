@@ -955,7 +955,9 @@ async function submitReport(server){
   } else {
     statusMsg.textContent = "送信しました（" + (serverList.length - successCount) + "台には接続できませんでした）";
   }
-  clearDraft();
+  // 送信後も入力内容を端末に残す(同じ日・同じコースで開き直したときに、送信した内容が
+  // そのまま表示され、修正して送り直せる)。下書きのキーに日付が入っているため、
+  // 翌日には引き継がれない。
 
   if (course) {
     const path = courseUrlPath(course.id);
@@ -1142,6 +1144,22 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   }
   submitReport(ADMIN_PRESETS.map(p => p.url));
 });
+// 日付が変わったら、前の日までの日報の入力内容(下書き)を端末から削除する。
+// 下書きのキーは「gomi_nippou_draft_コースID_日付」なので、今日の日付で終わらないものが対象。
+// (収集データ側の記録には触れない。未送信の通知に使われるため)
+function purgeOldDrafts(){
+  try {
+    const prefix = "gomi_nippou_draft_";
+    const suffix = "_" + CURRENT_DATE;
+    const remove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.indexOf(prefix) === 0 && !k.endsWith(suffix)) remove.push(k);
+    }
+    remove.forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
+}
+purgeOldDrafts();
 updateAutoField();
 restoreDraft();
 updateOdoDistance();

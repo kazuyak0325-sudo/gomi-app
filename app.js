@@ -1213,6 +1213,9 @@ function doReset(){
   saveCardboard();
   saveCardboardTimes();
   saveCardboardViolations();
+  // 収集日報の入力内容(車両NO・搭乗者・重量など)は、送信後も残る作りになっているため、
+  // 収集記録をリセットするときに、このコースの今日の分も一緒に消す。
+  try { localStorage.removeItem("gomi_nippou_draft_" + COURSE_ID + "_" + todayDateStr()); } catch (e) {}
   render(document.getElementById("filter").value);
 }
 
@@ -1221,7 +1224,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
     Object.keys(cardboardTimes).length > 0 || Object.keys(cardboardViolations).length > 0;
   const message = (hasData && !isSavedToday())
     ? "本日のデータはまだ保存されていません。保存せずにリセットすると記録が失われます。本当にリセットしますか？"
-    : "今日の記録（収集時刻・違反ゴミ）をすべてリセットしますか？";
+    : "今日の記録（収集時刻・違反ゴミ・収集日報の入力内容）をすべてリセットしますか？";
   showConfirm(message, doReset);
 });
 
