@@ -955,9 +955,9 @@ async function submitReport(server){
   } else {
     statusMsg.textContent = "送信しました（" + (serverList.length - successCount) + "台には接続できませんでした）";
   }
-  // 送信後も入力内容を端末に残す(同じ日・同じコースで開き直したときに、送信した内容が
-  // そのまま表示され、修正して送り直せる)。下書きのキーに日付が入っているため、
-  // 翌日には引き継がれない。
+  // タブレットを複数の車両で使い回すため、送信したら入力内容を消す
+  // (前の車両の入力が次の車両に残って、そのまま送信されるのを防ぐ)。
+  clearDraft();
 
   if (course) {
     const path = courseUrlPath(course.id);
