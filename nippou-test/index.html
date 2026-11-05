@@ -994,7 +994,13 @@ const LAST_COURSE_KEY = "gomi_last_nippou_course";
 const presetCourseId = new URLSearchParams(location.search).get("course");
 let CURRENT_COURSE = presetCourseId ? findCourse(presetCourseId) : null;
 if (CURRENT_COURSE) {
-  try { localStorage.setItem(LAST_COURSE_KEY, CURRENT_COURSE.id); } catch (e) {}
+  // コンテナ配りは収集実績を報告する対象ではないので、ここを最後に
+  // 開いただけで、後から本来のコースの日報を送る時に上書きされないよう、
+  // 「最後に開いたコース」としては記憶しない。
+  const isContainerDelivery = ("" + CURRENT_COURSE.id).startsWith("kurobane_container");
+  if (!isContainerDelivery) {
+    try { localStorage.setItem(LAST_COURSE_KEY, CURRENT_COURSE.id); } catch (e) {}
+  }
 } else {
   try {
     const lastCourseId = localStorage.getItem(LAST_COURSE_KEY);
