@@ -1308,6 +1308,23 @@ async function uploadPhotosForDate(dateStr, server){
   }
 }
 
+// トップ画面(index.html)の帯メッセージを、送信が成功した端末だけこっそり
+// 取りに行ってlocalStorageに覚えておく(次回以降オフラインでも新しい内容を表示)。
+// 失敗しても送信自体には影響させない(待たせない・エラーにしない)ためfire-and-forget。
+function syncAppSettings(server){
+  try {
+    const base = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "");
+    fetch(base + "/api/app-settings", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.tagline) {
+          try { localStorage.setItem("gomi_app_tagline", data.tagline); } catch (e) {}
+        }
+      })
+      .catch(() => {});
+  } catch (e) {}
+}
+
 async function tryUploadToServer(csv, dateStr, server){
   try {
     const controller = new AbortController();
@@ -1330,6 +1347,7 @@ async function tryUploadToServer(csv, dateStr, server){
       throw new Error(data.error || "アップロードに失敗しました。");
     }
     await uploadPhotosForDate(dateStr, server);
+    syncAppSettings(server);
     return true;
   } catch (e) {
     return false;

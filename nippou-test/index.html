@@ -74,6 +74,26 @@
     color: var(--accent-dark);
   }
   .region-btn.on { background: var(--accent); color: #fff; border-color: var(--accent) !important; }
+  .check-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .check-row {
+    display: flex; align-items: center; gap: 8px; min-width: 0;
+    flex: 1 1 calc(50% - 4px); max-width: calc(50% - 4px); box-sizing: border-box;
+    padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px;
+    background: #fff;
+  }
+  .check-row input[type=checkbox] { width: 20px; height: 20px; flex: 0 0 auto; }
+  .check-row span { font-size: 14px; flex: 1 1 auto; }
+  .amount-row span { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .check-row .amount-input {
+    width: 54px; flex: 0 0 auto; padding: 5px 6px; font-size: 13px;
+    border: 1px solid var(--border); border-radius: 6px; margin-left: auto;
+  }
+  .tire-season-toggle { display: flex; gap: 8px; margin-top: 10px; }
+  .tire-season-btn, .tire-position-btn {
+    flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 9px;
+    text-align: center; background: #fff; font-size: 14px; color: var(--text);
+  }
+  .tire-season-btn.on, .tire-position-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
   .auto-field {
     background: #f1f5f4;
     border: 1px dashed var(--border);
@@ -371,6 +391,42 @@
     </div>
     <label>走行距離（自動計算）</label>
     <div class="auto-field" id="odoDistanceField">-</div>
+  </div>
+
+  <div class="card">
+    <button type="button" class="link-btn" id="toggleMaintBtn">＋ 車両メンテナンス（燃料・オイル・タイヤなど）はこちら</button>
+    <div id="maintWrap" style="display:none;">
+      <label>燃料（L）</label>
+      <input type="text" inputmode="decimal" id="fuelAmount" placeholder="例：30">
+      <div class="check-grid">
+        <div class="check-row amount-row">
+          <span>オイル交換</span>
+          <input type="text" inputmode="decimal" id="oilAmount" class="amount-input" placeholder="L">
+        </div>
+        <div class="check-row amount-row">
+          <span>Ad補充</span>
+          <input type="text" inputmode="decimal" id="adAmount" class="amount-input" placeholder="L">
+        </div>
+        <label class="check-row"><input type="checkbox" id="elementChecked"><span>エレメント交換</span></label>
+        <label class="check-row"><input type="checkbox" id="tireRotationChecked"><span>タイヤローテーション</span></label>
+      </div>
+      <label>タイヤ交換</label>
+      <p style="font-size:12px;color:var(--text-muted);margin:0 0 6px;">現在使用中のタイヤの種類を選択してください</p>
+      <div class="tire-season-toggle" id="tireSeasonToggle">
+        <button type="button" class="tire-season-btn" data-season="summer">夏タイヤ</button>
+        <button type="button" class="tire-season-btn" data-season="winter">冬タイヤ</button>
+      </div>
+      <div class="tire-season-toggle" id="tirePositionToggle">
+        <button type="button" class="tire-position-btn" data-position="front">前</button>
+        <button type="button" class="tire-position-btn" data-position="rear">後</button>
+        <button type="button" class="tire-position-btn" data-position="all">全</button>
+      </div>
+      <label>本数</label>
+      <input type="text" inputmode="numeric" id="tireCount" placeholder="例：4">
+      <p style="font-size:12px;color:var(--text-muted);margin:14px 0 6px;">収集の内容は変えず、メンテナンスの項目だけを更新したいときはこちら（車両NOのみ必須）</p>
+      <button type="button" class="btn-primary" id="maintOnlySubmitBtn" style="background:var(--text-muted);">メンテナンスだけ更新</button>
+      <div class="status-msg" id="maintOnlyStatusMsg"></div>
+    </div>
   </div>
 
   <div class="card">
@@ -768,6 +824,21 @@ function updateAutoField(){
 function getAdminServer(){
   try { return localStorage.getItem("gomi_admin_server") || ""; } catch (e) { return ""; }
 }
+// トップ画面(index.html)の帯メッセージを、送信が成功した端末だけこっそり
+// 取りに行ってlocalStorageに覚えておく(次回以降オフラインでも新しい内容を表示)。
+function syncAppSettings(server){
+  try {
+    const base = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "");
+    fetch(base + "/api/app-settings", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.tagline) {
+          try { localStorage.setItem("gomi_app_tagline", data.tagline); } catch (e) {}
+        }
+      })
+      .catch(() => {});
+  } catch (e) {}
+}
 function setAdminServer(v){
   try { localStorage.setItem("gomi_admin_server", v); } catch (e) {}
 }
@@ -821,10 +892,42 @@ function draftKey(){
   const courseId = CURRENT_COURSE ? CURRENT_COURSE.id : "none";
   return "gomi_nippou_draft_" + courseId + "_" + CURRENT_DATE;
 }
-const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "districtFunen", "districtKaen", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_b6", "k_b7", "k_b8", "k_b9", "k_b10", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura", "odoStart", "odoEnd"];
+const DRAFT_FIELD_IDS = ["vehicleInput", "vehicle2Input", "district", "districtFunen", "districtKaen", "timeEndInput", "driverSelect", "helperSelect", "b1", "b2", "b3", "b4", "b5", "petBottle", "cardboardKg", "kamipack", "youpura", "k_b1", "k_b2", "k_b3", "k_b4", "k_b5", "k_b6", "k_b7", "k_b8", "k_b9", "k_b10", "k_bin", "k_can", "k_funen", "k_pet", "k_zasshi", "k_shinbun", "k_danball", "k_kamipack", "k_youpura", "odoStart", "odoEnd", "fuelAmount", "oilAmount", "adAmount", "tireCount"];
+const DRAFT_CHECKBOX_FIELD_IDS = ["elementChecked", "tireRotationChecked"];
+function getTireSeason(){
+  const btn = document.querySelector(".tire-season-btn.on");
+  return btn ? btn.dataset.season : "";
+}
+function setTireSeason(season){
+  document.querySelectorAll(".tire-season-btn").forEach(btn => {
+    btn.classList.toggle("on", btn.dataset.season === season);
+  });
+}
+document.querySelectorAll(".tire-season-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    setTireSeason(getTireSeason() === btn.dataset.season ? "" : btn.dataset.season);
+  });
+});
+function getTirePosition(){
+  const btn = document.querySelector(".tire-position-btn.on");
+  return btn ? btn.dataset.position : "";
+}
+function setTirePosition(position){
+  document.querySelectorAll(".tire-position-btn").forEach(btn => {
+    btn.classList.toggle("on", btn.dataset.position === position);
+  });
+}
+document.querySelectorAll(".tire-position-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    setTirePosition(getTirePosition() === btn.dataset.position ? "" : btn.dataset.position);
+  });
+});
 function saveDraft(){
   const data = {};
   DRAFT_FIELD_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
+  DRAFT_CHECKBOX_FIELD_IDS.forEach(id => { data[id] = document.getElementById(id).checked; });
+  data.tireSeason = getTireSeason();
+  data.tirePosition = getTirePosition();
   try { localStorage.setItem(draftKey(), JSON.stringify(data)); } catch (e) {}
 }
 function clearDraft(){
@@ -840,6 +943,11 @@ function restoreDraft(){
   DRAFT_FIELD_IDS.forEach(id => {
     if (data[id]) document.getElementById(id).value = data[id];
   });
+  DRAFT_CHECKBOX_FIELD_IDS.forEach(id => {
+    document.getElementById(id).checked = !!data[id];
+  });
+  setTireSeason(data.tireSeason || "");
+  setTirePosition(data.tirePosition || "");
   if (data.vehicle2Input) {
     document.getElementById("vehicle2Wrap").style.display = "block";
     document.getElementById("toggleVehicle2Btn").textContent = "－ 交代車両の入力を閉じる";
@@ -847,6 +955,11 @@ function restoreDraft(){
   if (data.k_b6 || data.k_b7 || data.k_b8 || data.k_b9 || data.k_b10) {
     document.getElementById("kaenMoreWrap").style.display = "block";
     document.getElementById("toggleKaenMoreBtn").textContent = "－ 6回目以降の入力を閉じる";
+  }
+  if (data.fuelAmount || data.oilAmount || data.elementChecked || data.adAmount ||
+      data.tireRotationChecked || data.tireSeason || data.tirePosition || data.tireCount) {
+    document.getElementById("maintWrap").style.display = "block";
+    document.getElementById("toggleMaintBtn").textContent = "－ 車両メンテナンスの入力を閉じる";
   }
   updateWeightTotals();
 }
@@ -918,6 +1031,14 @@ async function submitReport(server){
     district: currentDistrictValue(),
     odoStart: stripCommas(document.getElementById("odoStart").value),
     odoEnd: stripCommas(document.getElementById("odoEnd").value),
+    fuelAmount: stripCommas(document.getElementById("fuelAmount").value),
+    oilAmount: stripCommas(document.getElementById("oilAmount").value),
+    elementChecked: document.getElementById("elementChecked").checked,
+    adAmount: stripCommas(document.getElementById("adAmount").value),
+    tireRotationChecked: document.getElementById("tireRotationChecked").checked,
+    tireSeason: getTireSeason(),
+    tirePosition: getTirePosition(),
+    tireCount: stripCommas(document.getElementById("tireCount").value),
     timeStart: "8:30",
     timeEnd: document.getElementById("timeEndInput").value,
     count: count
@@ -955,6 +1076,8 @@ async function submitReport(server){
   } else {
     statusMsg.textContent = "送信しました（" + (serverList.length - successCount) + "台には接続できませんでした）";
   }
+  const okServer = serverList[results.findIndex(Boolean)];
+  if (okServer) syncAppSettings(okServer);
   // タブレットを複数の車両で使い回すため、送信したら入力内容を消す
   // (前の車両の入力が次の車両に残って、そのまま送信されるのを防ぐ)。
   clearDraft();
@@ -968,6 +1091,66 @@ async function submitReport(server){
     }
   }
 }
+
+// 収集の内容(可燃量・走行距離など)には触れず、メンテナンスの項目だけを
+// 既存の日報に上書き保存する。車両NOだけで送れるようにし、その日の
+// 本来の業務内容を空欄で上書きしてしまう事故を防ぐ。
+async function submitMaintenanceOnly(serverList){
+  const statusMsg = document.getElementById("maintOnlyStatusMsg");
+  const vehicleNo = document.getElementById("vehicleInput").value.trim();
+  if (!vehicleNo) {
+    statusMsg.className = "status-msg err";
+    statusMsg.textContent = "車両NOを入力してください。";
+    return;
+  }
+  const payload = {
+    date: CURRENT_DATE,
+    region: getNippouRegion(),
+    vehicleNo: vehicleNo,
+    fuelAmount: stripCommas(document.getElementById("fuelAmount").value),
+    oilAmount: stripCommas(document.getElementById("oilAmount").value),
+    elementChecked: document.getElementById("elementChecked").checked,
+    adAmount: stripCommas(document.getElementById("adAmount").value),
+    tireRotationChecked: document.getElementById("tireRotationChecked").checked,
+    tireSeason: getTireSeason(),
+    tirePosition: getTirePosition(),
+    tireCount: stripCommas(document.getElementById("tireCount").value)
+  };
+  statusMsg.className = "status-msg";
+  statusMsg.textContent = "送信中...";
+  const list = (Array.isArray(serverList) ? serverList : [serverList]).filter(Boolean);
+  const results = await Promise.all(list.map(async (s) => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const res = await fetch(s.replace(/\/$/, "") + "/api/nippou-maintenance-update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      const data = await res.json();
+      return !!data.ok;
+    } catch (e) {
+      return false;
+    }
+  }));
+  const successCount = results.filter(Boolean).length;
+  if (successCount === 0) {
+    statusMsg.className = "status-msg err";
+    statusMsg.textContent = "送信に失敗しました。事務所PCに接続できませんでした。";
+    return;
+  }
+  statusMsg.className = "status-msg ok";
+  statusMsg.textContent = successCount === list.length ? "メンテナンスを更新しました！" :
+    "更新しました（" + (list.length - successCount) + "台には接続できませんでした）";
+  const okServer = list[results.findIndex(Boolean)];
+  if (okServer) syncAppSettings(okServer);
+}
+document.getElementById("maintOnlySubmitBtn").addEventListener("click", () => {
+  submitMaintenanceOnly(ADMIN_PRESETS.map(p => p.url));
+});
 
 function courseUrlPath(courseId){
   const idx = courseId.indexOf("-");
@@ -1026,6 +1209,15 @@ document.getElementById("toggleVehicle2Btn").addEventListener("click", () => {
   btn.textContent = showing
     ? "＋ 車両故障などで途中から別の車両に交代した場合はこちら"
     : "－ 交代車両の入力を閉じる";
+});
+document.getElementById("toggleMaintBtn").addEventListener("click", () => {
+  const wrap = document.getElementById("maintWrap");
+  const btn = document.getElementById("toggleMaintBtn");
+  const showing = wrap.style.display !== "none";
+  wrap.style.display = showing ? "none" : "block";
+  btn.textContent = showing
+    ? "＋ 車両メンテナンス（燃料・オイル・タイヤなど）はこちら"
+    : "－ 車両メンテナンスの入力を閉じる";
 });
 document.getElementById("toggleKaenMoreBtn").addEventListener("click", () => {
   const wrap = document.getElementById("kaenMoreWrap");

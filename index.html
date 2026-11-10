@@ -496,7 +496,13 @@
     <li>常務のPC・みんなのPC、両方の証明書を使っている場合は、両方について同じ手順を行う</li>
   </ol>
 </div>
-<p class="tagline">今日も一日安全運転・安全作業！</p>
+<p class="tagline" id="taglineEl">今日も一日安全運転・安全作業！</p>
+<script>
+  try {
+    var savedTagline = localStorage.getItem("gomi_app_tagline");
+    if (savedTagline) { document.getElementById("taglineEl").textContent = savedTagline; }
+  } catch (e) {}
+</script>
 <div class="grid" id="otawaraGrid">
   <a class="card" style="background:#4b2e83" href="murasaki/"><span class="mark">紫</span>コース</a>
   <a class="card" style="background:#2e7d32" href="midori/"><span class="mark">緑</span>コース</a>
