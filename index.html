@@ -473,7 +473,6 @@
   <button id="topHistoryBtn">過去の記録</button>
   <button id="unsentBtn">未送信データの確認</button>
   <button id="nippouTopBtn">収集日報を入力</button>
-  <button id="funen2TestTopBtn">不燃②コース案内（テスト）</button>
   <div class="admin-addr-box">
     アップロード先
     <code id="adminAddrText">未設定</code>
@@ -1399,10 +1398,6 @@ document.getElementById("topHistoryBtn").addEventListener("click", () => {
 document.getElementById("nippouTopBtn").addEventListener("click", () => {
   topMenuPanel.classList.remove("open");
   location.href = "nippou-test/";
-});
-document.getElementById("funen2TestTopBtn").addEventListener("click", () => {
-  topMenuPanel.classList.remove("open");
-  location.href = "funen2-test/";
 });
 
 (function(){
