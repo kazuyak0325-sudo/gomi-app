@@ -556,6 +556,27 @@ function renderAdminAddr(){
 }
 renderAdminAddr();
 
+// 帯メッセージは今まで「収集データの送信に成功した時だけ」こっそり取りに行っていたが、
+// それだと「送信はしたのにまだ反映されない」が起きやすいので、トップ画面を開いた時にも
+// 直接取りに行くようにする(こちらも失敗しても画面には何も表示しないfire-and-forget)。
+(function(){
+  const server = getAdminServer();
+  if (!server) return;
+  try {
+    const base = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "");
+    fetch(base + "/api/app-settings", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.tagline) {
+          try { localStorage.setItem("gomi_app_tagline", data.tagline); } catch (e) {}
+          const el = document.getElementById("taglineEl");
+          if (el) el.textContent = data.tagline;
+        }
+      })
+      .catch(() => {});
+  } catch (e) {}
+})();
+
 const ADMIN_PIN = "0325";
 
 function askPin(onSuccess){
