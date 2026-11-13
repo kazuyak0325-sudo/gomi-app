@@ -20,6 +20,15 @@ function formatDateJp(d){
   const days = ["日","月","火","水","木","金","土"];
   return d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日(" + days[d.getDay()] + ")";
 }
+
+// このページがslide.html等のiframe内で表示されている場合、location.hrefへの
+// 相対パス代入だとiframeの中だけが遷移してしまい、画面が壊れて見える。
+// iframe内では一番上のウィンドウごと遷移させることで、普通に画面全体が切り替わるようにする。
+function navigateTop(relativePath){
+  const target = new URL(relativePath, location.href).href;
+  if (window.top !== window) { window.top.location.href = target; }
+  else { location.href = target; }
+}
 try {
   const courseNames = JSON.parse(localStorage.getItem("gomi_course_names") || "{}");
   courseNames[COURSE_ID] = COURSE_NAME;
@@ -67,7 +76,7 @@ try {
   const topBtn = document.createElement("button");
   topBtn.className = "violation-filter-btn";
   topBtn.textContent = "トップ画面に戻る";
-  topBtn.addEventListener("click", () => { location.href = "../../"; });
+  topBtn.addEventListener("click", () => { navigateTop("../../"); });
   menuPanel.appendChild(topBtn);
 
   const violationFilterBtn = document.createElement("button");
@@ -87,7 +96,7 @@ try {
   nippouBtn.className = "violation-filter-btn";
   nippouBtn.textContent = "収集日報を入力";
   nippouBtn.addEventListener("click", () => {
-    location.href = "../../nippou-test/?course=" + encodeURIComponent(COURSE_ID);
+    navigateTop("../../nippou-test/?course=" + encodeURIComponent(COURSE_ID));
   });
   menuPanel.appendChild(nippouBtn);
 
@@ -1218,6 +1227,9 @@ function doReset(){
   // 収集日報の入力内容(車両NO・搭乗者・重量など)は、送信後も残る作りになっているため、
   // 収集記録をリセットするときに、このコースの今日の分も一緒に消す。
   try { localStorage.removeItem("gomi_nippou_draft_" + COURSE_ID + "_" + todayDateStr()); } catch (e) {}
+  // 「送信済み」フラグも一緒に消す(残したままだと、リセット後に送り忘れていても
+  // スライド画面の✓送信済みマークがついたままになってしまうため)。
+  try { localStorage.removeItem(savedKeyFor(todayDateStr())); } catch (e) {}
   render(document.getElementById("filter").value);
 }
 
@@ -1462,7 +1474,7 @@ render("");
   uploadOrDownload(buildCsv(), todayDateStr(), servers, (ok) => {
     if (ok) {
       showToast("収集データも送信しました！トップ画面に戻ります...");
-      setTimeout(() => { location.href = "../../"; }, 1500);
+      setTimeout(() => { navigateTop("../../"); }, 1500);
     }
   });
 })();
@@ -1541,7 +1553,7 @@ function showVehicleModal(fromHeader){
   cancelBtn.textContent = "キャンセル";
   cancelBtn.addEventListener("click", () => {
     if (fromHeader) overlay.remove();
-    else location.href = "../../";
+    else navigateTop("../../");
   });
   const okBtn = document.createElement("button");
   okBtn.className = "modal-btn-ok";
