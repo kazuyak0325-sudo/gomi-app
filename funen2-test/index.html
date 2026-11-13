@@ -165,8 +165,11 @@ document.getElementById("histContainerLink").href = "../?historyColor=" + encode
 const cardsEl = document.getElementById("cards");
 let html = "";
 
+const slideHref = "slide.html?funen=" + encodeURIComponent(funenNum || "") +
+  "&container=" + encodeURIComponent(containerNum || "");
+
 if (funenNum) {
-  html += '<a class="card funen" href="../kurobane_funen/' + funenNum + '/">' +
+  html += '<a class="card funen" href="' + slideHref + '&start=funen">' +
     '<div class="label">🚛 不燃（本日）</div>' +
     '<div class="num">' + funenNum + 'コース</div>' +
     '</a>';
@@ -175,7 +178,7 @@ if (funenNum) {
 }
 
 if (containerNum) {
-  html += '<button type="button" class="card container" data-num="' + containerNum + '" data-href="../kurobane_container/' + containerNum + '/">' +
+  html += '<button type="button" class="card container" data-num="' + containerNum + '" data-href="' + slideHref + '&start=container">' +
     '<div class="label">📦 コンテナ設置（' + fmtDate(tomorrow) + '分の準備）</div>' +
     '<div class="num">' + containerNum + 'コース</div>' +
     '</button>';

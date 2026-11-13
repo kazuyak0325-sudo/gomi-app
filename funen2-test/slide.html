@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>不燃② コース（スライド）</title>
+<meta name="theme-color" content="#607d8b">
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #f5f5f5; overflow: hidden;
+  }
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    background: #607d8b; color: #fff;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 0;
+  }
+  .back {
+    display: inline-block; color: #fff; text-decoration: none;
+    font-size: 12px; opacity: 0.9; margin-bottom: 6px;
+  }
+  .tabs { display: flex; gap: 6px; padding-bottom: 8px; }
+  .tab {
+    flex: 1; text-align: center; padding: 9px 6px; border-radius: 10px 10px 0 0;
+    background: rgba(255,255,255,0.15); color: #fff; font-size: 13px; font-weight: 700;
+    border: none; font-family: inherit;
+  }
+  .tab.active { background: #f5f5f5; color: #37474f; }
+  .tab .sent-mark { color: #2e7d32; font-weight: 700; }
+  .tab.active .sent-mark { color: #2e7d32; }
+  .warn {
+    font-size: 11px; text-align: center; background: #fff3cd; color: #6b4a00;
+    padding: 5px 8px; line-height: 1.5;
+  }
+  .warn select {
+    margin-left: 6px; font-size: 12px; font-weight: 700; padding: 2px 4px;
+    border-radius: 6px; border: 1px solid #c9a227; color: #6b4a00; background: #fff;
+  }
+  .panels {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    top: var(--topbar-h, 92px);
+    display: flex; overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  }
+  .panel {
+    flex: 0 0 100vw; width: 100vw; height: 100%;
+    scroll-snap-align: start; scroll-snap-stop: always;
+  }
+  .panel iframe { width: 100%; height: 100%; border: none; display: block; }
+  .dots { text-align: center; position: fixed; bottom: 6px; left: 0; right: 0; z-index: 10; }
+  .dots span {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(0,0,0,0.2); margin: 0 3px;
+  }
+  .dots span.active { background: #607d8b; }
+</style>
+</head>
+<body>
+<div class="topbar" id="topbar">
+  <a class="back" href="./">← 今日のコース案内に戻る</a>
+  <div class="tabs">
+    <button type="button" class="tab active" id="tabFunen">① 不燃<span class="sent-mark" id="markFunen"></span></button>
+    <button type="button" class="tab" id="tabContainer">② コンテナ<span class="sent-mark" id="markContainer"></span></button>
+  </div>
+  <div class="warn" id="warnFunen">⚠️ 番号は自動計算です。違う場合はここで変更：<select id="selFunen"></select></div>
+  <div class="warn" id="warnContainer" style="display:none;">⚠️ 番号は自動計算です。違う場合はここで変更：<select id="selContainer"></select></div>
+</div>
+<div class="panels" id="panels">
+  <div class="panel" id="panelFunen"></div>
+  <div class="panel" id="panelContainer"></div>
+</div>
+<div class="dots"><span id="dotFunen" class="active"></span><span id="dotContainer"></span></div>
+<script>
+const params = new URLSearchParams(location.search);
+const funenNum = params.get("funen");
+const containerNum = params.get("container");
+const start = params.get("start") || "funen";
+
+function msgBox(text) {
+  const d = document.createElement("div");
+  d.style.cssText = "padding:40px 20px;text-align:center;color:#888;font-size:14px;";
+  d.textContent = text;
+  return d;
+}
+
+function loadCourse(panelEl, folder, num) {
+  panelEl.innerHTML = "";
+  if (num) {
+    const f = document.createElement("iframe");
+    f.src = "../" + folder + "/" + num + "/";
+    panelEl.appendChild(f);
+  } else {
+    panelEl.appendChild(msgBox("本日は収集がありません。右上の番号選択で手動でも選べます。"));
+  }
+}
+
+function buildSelect(selectEl, currentNum, onChange) {
+  let opts = '<option value="">―</option>';
+  for (let i = 1; i <= 10; i++) {
+    opts += '<option value="' + i + '"' + (String(i) === String(currentNum) ? " selected" : "") + '>' + i + 'コース</option>';
+  }
+  selectEl.innerHTML = opts;
+  selectEl.addEventListener("change", () => onChange(selectEl.value));
+}
+
+function todayDateStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+function isSaved(folder, num) {
+  if (!num) return false;
+  const key = "gomi_saved_" + folder + "-" + num + "_" + todayDateStr();
+  try { return localStorage.getItem(key) === "1"; } catch (e) { return false; }
+}
+
+let curFunenNum = funenNum;
+let curContainerNum = containerNum;
+const markFunen = document.getElementById("markFunen");
+const markContainer = document.getElementById("markContainer");
+
+function refreshSentMarks() {
+  markFunen.textContent = isSaved("kurobane_funen", curFunenNum) ? " ✓送信済み" : "";
+  markContainer.textContent = isSaved("kurobane_container", curContainerNum) ? " ✓送信済み" : "";
+}
+
+window.addEventListener("storage", (e) => {
+  if (!e.key || e.key.indexOf("gomi_saved_") === 0) refreshSentMarks();
+});
+setInterval(refreshSentMarks, 4000);
+
+const panelFunen = document.getElementById("panelFunen");
+const panelContainer = document.getElementById("panelContainer");
+loadCourse(panelFunen, "kurobane_funen", funenNum);
+loadCourse(panelContainer, "kurobane_container", containerNum);
+refreshSentMarks();
+
+buildSelect(document.getElementById("selFunen"), funenNum, (v) => {
+  curFunenNum = v;
+  loadCourse(panelFunen, "kurobane_funen", v);
+  refreshSentMarks();
+});
+buildSelect(document.getElementById("selContainer"), containerNum, (v) => {
+  curContainerNum = v;
+  loadCourse(panelContainer, "kurobane_container", v);
+  refreshSentMarks();
+});
+
+function fitTopbar() {
+  const h = document.getElementById("topbar").offsetHeight;
+  document.documentElement.style.setProperty("--topbar-h", h + "px");
+}
+fitTopbar();
+window.addEventListener("resize", fitTopbar);
+
+const panels = document.getElementById("panels");
+const tabFunen = document.getElementById("tabFunen");
+const tabContainer = document.getElementById("tabContainer");
+const dotFunen = document.getElementById("dotFunen");
+const dotContainer = document.getElementById("dotContainer");
+
+const warnFunen = document.getElementById("warnFunen");
+const warnContainer = document.getElementById("warnContainer");
+
+function setActive(which) {
+  tabFunen.classList.toggle("active", which === "funen");
+  tabContainer.classList.toggle("active", which === "container");
+  dotFunen.classList.toggle("active", which === "funen");
+  dotContainer.classList.toggle("active", which === "container");
+  warnFunen.style.display = which === "funen" ? "" : "none";
+  warnContainer.style.display = which === "container" ? "" : "none";
+  fitTopbar();
+}
+
+tabFunen.addEventListener("click", () => {
+  panels.scrollTo({ left: 0, behavior: "smooth" });
+});
+tabContainer.addEventListener("click", () => {
+  panels.scrollTo({ left: panels.clientWidth, behavior: "smooth" });
+});
+
+let scrollTimer = null;
+panels.addEventListener("scroll", () => {
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    const which = panels.scrollLeft > panels.clientWidth / 2 ? "container" : "funen";
+    setActive(which);
+  }, 80);
+});
+
+if (start === "container" && containerNum) {
+  requestAnimationFrame(() => {
+    panels.scrollTo({ left: panels.clientWidth, behavior: "auto" });
+    setActive("container");
+  });
+}
+</script>
+</body>
+</html>
