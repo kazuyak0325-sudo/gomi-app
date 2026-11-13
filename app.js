@@ -91,23 +91,22 @@ try {
   });
   menuPanel.appendChild(nippouBtn);
 
-  const resetBtn = document.getElementById("resetBtn");
-  if (resetBtn) { resetBtn.className = "violation-filter-btn"; menuPanel.appendChild(resetBtn); }
+  const saveBtn = document.getElementById("saveBtn");
+  if (saveBtn) { saveBtn.className = "violation-filter-btn"; menuPanel.appendChild(saveBtn); }
 
-  // ステーション編集・収集データ送信 are rarely needed day-to-day now that
-  // the nippou report page sends the collection data automatically, so
+  // ステーション編集・今日の記録をリセット are rarely needed day-to-day, so
   // they're tucked behind their own toggle at the bottom of the menu
   // instead of sitting in the main list.
   const editBtn = document.getElementById("editBtn");
-  const saveBtn = document.getElementById("saveBtn");
-  if (editBtn || saveBtn) {
+  const resetBtn = document.getElementById("resetBtn");
+  if (editBtn || resetBtn) {
     const moreToggle = document.createElement("button");
     moreToggle.className = "violation-filter-btn menu-more-toggle";
     moreToggle.textContent = "▶ その他の操作";
     const moreSection = document.createElement("div");
     moreSection.className = "menu-more-section";
     if (editBtn) { editBtn.className = "violation-filter-btn"; moreSection.appendChild(editBtn); }
-    if (saveBtn) { saveBtn.className = "violation-filter-btn"; moreSection.appendChild(saveBtn); }
+    if (resetBtn) { resetBtn.className = "violation-filter-btn"; moreSection.appendChild(resetBtn); }
     moreToggle.addEventListener("click", (e) => {
       e.stopPropagation();
       const showing = moreSection.classList.toggle("open");
@@ -156,6 +155,9 @@ const IS_CARDBOARD_COURSE = /-pet\d/.test(COURSE_ID);
 const IS_RESOURCE_COURSE = /^kurobane_funen/.test(COURSE_ID);
 const IS_CONTAINER_COURSE = /^kurobane_container/.test(COURSE_ID);
 const HAS_SECONDARY = IS_CARDBOARD_COURSE || IS_RESOURCE_COURSE;
+const SAVE_BTN_LABEL = IS_CONTAINER_COURSE ? "コンテナ設置データを送信"
+  : IS_RESOURCE_COURSE ? "不燃収集データを送信"
+  : "本日の収集データを送信";
 const SECONDARY_LABEL = IS_RESOURCE_COURSE ? "資源" : "ダンボール";
 const SECONDARY_ICON = IS_RESOURCE_COURSE ? "♻️" : "📦";
 
@@ -1377,7 +1379,7 @@ async function uploadOrDownload(csv, dateStr, servers, onDone){
   if (onDone) onDone(true);
 }
 
-document.getElementById("saveBtn").textContent = "本日の収集データを送信";
+document.getElementById("saveBtn").textContent = SAVE_BTN_LABEL;
 
 document.getElementById("saveBtn").addEventListener("click", () => {
   if (stations.length === 0) {
@@ -1390,7 +1392,7 @@ document.getElementById("saveBtn").addEventListener("click", () => {
     btn.textContent = "アップロード中...";
     await uploadOrDownload(buildCsv(), todayDateStr(), server);
     btn.disabled = false;
-    btn.textContent = "本日の収集データを送信";
+    btn.textContent = SAVE_BTN_LABEL;
   });
 });
 
