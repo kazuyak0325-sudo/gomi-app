@@ -23,6 +23,14 @@
     margin: 0 0 20px; background: #fdecea; padding: 6px 10px; border-radius: 8px;
   }
   .today { text-align: center; font-size: 13px; color: #666; margin-bottom: 20px; }
+  a.back {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #555;
+    text-decoration: none;
+    border-bottom: 1px solid #999;
+  }
   .card {
     display: block; text-decoration: none; color: #fff; border-radius: 16px;
     padding: 20px 18px; margin-bottom: 16px; text-shadow: 0 1px 3px rgba(0,0,0,0.45);
@@ -33,22 +41,78 @@
   .card.funen { background: #607d8b; }
   .card.container { background: #8d6e63; }
   .card.none { background: #9e9e9e; }
-  .footnote { font-size: 11px; color: #888; line-height: 1.7; margin-top: 10px; }
+  button.card { border: none; width: 100%; text-align: left; font-family: inherit; cursor: pointer; }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 100;
+  }
+  .modal-box { background: #fff; border-radius: 14px; padding: 20px; max-width: 320px; width: 100%; }
+  .modal-box p { margin: 0 0 16px; font-size: 15px; font-weight: 700; text-align: center; color: #222; }
+  .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+  .modal-actions button {
+    padding: 13px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; font-family: inherit;
+  }
+  .modal-btn-ok { background: #8d6e63; color: #fff; }
+  .modal-btn-cancel { background: #eee; color: #333; }
+  .manual-row { display: flex; gap: 10px; margin-top: 14px; }
+  .manual-row a {
+    flex: 1;
+    display: block;
+    text-align: center;
+    padding: 14px 10px;
+    border-radius: 14px;
+    background: #eee;
+    color: #333;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .manual-row a:active { background: #ddd; }
+  .confirm-note {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fff3cd;
+    border: 1px solid #e0b877;
+    color: #6b4a00;
+  }
+  .confirm-note strong { display: block; font-size: 13px; margin-bottom: 2px; }
+  .confirm-note span { display: block; font-size: 12px; line-height: 1.5; }
+  .hist-row { display: flex; gap: 10px; margin-top: 10px; }
+  .hist-link {
+    flex: 1;
+    display: block;
+    text-align: center;
+    padding: 14px 10px;
+    border-radius: 10px;
+    background: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .hist-link.funen { border: 1px dashed #607d8b; color: #607d8b; }
+  .hist-link.container { border: 1px dashed #8d6e63; color: #8d6e63; }
 </style>
 </head>
 <body>
+<a class="back" href="../">← コース選択に戻る</a>
 <div class="wrap">
   <h1>不燃② 今日のコース案内</h1>
   <p class="sub">テスト画面（まだ正式版ではありません）</p>
   <p class="today" id="todayLabel"></p>
   <div id="cards"></div>
-  <p class="footnote">
-    「不燃」は本日分、「コンテナ設置」は翌営業日分のコースを、どちらも同じ
-    計算式（曜日ごとに月内の出現回数を数え、奇数回目=基本番号(月1火2水3木4金5)・
-    偶数回目=+5番、5回目がある週は収集なし、月をまたぐ時は翌月最初の月曜で
-    リセット、年始1/1〜1/3は休みとして数えない）で算出しています。番号が
-    合っているか必ず確認してから作業してください。
-  </p>
+  <div class="confirm-note">
+    <strong>⚠️ 番号は自動計算です</strong>
+    <span>作業前に、実際のコースと合っているか必ず確認してください。</span>
+  </div>
+  <div class="manual-row">
+    <a href="../kurobane_funen/course/">不燃を手動で選ぶ</a>
+    <a href="../kurobane_container/">コンテナを手動で選ぶ</a>
+  </div>
+  <div class="hist-row">
+    <a class="hist-link funen" id="histFunenLink">不燃の記録を見る</a>
+    <a class="hist-link container" id="histContainerLink">コンテナの記録を見る</a>
+  </div>
 </div>
 <script>
 // 曜日ごとに「その月の中で何回目の出現か」を数え、奇数回目=基本番号(月1火2水3木4金5)、
@@ -95,6 +159,8 @@ const funenNum = getRotationNumber(today);
 const containerNum = getRotationNumber(tomorrow);
 
 document.getElementById("todayLabel").textContent = "本日：" + fmtDate(today);
+document.getElementById("histFunenLink").href = "../?historyColor=" + encodeURIComponent("黒羽・湯津上 不燃");
+document.getElementById("histContainerLink").href = "../?historyColor=" + encodeURIComponent("黒羽・湯津上 コンテナ配り");
 
 const cardsEl = document.getElementById("cards");
 let html = "";
@@ -109,15 +175,50 @@ if (funenNum) {
 }
 
 if (containerNum) {
-  html += '<a class="card container" href="../kurobane_container/' + containerNum + '/">' +
+  html += '<button type="button" class="card container" data-num="' + containerNum + '" data-href="../kurobane_container/' + containerNum + '/">' +
     '<div class="label">📦 コンテナ設置（' + fmtDate(tomorrow) + '分の準備）</div>' +
     '<div class="num">' + containerNum + 'コース</div>' +
-    '</a>';
+    '</button>';
 } else {
   html += '<div class="card none"><div class="label">📦 コンテナ設置（' + fmtDate(tomorrow) + '分の準備）</div><div class="num">収集なし</div></div>';
 }
 
 cardsEl.innerHTML = html;
+
+function confirmContainerNav(num, href){
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  const p = document.createElement("p");
+  p.textContent = "本当に" + num + "コースで合っていますか？";
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const okBtn = document.createElement("button");
+  okBtn.type = "button";
+  okBtn.className = "modal-btn-ok";
+  okBtn.textContent = "はい、合っている";
+  okBtn.addEventListener("click", () => { location.href = href; });
+  const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
+  cancelBtn.className = "modal-btn-cancel";
+  cancelBtn.textContent = "いいえ、番号を選び直す";
+  cancelBtn.addEventListener("click", () => { location.href = "../kurobane_container/"; });
+  actions.appendChild(okBtn);
+  actions.appendChild(cancelBtn);
+  box.appendChild(p);
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+const containerBtn = cardsEl.querySelector("button.card.container");
+if (containerBtn) {
+  containerBtn.addEventListener("click", () => {
+    confirmContainerNav(containerBtn.dataset.num, containerBtn.dataset.href);
+  });
+}
 </script>
 </body>
 </html>
