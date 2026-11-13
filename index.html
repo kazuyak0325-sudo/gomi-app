@@ -559,9 +559,9 @@ renderAdminAddr();
 // 帯メッセージは今まで「収集データの送信に成功した時だけ」こっそり取りに行っていたが、
 // それだと「送信はしたのにまだ反映されない」が起きやすいので、トップ画面を開いた時にも
 // 直接取りに行くようにする(こちらも失敗しても画面には何も表示しないfire-and-forget)。
+// 取得先は「常務のPC(めいんPC)」に固定(2台とも最新でないと表示が運次第になるため)。
 (function(){
-  const server = getAdminServer();
-  if (!server) return;
+  const server = ADMIN_PRESETS[0].url;
   try {
     const base = (server.startsWith("http") ? server : "http://" + server).replace(/\/$/, "");
     fetch(base + "/api/app-settings", { cache: "no-store" })

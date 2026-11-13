@@ -1361,7 +1361,10 @@ async function tryUploadToServer(csv, dateStr, server){
       throw new Error(data.error || "アップロードに失敗しました。");
     }
     await uploadPhotosForDate(dateStr, server);
-    syncAppSettings(server);
+    // 帯メッセージは「常務のPC(めいんPC)」だけを正としてそこから取りに行く。
+    // 両方のPCに取りに行くと、片方が更新し忘れている時にどちらが表示されるか
+    // 運次第になってしまうため。
+    syncAppSettings(ADMIN_PRESETS[0].url);
     return true;
   } catch (e) {
     return false;
