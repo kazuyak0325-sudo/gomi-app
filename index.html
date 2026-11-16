@@ -520,7 +520,7 @@
   <a class="card" style="background:#ef6c00" href="kurobane_kaen1/"><span class="mark vert">可燃①</span><span class="card-title"><small>下町・寒井<br>田町・須賀川</small></span></a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen2/"><span class="mark vert">可燃②</span><span class="card-title"><small>大豆田・両郷<br>前田・南方</small></span></a>
   <a class="card" style="background:#ef6c00" href="kurobane_kaen3/"><span class="mark vert">可燃③</span><span class="card-title"><small>狭原・倉骨<br>佐良土・宇田川</small></span></a>
-  <a class="card" style="background:#26a69a" href="kurobane_youpura/"><span class="mark vert">容プラ</span>コース</a>
+  <a class="card" style="background:#26a69a" href="kurobane_youpura/" id="kurobaneYoupuraCard"><span class="mark vert">容プラ</span><span id="kurobaneYoupuraLabel">コース</span></a>
 </div>
 <div class="footer">
   <p class="version-tag" id="versionTag"></p>
@@ -528,6 +528,41 @@
 <script>
 const TOP_VERSION = "v7.8";
 document.getElementById("versionTag").textContent = TOP_VERSION;
+
+// 黒羽・湯津上の容プラは、不燃と全く同じ曜日ローテーションのコース番号を使う
+// (計算式はfunen2-test/index.htmlのgetRotationNumberと同じもの)。
+function getKurobaneRotationNumber(dateObj) {
+  const wd = dateObj.getDay();
+  if (wd === 0 || wd === 6) return null;
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth();
+  const day = dateObj.getDate();
+  if (month === 0 && day <= 3) return null;
+  const base = {1:1, 2:2, 3:3, 4:4, 5:5};
+  let occ = 0;
+  for (let d = 1; d <= day; d++) {
+    const dt = new Date(year, month, d);
+    if (dt.getDay() !== wd) continue;
+    if (month === 0 && d <= 3) continue;
+    occ++;
+  }
+  if (occ === 5) return null;
+  return occ % 2 === 1 ? base[wd] : base[wd] + 5;
+}
+
+(function(){
+  const youpuraNum = getKurobaneRotationNumber(new Date());
+  const youpuraCard = document.getElementById("kurobaneYoupuraCard");
+  const youpuraLabel = document.getElementById("kurobaneYoupuraLabel");
+  if (youpuraCard && youpuraLabel) {
+    if (youpuraNum) {
+      youpuraCard.href = "kurobane_youpura/" + youpuraNum + "/";
+      youpuraLabel.textContent = youpuraNum + "コース";
+    } else {
+      youpuraLabel.textContent = "本日収集なし";
+    }
+  }
+})();
 
 (function(){
   const CERT_WARNING_FROM = "2036-08-21";
