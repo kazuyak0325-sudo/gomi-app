@@ -477,6 +477,7 @@
     <button id="editAdminBtn">編集</button>
   </div>
   <button id="updateBtn">最新版に更新する</button>
+  <button id="uraOffBtn" style="display:none">裏モードを終了</button>
 </div>
 <div class="region-toggle" id="regionToggle">
   <button type="button" class="region-btn" data-region="otawara">大田原地区</button>
@@ -1471,7 +1472,7 @@ document.getElementById("updateBtn").addEventListener("click", async () => {
   var KEY = 'gomi_admin_nav', H = '636b2c98e85611e816e513bfa2e6ea1e6681e4b715b45bd3c22d0fb03d8e454c';
   var box = document.getElementById('mapLinkGrid'), vt = document.getElementById('versionTag'); if (!box || !vt) return;
   function isOn(){ try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
-  function apply(){ box.style.display = isOn() ? '' : 'none'; }
+  function apply(){ box.style.display = isOn() ? '' : 'none'; var ub = document.getElementById('uraOffBtn'); if (ub) ub.style.display = isOn() ? '' : 'none'; }
   function sha(s){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode('gomi-navi:' + s)).then(function(b){ return Array.prototype.map.call(new Uint8Array(b), function(x){ return ('0' + x.toString(16)).slice(-2); }).join(''); }); }
 
 
@@ -1670,6 +1671,12 @@ document.getElementById("updateBtn").addEventListener("click", async () => {
   }
   vt.style.cssText += ';-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:default';
   apply();
+  // トップのメニューの「裏モードを終了」
+  var uraOff = document.getElementById('uraOffBtn');
+  if (uraOff) uraOff.addEventListener('click', function(){
+    var pn = document.getElementById('topMenuPanel'); if (pn) pn.classList.remove('open');
+    askYesNo('裏モードを<br>やめますか？', function(){ try { localStorage.removeItem(KEY); } catch (e) {} apply(); });
+  });
   var taps = 0, t0 = 0;
   vt.addEventListener('click', function(){
     var now = Date.now(); if (now - t0 > 1500) taps = 0; t0 = now; taps++;
