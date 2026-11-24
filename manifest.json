@@ -2,7 +2,7 @@
   "name": "ゴミ収集記録アプリ",
   "short_name": "ゴミ収集",
   "start_url": "./index.html",
-  "scope": "/gomi-app/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#333333",
