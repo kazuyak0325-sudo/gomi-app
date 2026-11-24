@@ -1471,7 +1471,9 @@ document.getElementById("updateBtn").addEventListener("click", async () => {
 (function(){
   var KEY = 'gomi_admin_nav', H = '636b2c98e85611e816e513bfa2e6ea1e6681e4b715b45bd3c22d0fb03d8e454c';
   var box = document.getElementById('mapLinkGrid'), vt = document.getElementById('versionTag'); if (!box || !vt) return;
-  function isOn(){ try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+  function todayStr(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  // 裏モードは、その日だけ有効（次の日には、自動で解除。保存する値＝有効にした日付。古い形式の「1」は、今日の分として扱う）
+  function isOn(){ try { var v = localStorage.getItem(KEY); if (!v) return false; var t = todayStr(); if (v === '1') { localStorage.setItem(KEY, t); return true; } if (v === t) return true; localStorage.removeItem(KEY); return false; } catch (e) { return false; } }
   function apply(){ box.style.display = isOn() ? '' : 'none'; var ub = document.getElementById('uraOffBtn'); if (ub) ub.style.display = isOn() ? '' : 'none'; }
   function sha(s){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode('gomi-navi:' + s)).then(function(b){ return Array.prototype.map.call(new Uint8Array(b), function(x){ return ('0' + x.toString(16)).slice(-2); }).join(''); }); }
 
@@ -1687,7 +1689,7 @@ document.getElementById("updateBtn").addEventListener("click", async () => {
     return;
   });
   function openSpell(){
-    askSpell(function(c){ var n = String(c).normalize('NFKC').replace(/\s+/g, ''); return sha(n).then(function(x){ if (x === H) { try { localStorage.setItem(KEY, '1'); } catch (e) {} apply(); return true; } return false; }); });
+    askSpell(function(c){ var n = String(c).normalize('NFKC').replace(/\s+/g, ''); return sha(n).then(function(x){ if (x === H) { try { localStorage.setItem(KEY, todayStr()); } catch (e) {} apply(); return true; } return false; }); });
   }
 })();
 </script>

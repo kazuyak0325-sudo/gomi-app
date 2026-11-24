@@ -1605,7 +1605,15 @@ if (stations.length > 0 && !getVehicleFor(todayDateStr())) showVehicleModal();
 // 管理者だけに、「ナビで開く」ボタンを出す（トップで、バージョンを7回タップして、管理者コードを入れた端末だけ）
 (function () {
   var NAVI_COURSES = ["ao-getsumoku","ao-kakin","ao-pet1","ao-pet2","kiiro-getsumoku","kiiro-kakin","kiiro-pet1","kiiro-pet2","kuro-getsumoku","kuro-kakin","kuro-pet1","kuro-pet2","midori-getsumoku","midori-kakin","midori-pet1","midori-pet2","murasaki-getsumoku","murasaki-kakin","murasaki-pet1","murasaki-pet2","pink-getsumoku","pink-kakin","pink-pet1","pink-pet2","youpura_ao-nishi","youpura_kiiro-higashi","youpura_kiiro-kanada","youpura_kiiro-nishi","youpura_kiiro-sakuyama","youpura_murasaki-higashi","youpura_murasaki-kanada","youpura_murasaki-nishi","youpura_murasaki-sakuyama"];
-  function isAdmin() { try { return localStorage.getItem("gomi_admin_nav") === "1"; } catch (e) { return false; } }
+  function isAdmin() {   // 裏モードは、その日だけ有効（次の日には、自動で解除）
+    try {
+      var v = localStorage.getItem("gomi_admin_nav"); if (!v) return false;
+      var d = new Date(), t = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+      if (v === "1") { localStorage.setItem("gomi_admin_nav", t); return true; }
+      if (v === t) return true;
+      localStorage.removeItem("gomi_admin_nav"); return false;
+    } catch (e) { return false; }
+  }
   function apply() {
     var btn = document.getElementById("naviBtn");
     var show = isAdmin() && NAVI_COURSES.indexOf(COURSE_ID) >= 0;
