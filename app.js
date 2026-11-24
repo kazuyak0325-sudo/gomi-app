@@ -1588,3 +1588,49 @@ function showVehicleModal(fromHeader){
 
 refreshDateVersion();
 if (stations.length > 0 && !getVehicleFor(todayDateStr())) showVehicleModal();
+// ナビ（地図アプリ）など、ほかの画面で記録が変わったら、この画面にも、すぐ反映する（サンプル）
+(function () {
+  function reloadRecords() {
+    var r, rv; try { r = JSON.parse(localStorage.getItem(todayKey()) || "{}"); rv = JSON.parse(localStorage.getItem(todayViolationKey()) || "{}"); } catch (e) { return; }
+    if (JSON.stringify(r) === JSON.stringify(records) && JSON.stringify(rv) === JSON.stringify(violations)) return;
+    records = r; violations = rv;
+    try { syncStationVehicles(); } catch (e) {}
+    render(document.getElementById("filter").value);
+  }
+  window.addEventListener("storage", function (e) { if (e.key === todayKey() || e.key === todayViolationKey()) reloadRecords(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) reloadRecords(); });
+  window.addEventListener("focus", reloadRecords);
+})();
+
+// 管理者だけに、「ナビで開く」ボタンを出す（トップで、バージョンを7回タップして、管理者コードを入れた端末だけ）
+(function () {
+  var NAVI_COURSES = ["ao-getsumoku","ao-kakin","ao-pet1","ao-pet2","kiiro-getsumoku","kiiro-kakin","kiiro-pet1","kiiro-pet2","kuro-getsumoku","kuro-kakin","kuro-pet1","kuro-pet2","midori-getsumoku","midori-kakin","midori-pet1","midori-pet2","murasaki-getsumoku","murasaki-kakin","murasaki-pet1","murasaki-pet2","pink-getsumoku","pink-kakin","pink-pet1","pink-pet2","youpura_ao-nishi","youpura_kiiro-higashi","youpura_kiiro-kanada","youpura_kiiro-nishi","youpura_kiiro-sakuyama","youpura_murasaki-higashi","youpura_murasaki-kanada","youpura_murasaki-nishi","youpura_murasaki-sakuyama"];
+  function isAdmin() { try { return localStorage.getItem("gomi_admin_nav") === "1"; } catch (e) { return false; } }
+  function apply() {
+    var btn = document.getElementById("naviBtn");
+    var show = isAdmin() && NAVI_COURSES.indexOf(COURSE_ID) >= 0;
+    if (!show) { if (btn) btn.remove(); return; }
+    if (btn) return;
+    var right = document.querySelector("#hdrTop .hdr-right"); if (!right) return;
+    btn = document.createElement("button");
+    btn.id = "naviBtn"; btn.className = "vehicle-change-btn"; btn.textContent = "🗺 ナビで開く";
+    btn.addEventListener("click", function () { location.href = "/gomi-map/course.html?c=" + encodeURIComponent(COURSE_ID); });
+    right.prepend(btn);
+  }
+  apply();
+  window.addEventListener("storage", function (e) { if (e.key === "gomi_admin_nav") apply(); });
+})();
+
+// 収集記録をリセットしたとき、裏モード（じゅもんで開いた設定）と、ナビの今日の分も、一緒にリセットする
+(function () {
+  var _r = doReset;
+  doReset = function () {
+    _r();
+    try {
+      localStorage.removeItem("gomi_admin_nav");
+      var ymd = todayDateStr();
+      Object.keys(localStorage).forEach(function (k) { if (k.indexOf("gomi-map:") === 0 && k.slice(-ymd.length) === ymd) localStorage.removeItem(k); });
+      var b = document.getElementById("naviBtn"); if (b) b.remove();
+    } catch (e) {}
+  };
+})();

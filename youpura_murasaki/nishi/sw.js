@@ -1,6 +1,6 @@
 ﻿const CACHE_NAME = "gomi-app-youpura_murasaki-nishi-1793777155";
 const CACHE_PREFIX = "gomi-app-youpura_murasaki-nishi-";
-const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1793777155", "../../app.js?v=1793777155"];
+const ASSETS = ["./", "index.html", "manifest.json", "icon.png", "../../style.css?v=1793777155", "../../app.js?v=1795498381"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

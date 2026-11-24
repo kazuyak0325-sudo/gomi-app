@@ -1,4 +1,4 @@
-const CACHE_NAME = "gomi-app-top-v5";
+const CACHE_NAME = "gomi-app-top-v6";
 const CACHE_PREFIX = "gomi-app-top-";
 const ASSETS = ["./", "index.html", "icon.png", "nippou-test/", "nippou-test/index.html"];
 const NETWORK_TIMEOUT_MS = 3000;
