@@ -1469,7 +1469,7 @@ document.getElementById("updateBtn").addEventListener("click", async () => {
 <script>
 // 管理者だけに、「ごみ収集ナビ」の入口を出す。バージョン表示を、7回つづけてタップ → 管理者コードを入力
 (function(){
-  var KEY = 'gomi_admin_nav', H = '636b2c98e85611e816e513bfa2e6ea1e6681e4b715b45bd3c22d0fb03d8e454c';
+  var KEY = 'gomi_admin_nav', H = '857775a2bfadef7fe54b047a742a67b30752e30b1d24b4fe4809d724855f44bd';
   var box = document.getElementById('mapLinkGrid'), vt = document.getElementById('versionTag'); if (!box || !vt) return;
   function todayStr(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   // 裏モードは、その日だけ有効（次の日には、自動で解除。保存する値＝有効にした日付。古い形式の「1」は、今日の分として扱う）
