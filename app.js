@@ -1186,10 +1186,14 @@ if (HAS_SECONDARY) {
   const filterBtn = document.createElement("button");
   filterBtn.id = "cardboardFilterBtn";
   filterBtn.className = "cardboard-filter-btn";
-  filterBtn.textContent = SECONDARY_LABEL + "ありのみ表示";
+  filterBtn.textContent = SECONDARY_ICON + " すべて表示中（押すと有のみ）";
+  // ナビ(地図)に、「ありのみ表示」の状態を伝える（保存場所: gomi_cbf_<コース>_<日付> = "1" / "0"）
+  const cbfKey = "gomi_cbf_" + COURSE_ID + "_" + todayDateStr();
+  try { localStorage.setItem(cbfKey, "0"); } catch (e) {}
   filterBtn.addEventListener("click", () => {
     cardboardFilterOn = !cardboardFilterOn;
-    filterBtn.textContent = cardboardFilterOn ? "すべて表示に戻す" : (SECONDARY_LABEL + "ありのみ表示");
+    try { localStorage.setItem(cbfKey, cardboardFilterOn ? "1" : "0"); } catch (e) {}
+    filterBtn.textContent = cardboardFilterOn ? "✓ 有のみ表示中（押すと全部）" : (SECONDARY_ICON + " すべて表示中（押すと有のみ）");
     filterBtn.classList.toggle("on", cardboardFilterOn);
     const cbWord = document.getElementById("cbWord");
     if (cbWord) cbWord.classList.toggle("cardboard-mode", cardboardFilterOn);
@@ -1592,12 +1596,18 @@ if (stations.length > 0 && !getVehicleFor(todayDateStr())) showVehicleModal();
 (function () {
   function reloadRecords() {
     var r, rv; try { r = JSON.parse(localStorage.getItem(todayKey()) || "{}"); rv = JSON.parse(localStorage.getItem(todayViolationKey()) || "{}"); } catch (e) { return; }
-    if (JSON.stringify(r) === JSON.stringify(records) && JSON.stringify(rv) === JSON.stringify(violations)) return;
-    records = r; violations = rv;
+    var cb = cardboard, ct = cardboardTimes, cbChanged = false;
+    if (typeof HAS_SECONDARY !== "undefined" && HAS_SECONDARY) {
+      try { cb = JSON.parse(localStorage.getItem(cardboardKeyFor(todayDateStr())) || "{}"); ct = JSON.parse(localStorage.getItem(cardboardTimeKeyFor(todayDateStr())) || "{}"); } catch (e) { return; }
+      cbChanged = JSON.stringify(cb) !== JSON.stringify(cardboard) || JSON.stringify(ct) !== JSON.stringify(cardboardTimes);
+      try { var fl = localStorage.getItem("gomi_cbf_" + COURSE_ID + "_" + todayDateStr()), fb = document.getElementById("cardboardFilterBtn"); if (fb && fl !== null && (fl === "1") !== cardboardFilterOn) fb.click(); } catch (e) {}
+    }
+    if (!cbChanged && JSON.stringify(r) === JSON.stringify(records) && JSON.stringify(rv) === JSON.stringify(violations)) return;
+    records = r; violations = rv; cardboard = cb; cardboardTimes = ct;
     try { syncStationVehicles(); } catch (e) {}
     render(document.getElementById("filter").value);
   }
-  window.addEventListener("storage", function (e) { if (e.key === todayKey() || e.key === todayViolationKey()) reloadRecords(); });
+  window.addEventListener("storage", function (e) { if (e.key && (e.key === todayKey() || e.key === todayViolationKey() || e.key.indexOf("gomi_cb_") === 0 || e.key.indexOf("gomi_ct_") === 0 || e.key.indexOf("gomi_cbf_") === 0)) reloadRecords(); });
   document.addEventListener("visibilitychange", function () { if (!document.hidden) reloadRecords(); });
   window.addEventListener("focus", reloadRecords);
 })();
